@@ -29,12 +29,12 @@ namespace ETool.ANode
             while (change)
             {
                 change = false;
-                if (fields.Count - 3 > fields[1].target.target_Int)
+                if (fields.Count - 3 > (int)fields[1].GetValue(FieldType.Int))
                 {
                     change = true;
                     SubField();
                 }
-                if (fields.Count - 3 < fields[1].target.target_Int)
+                if (fields.Count - 3 < (int)fields[1].GetValue(FieldType.Int))
                 {
                     change = true;
                     AddField();

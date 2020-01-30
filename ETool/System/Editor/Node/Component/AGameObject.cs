@@ -19,7 +19,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(GameObject), 0)]
         public GameObject GetGameObject(BlueprintInput data)
         {
-            return fields[0].target.target_GameObject;
+            return (GameObject)Field.GetObjectByFieldType(FieldType.GameObject, fields[0].target);
         }
     }
 }

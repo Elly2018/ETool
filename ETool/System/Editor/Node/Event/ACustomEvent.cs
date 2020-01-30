@@ -7,6 +7,7 @@ namespace ETool.ANode
     public class ACustomEvent : NodeBase
     {
         private object[] obj;
+        private BlueprintCustomEvent MyTarget = null;
 
         public ACustomEvent(Vector2 position, float width, float height) : base(position, width, height)
         {
@@ -32,39 +33,47 @@ namespace ETool.ANode
 
         public override void DynamicFieldInitialize(BlueprintInput data)
         {
-            BlueprintCustomEvent target = null;
             for (int i = 0; i < data.blueprintCustomEvents.Count; i++)
             {
-                if (i + 2 == page)
+                if (i + EBlueprint.DefaultPageCount == page)
                 {
-                    target = data.blueprintCustomEvents[i];
+                    MyTarget = data.blueprintCustomEvents[i];
                     break;
                 }
             }
 
-            if (target == null) return;
+            if (MyTarget == null) return;
+            UpdateField();
+        }
 
+        public void SetCustomEvent(BlueprintCustomEvent bce)
+        {
+            MyTarget = bce;
+            UpdateField();
+        }
 
+        private void UpdateField()
+        {
             bool change = true;
             while (change)
             {
                 change = false;
-                if(fields.Count > target.arugments.Count + 1)
+                if (fields.Count > MyTarget.arugments.Count + 1)
                 {
                     change = true;
                     ACustomEvent.RemoveVariableField(this, false);
                 }
-                if (fields.Count < target.arugments.Count + 1)
+                if (fields.Count < MyTarget.arugments.Count + 1)
                 {
                     change = true;
-                    ACustomEvent.AddVariableField(target.arugments[fields.Count - 1], this, false);
+                    ACustomEvent.AddVariableField(MyTarget.arugments[fields.Count - 1], this, false);
                 }
             }
 
-            for(int i = 1; i < fields.Count; i++)
+            for (int i = 1; i < fields.Count; i++)
             {
-                if (!ACustomEvent.CheckArugmentMatch(target.arugments[i - 1], fields[i]))
-                    ACustomEvent.ChangeVariableField(target.arugments[i - 1], this, i, false);
+                if (!ACustomEvent.CheckArugmentMatch(MyTarget.arugments[i - 1], fields[i]))
+                    ACustomEvent.ChangeVariableField(MyTarget.arugments[i - 1], this, i, false);
             }
         }
 

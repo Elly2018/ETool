@@ -31,7 +31,7 @@ namespace ETool.ANode
             fields.Add(new Field(FieldType.Event, "Event", ConnectionType.DataBoth, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "Translate", ConnectionType.DataInput, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Boolean, "Local", ConnectionType.DataInput, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.Transform, "Target", ConnectionType.DataOutput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Transform, "Target", ConnectionType.DataInput, this, FieldContainer.Object));
         }
     }
 }

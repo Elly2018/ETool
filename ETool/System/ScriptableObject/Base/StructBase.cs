@@ -26,7 +26,7 @@ namespace ETool
         /// <summary>
         /// Element data type
         /// </summary>
-        public string type = "System.Int32";
+        public FieldType type;
 
         /// <summary>
         /// 

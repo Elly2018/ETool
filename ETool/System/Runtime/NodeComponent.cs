@@ -8,14 +8,21 @@ namespace ETool
     [AddComponentMenu("ETool/Node Component")]
     public class NodeComponent : MonoBehaviour
     {
-        public ScriptableObject ABlueprint;
+        public EBlueprint ABlueprint;
+        public BlueprintGameobjectRegister[] blueprintGameobjectRegister;
+
+        private void Awake()
+        {
+            EBlueprint buffer = ScriptableObject.CreateInstance<EBlueprint>();
+            buffer.EBlueprintClone(ABlueprint, gameObject, blueprintGameobjectRegister);
+            buffer.name = ABlueprint.name + "(Instance)";
+            ABlueprint = buffer;
+        }
 
         private void OnValidate()
         {
-            if (ABlueprint.GetType().FullName == "ETool.EBlueprint")
-                Calling("EOnValidate");
-            else
-                ABlueprint = null;
+            if (ABlueprint == null) return;
+            Calling("EOnValidate");
         }
 
         private void Start()
@@ -38,7 +45,11 @@ namespace ETool
 
         private void OnApplicationPause(bool pause)
         {
-            if (pause) return;
+            if (pause)
+            {
+                if (ABlueprint == null) return;
+                Calling("EOnValidate");
+            }
             if (ABlueprint == null) return;
             Calling("EStop");
         }
@@ -127,6 +138,7 @@ namespace ETool
             MethodInfo info = blueprint.GetMethod(methodName);
             List<object> _arg = new List<object>();
             _arg.Add(gameObject);
+            _arg.Add(blueprintGameobjectRegister);
             info.Invoke(ABlueprint, _arg.ToArray());
         }
 
@@ -138,5 +150,12 @@ namespace ETool
             _arg.Add(o);
             info.Invoke(ABlueprint, _arg.ToArray());
         }
+    }
+
+    [System.Serializable]
+    public class BlueprintGameobjectRegister
+    {
+        public string label;
+        public GameObject target;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace ETool.ANode
 {
-    public interface INode
+    public interface INodeStyle
     {
         StyleType GetNodeStyle();
         StyleType GetNodeSelectStyle();

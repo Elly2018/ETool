@@ -6,6 +6,7 @@ namespace ETool.ANode
     public class ACustomEventCall : NodeBase
     {
         private object[] obj;
+        private BlueprintCustomEvent MyTarget = null;
 
         public ACustomEventCall(Vector2 position, float width, float height) : base(position, width, height)
         {
@@ -15,51 +16,90 @@ namespace ETool.ANode
         public override void ProcessCalling(BlueprintInput data)
         {
             List<object> _arg = new List<object>();
-            for(int i = 1; i < fields.Count; i++)
+            for (int i = 1; i < fields.Count; i++)
             {
-                if(CheckIfConnectionExist(i, data, true))
+                if (CheckIfConnectionExist(i, data, true))
                     _arg.Add(GetFieldInputValue(i, data));
                 else
                     _arg.Add(null);
 
             }
-            ActiveCustomEvent(data, targetPage, _arg.ToArray());
+
+            if (targetPage < EBlueprint.DefaultPageCount)
+            {
+                /* This is outside node */
+                ActiveInheritCustomEvent(data, _arg.ToArray());
+            }
+            else
+            {
+                /* This is private event */
+                
+                ActiveCustomEvent(data, targetPage, _arg.ToArray());
+            }
             ActiveNextEvent(0, data);
         }
 
         public override void DynamicFieldInitialize(BlueprintInput data)
         {
-            BlueprintCustomEvent target = null;
-            for (int i = 0; i < data.blueprintCustomEvents.Count; i++)
+            if (targetPage < EBlueprint.DefaultPageCount)
             {
-                if (i + 2 == targetPage)
+                /* Inherit */
+                if(data.inherit != null)
                 {
-                    target = data.blueprintCustomEvents[i];
-                    break;
+                    foreach (var i in data.inherit.GetInheritEvent())
+                    {
+                        if (i.eventName == title)
+                        {
+                            MyTarget = i;
+                        }
+                    }
                 }
             }
-            if (target == null) return;
+            else
+            {
+                /* Private */
+                foreach(var i in data.blueprintCustomEvents)
+                {
+                    if(i.eventName == title)
+                    {
+                        MyTarget = i;
+                    }
+                }
+            }
 
+            /* Arugment update */
+            if (MyTarget == null) return;
+            UpdateField();
+        }
+
+        public void SetCustomEvent(BlueprintCustomEvent bce)
+        {
+            MyTarget = bce;
+            UpdateField();
+        }
+
+        private void UpdateField()
+        {
             bool change = true;
             while (change)
             {
                 change = false;
-                if (fields.Count > target.arugments.Count + 1)
+                if (fields.Count > MyTarget.arugments.Count + 1)
                 {
                     change = true;
                     ACustomEvent.RemoveVariableField(this, true);
                 }
-                if (fields.Count < target.arugments.Count + 1)
+                if (fields.Count < MyTarget.arugments.Count + 1)
                 {
                     change = true;
-                    ACustomEvent.AddVariableField(target.arugments[fields.Count - 1], this, true);
+                    ACustomEvent.AddVariableField(MyTarget.arugments[fields.Count - 1], this, true);
                 }
             }
 
             for (int i = 1; i < fields.Count; i++)
             {
-                if (!ACustomEvent.CheckArugmentMatch(target.arugments[i - 1], fields[i]))
-                    ACustomEvent.ChangeVariableField(target.arugments[i - 1], this, i, true);
+                if (!ACustomEvent.CheckArugmentMatch(MyTarget.arugments[i - 1], fields[i]))
+                    ACustomEvent.ChangeVariableField(MyTarget.arugments[i - 1], this, i, true);
             }
         }
 

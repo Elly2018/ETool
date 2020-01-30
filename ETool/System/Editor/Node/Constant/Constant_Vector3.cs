@@ -18,7 +18,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(Vector3), 0)]
         public Vector3 GetVector3(BlueprintInput data)
         {
-            return fields[0].target.target_Vector3;
+            return (Vector3)Field.GetObjectByFieldType(FieldType.Vector3, fields[0].target);
         }
     }
 }

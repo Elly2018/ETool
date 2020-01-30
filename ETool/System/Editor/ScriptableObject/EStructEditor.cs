@@ -21,7 +21,7 @@ namespace ETool
             {
                 HGroupStart();
                 DrawElementLabel(se[i]);
-                se[i].type = DrawElementDataType(se[i].type);
+                se[i].type = (FieldType)EditorGUILayout.EnumPopup(se[i].type);
                 DrawElementContainerType(se[i]);
                 DrawElementDefaultValue(se[i]);
                 if (GUILayout.Button("-"))
@@ -85,12 +85,10 @@ namespace ETool
         /// <param name="e"></param>
         private void DrawElementDefaultValue(StructElement e)
         {
-            if (e.type == null)
-                return;
             if (e.structDataType != (int)StructDataType.Object)
                 GUI.enabled = false;
 
-            e.elementDefault = DrawFieldHelper(e.elementDefault, e.type);
+            e.elementDefault = Field.DrawFieldHelper(e.elementDefault, e.type);
 
             GUI.enabled = true;
         }

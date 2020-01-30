@@ -1,28 +1,84 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using ETool.ANode;
 
 namespace ETool
 {
+    /// <summary>
+    /// Base class of node <br />
+    /// Contain basic functionality
+    /// </summary>
     [System.Serializable]
     public class Node
     {
-        public const float PropertiesHeight = 44;
+        /// <summary>
+        /// Each properties rect height
+        /// </summary>
+        public const float PropertiesHeight = 40;
 
+        /// <summary>
+        /// Node render rect
+        /// </summary>
         public Rect rect;
+
+        /// <summary>
+        /// Node title string
+        /// </summary>
         public string title;
+
+        /// <summary>
+        /// Node description <br />
+        /// After click right click menu will show on screen
+        /// </summary>
         public string description;
+
+        /// <summary>
+        /// Define render page index
+        /// </summary>
         public int page;
 
+        /// <summary>
+        /// Is node is in drag mode
+        /// </summary>
         public bool isDragged;
+
+        /// <summary>
+        /// Is node is in select mode
+        /// </summary>
         public bool isSelected;
 
-        public ConnectionPoint inPoint;
-        public ConnectionPoint outPoint;
+        /// <summary>
+        /// Is node is in hover mode
+        /// </summary>
+        public bool isHover;
+
+        /// <summary>
+        /// Is there error in the node
+        /// </summary>
+        public List<NodeError> nodeErrors = new List<NodeError>();
+
+
+        /// <summary>
+        /// Node type as string <br />
+        /// This string will use for create instance when check stage is enable <br />
+        /// Because unity does not support inherit type serialize <br />
+        /// So we store in the string, and after check stage we make new instance to cover the old one
+        /// </summary>
         public string NodeType;
 
+        /// <summary>
+        /// Define node fields <br />
+        /// The most inportant variable in the node
+        /// </summary>
         public List<Field> fields = new List<Field>();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="position">Node spawn position</param>
+        /// <param name="width">Node width</param>
+        /// <param name="height">Node height</param>
         public Node(Vector2 position, float width, float height)
         {
             rect = new Rect(position.x, position.y, width, height);
@@ -30,21 +86,77 @@ namespace ETool
             if (fields == null) fields = new List<Field>();
         }
 
+        /// <summary>
+        /// Initialize stage
+        /// </summary>
         public void Initialize()
         {
             FieldInitialize();
         }
 
+        #region Virtual Method
+        /// <summary>
+        /// Field initialize <br />
+        /// Usually field will create at this stage
+        /// </summary>
         public virtual void FieldInitialize() { }
+
+        /// <summary>
+        /// Post field initialize <br />
+        /// Usually after initialize, this method will called
+        /// </summary>
         public virtual void PostFieldInitialize() { }
+
+        /// <summary>
+        /// Post field initialize at runtime <br />
+        /// Usually after initialize, this method will called
+        /// </summary>
+        /// <param name="data"></param>
         public virtual void PostFieldInitialize(BlueprintInput data) { }
+
+        /// <summary>
+        /// When there are dynamic field <br />
+        /// Usually after initialize and post initialize, this method will called
+        /// </summary>
+        /// <param name="data"></param>
         public virtual void DynamicFieldInitialize(BlueprintInput data) { }
 
+        /// <summary>
+        /// When there are all initialize field <br />
+        /// Usually after initialize and post initialize, this method will called
+        /// </summary>
+        /// <param name="data"></param>
+        public virtual void FinalFieldInitialize(BlueprintInput data) { }
+
+        /// <summary>
+        /// When event is trigger <br />
+        /// The node main execute method
+        /// </summary>
+        /// <param name="data"></param>
+        public virtual void ProcessCalling(BlueprintInput data) { }
+
+        /// <summary>
+        /// When one of field is changed value <br />
+        /// This method will called
+        /// </summary>
+        public virtual void FieldUpdate() { }
+        public virtual void SelectionChanged(bool change) { }
+        public virtual void DragChanged(bool change) { }
+        #endregion
+
+        /// <summary>
+        /// Drag node method
+        /// </summary>
+        /// <param name="delta">Moving delta</param>
         public virtual void Drag(Vector2 delta)
         {
             rect.position += delta;
         }
 
+        /// <summary>
+        /// Drawing fields method
+        /// </summary>
+        /// <param name="fs">Target field list</param>
         public void DrawField(List<Field> fs)
         {
             GUI.Label(rect, title, StyleUtility.GetStyle(StyleType.GUI_Title));
@@ -59,85 +171,147 @@ namespace ETool
             }
         }
 
-        public virtual void ProcessCalling(BlueprintInput data) {}
-        public virtual void FieldUpdate() { }
-        public virtual void SelectionChanged(bool change) { }
-        public virtual void DragChanged(bool change) { }
-
+        /// <summary>
+        /// Receive the editor event <br />
+        /// Usually contain basic functionally of the node <br />
+        /// Moving, Drag, Click
+        /// </summary>
+        /// <param name="e">Editor event</param>
+        /// <returns></returns>
         public bool ProcessEvents(Event e)
         {
             switch (e.type)
             {
                 case EventType.MouseDown:
-                    if (e.button == 0)
                     {
-                        if (rect.Contains(e.mousePosition))
+                        if (e.button == 0)
                         {
-                            isDragged = true;
-                            GUI.changed = true;
-                            isSelected = true;
-                            SelectionChanged(isSelected);
-                            DragChanged(isDragged);
-                        }
-                        else
-                        {
-                            if(!e.shift)
+                            if (rect.Contains(e.mousePosition))
                             {
-                                isSelected = false;
+                                isDragged = true;
+                                GUI.changed = true;
+                                isSelected = true;
+                                SelectionChanged(isSelected);
+                                DragChanged(isDragged);
                             }
-                            GUI.changed = true;
-                            SelectionChanged(isSelected);
+                            else
+                            {
+                                if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreDrag(this))
+                                {
+                                    isSelected = false;
+                                }
+                                GUI.changed = true;
+                                SelectionChanged(isSelected);
+                            }
                         }
+                        if (e.button == 1 && isSelected && rect.Contains(e.mousePosition))
+                        {
+                            ProcessContextMenu();
+                            e.Use();
+                        }
+                        break;
                     }
-                    if (e.button == 1 && isSelected && rect.Contains(e.mousePosition))
-                    {
-                        ProcessContextMenu();
-                        e.Use();
-                    }
-                    break;
-
+                    
                 case EventType.MouseUp:
-                    isDragged = false;
-                    DragChanged(isDragged);
-                    break;
+                    {
+                        isDragged = false;
+                        DragChanged(isDragged);
+                        break;
+                    }
 
                 case EventType.MouseDrag:
-                    if (e.button == 0 && isSelected)
                     {
-                        Drag(e.delta);
-                        //e.Use();
-                        return true;
+                        if (e.button == 0 && isSelected)
+                        {
+                            EditorUtility.SetDirty(NodeBasedEditor.Instance);
+                            Drag(e.delta);
+                            //e.Use();
+                            return true;
+                        }
+                        break;
                     }
-                    break;
-                case EventType.MouseMove:
-
-                    break;
+                    
             }
             return false;
         }
 
+        /// <summary>
+        /// When cursor is on node, and receive right click event
+        /// </summary>
         public virtual void ProcessContextMenu()
         {
             GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Remove node"), false, OnClickRemoveNode);
             genericMenu.AddItem(new GUIContent("Description"), false, OnClickDescription);
-            genericMenu.AddItem(new GUIContent("Copy"), false, OnClickCopy);
+
+            if (NodeBasedEditor.Instance.CheckAnyNodeSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Copy selection"), false, NodeBasedEditor.Instance.OnClickCopy);
+            }
+
+            if (NodeBasedEditor.Instance.CheckAnyConnectionSelect() || NodeBasedEditor.Instance.CheckAnyNodeSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Delete Selected"), false, NodeBasedEditor.Instance.DeleteSelection);
+            }
+            if (nodeErrors.Count != 0)
+            {
+                foreach(var i in nodeErrors)
+                {
+                    genericMenu.AddItem(new GUIContent("ErrorMessage: " + i.errorType.ToString()), false, OnClickErrorMessage, i.errorString);
+                }
+            }
+
+            if(NodeType == typeof(ACustomEventCall).FullName)
+            {
+                foreach(var i in NodeBasedEditor.Instance.GetAllCustomEventName())
+                {
+                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i), false, ChangeCustomEvent, i);
+                }
+                foreach(var i in NodeBasedEditor.Instance.GetAllInheritCustomEventName())
+                {
+                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i), false, ChangeInheritCustomEvent, i);
+                }
+            }
+
             genericMenu.ShowAsContext();
         }
 
+        protected void ChangeCustomEvent(object o)
+        {
+            AddCustomEvent target = (AddCustomEvent)o;
+            NodeBase nb = (NodeBase)this;
+            if (nb != null)
+            {
+                nb.title = target.addEventName;
+                nb.targetPage = target.page;
+            }
+        }
+
+        protected void ChangeInheritCustomEvent(object o)
+        {
+            string target = (string)o;
+            NodeBase nb = (NodeBase)this;
+            if (nb != null)
+            {
+                nb.title = target;
+                nb.targetPage = 0;
+            }   
+        }
+
+        /// <summary>
+        /// User want to check error message
+        /// </summary>
+        /// <param name="messageString"></param>
+        protected void OnClickErrorMessage(object messageString)
+        {
+            NodeBasedEditor.Instance.GreyBackgroundOkButton((string)messageString);
+        }
+
+        /// <summary>
+        /// User want to check node description
+        /// </summary>
         protected void OnClickDescription()
         {
             NodeBasedEditor.Instance.GreyBackgroundOkButton(description);
-        }
-
-        protected void OnClickRemoveNode()
-        {
-            NodeBasedEditor.Instance.OnClickRemoveSelectionNode();
-        }
-
-        protected void OnClickCopy()
-        {
-            NodeBasedEditor.Instance.OnClickCopyNodes();
         }
     }
 }

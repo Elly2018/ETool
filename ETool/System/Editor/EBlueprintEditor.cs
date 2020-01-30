@@ -23,11 +23,11 @@ namespace ETool
             bool eventAnyNameEmpty = false;
             bool eventRepeatName = false;
             VGroupStart();
-
             EditorGUILayout.Space();
             DrawTitle2("Event");
             EditorGUILayout.Space();
             #region Event
+            EditorGUI.BeginChangeCheck();
             if (EditorGUILayout.PropertyField(serializedObject.FindProperty("blueprintEvent")))
             {
                 EditorGUI.indentLevel++;
@@ -55,95 +55,143 @@ namespace ETool
                 EditorGUILayout.PropertyField(sp.FindPropertyRelative("onTriggerStay2D"));
                 EditorGUI.indentLevel--;
             }
+            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(b);
             #endregion
             EditorGUILayout.Space();
             DrawTitle2("Custom Event");
             EditorGUILayout.Space();
             #region Custom Event
             VGroupStart();
-            for(int i = 0; i < b.blueprintEvent.customEvent.Count; i++)
+            /* Private custom event */
+            EditorGUI.BeginChangeCheck();
             {
-                if (b.blueprintEvent.customEvent[i].eventName == null || b.blueprintEvent.customEvent[i].eventName == "")
+                DrawTitle3("Blueprint Custom Event");
+                for (int i = 0; i < b.blueprintEvent.customEvent.Count; i++)
                 {
-                    eventAnyNameEmpty = true;
-                }
-                for (int j = i + 1; j < b.blueprintEvent.customEvent.Count; j++)
-                {
-                    if (b.blueprintEvent.customEvent[i].eventName == b.blueprintEvent.customEvent[j].eventName)
+                    if (b.blueprintEvent.customEvent[i].eventName == null || b.blueprintEvent.customEvent[i].eventName == "")
                     {
-                        eventRepeatName = true;
+                        eventAnyNameEmpty = true;
                     }
-                }
-                b.blueprintEvent.customEvent[i].fold = EditorGUILayout.Foldout(b.blueprintEvent.customEvent[i].fold, b.blueprintEvent.customEvent[i].eventName);
-                if (!b.blueprintEvent.customEvent[i].fold) continue;
-                VGroupStart();
-                b.blueprintEvent.customEvent[i].eventName = 
-                    EditorGUILayout.TextField("Event Name", b.blueprintEvent.customEvent[i].eventName);
-                b.blueprintEvent.customEvent[i].returnType =
-                    (FieldType)EditorGUILayout.EnumPopup("Return Type", b.blueprintEvent.customEvent[i].returnType);
-                #region Arugment
-                HGroupStart();
-                EditorGUILayout.LabelField("Label", GUILayout.MinWidth(100));
-                EditorGUILayout.LabelField("Type", GUILayout.MinWidth(100));
-                HGroupEnd();
-
-                for (int j = 0; j < b.blueprintEvent.customEvent[i].arugments.Count; j++)
-                {
-                    BlueprintVariable bmv = b.blueprintEvent.customEvent[i].arugments[j];
-                    HGroupStart();
-                    bmv.label = EditorGUILayout.TextField(bmv.label);
-                    EditorGUI.BeginChangeCheck();
-                    bmv.type = (FieldType)EditorGUILayout.EnumPopup(bmv.type);
-                    if (EditorGUI.EndChangeCheck())
+                    for (int j = i + 1; j < b.blueprintEvent.customEvent.Count; j++)
                     {
-                        b.ChangeCustomEventArugment(i, j);
-                    }
-                    if (GUILayout.Button("-"))
-                    {
-                        b.DeleteCustomEventArugment(i, j);
-                        b.blueprintEvent.customEvent[i].arugments.RemoveAt(j);
-                        return;
-                    }
-                    if (b.blueprintEvent.customEvent[i].arugments[j].label == "" ||
-                        b.blueprintEvent.customEvent[i].arugments[j].label == null)
-                        eventAnyArugmentLabelEmpty = true;
-                    for(int k = j + 1; k < b.blueprintEvent.customEvent[i].arugments.Count; k++)
-                    {
-                        if(b.blueprintEvent.customEvent[i].arugments[j].label ==
-                            b.blueprintEvent.customEvent[i].arugments[k].label)
+                        if (b.blueprintEvent.customEvent[i].eventName == b.blueprintEvent.customEvent[j].eventName)
                         {
-                            eventRepeatVLabelName = true;
+                            eventRepeatName = true;
                         }
                     }
+                    b.blueprintEvent.customEvent[i].fold = EditorGUILayout.Foldout(b.blueprintEvent.customEvent[i].fold, b.blueprintEvent.customEvent[i].eventName);
+                    if (!b.blueprintEvent.customEvent[i].fold) continue;
+                    VGroupStart();
+                    b.blueprintEvent.customEvent[i].eventName =
+                        EditorGUILayout.TextField("Event Name", b.blueprintEvent.customEvent[i].eventName);
+                    b.blueprintEvent.customEvent[i].accessAbility =
+                        (AccessAbility)EditorGUILayout.EnumPopup("Access Ability", b.blueprintEvent.customEvent[i].accessAbility);
+                    b.blueprintEvent.customEvent[i].returnType =
+                        (FieldType)EditorGUILayout.EnumPopup("Return Type", b.blueprintEvent.customEvent[i].returnType);
+                    #region Arugment
+                    HGroupStart();
+                    EditorGUILayout.LabelField("Label", GUILayout.MinWidth(100));
+                    EditorGUILayout.LabelField("Type", GUILayout.MinWidth(100));
                     HGroupEnd();
+
+                    for (int j = 0; j < b.blueprintEvent.customEvent[i].arugments.Count; j++)
+                    {
+                        BlueprintVariable bmv = b.blueprintEvent.customEvent[i].arugments[j];
+                        HGroupStart();
+                        bmv.label = EditorGUILayout.TextField(bmv.label);
+                        EditorGUI.BeginChangeCheck();
+                        bmv.type = (FieldType)EditorGUILayout.EnumPopup(bmv.type);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            b.ChangeCustomEventArugment(i, j);
+                        }
+                        if (GUILayout.Button("-"))
+                        {
+                            b.DeleteCustomEventArugment(i, j);
+                            b.blueprintEvent.customEvent[i].arugments.RemoveAt(j);
+                            return;
+                        }
+                        if (b.blueprintEvent.customEvent[i].arugments[j].label == "" ||
+                            b.blueprintEvent.customEvent[i].arugments[j].label == null)
+                            eventAnyArugmentLabelEmpty = true;
+                        for (int k = j + 1; k < b.blueprintEvent.customEvent[i].arugments.Count; k++)
+                        {
+                            if (b.blueprintEvent.customEvent[i].arugments[j].label ==
+                                b.blueprintEvent.customEvent[i].arugments[k].label)
+                            {
+                                eventRepeatVLabelName = true;
+                            }
+                        }
+                        HGroupEnd();
+                    }
+                    if (eventAnyArugmentLabelEmpty)
+                    {
+                        EditorGUILayout.HelpBox("Arugment label cannot be empty", MessageType.Error);
+                    }
+                    if (eventRepeatVLabelName)
+                    {
+                        EditorGUILayout.HelpBox("Arugment label cannot be repeat", MessageType.Error);
+                    }
+                    HGroupStart();
+                    if (GUILayout.Button("Add Arugment"))
+                    {
+                        b.blueprintEvent.customEvent[i].arugments.Add(new BlueprintVariable());
+                    }
+                    if (GUILayout.Button("Clear Arugment"))
+                    {
+                        b.blueprintEvent.customEvent[i].arugments.Clear();
+                    }
+                    if (GUILayout.Button("Delete Custom Event"))
+                    {
+                        b.DeleteCustomEvent(i);
+                        b.blueprintEvent.customEvent.RemoveAt(i);
+                        return;
+                    }
+                    HGroupEnd();
+                    VGroupEnd();
+                    EditorGUILayout.Space();
+                    #endregion
                 }
-                if (eventAnyArugmentLabelEmpty)
-                {
-                    EditorGUILayout.HelpBox("Arugment label cannot be empty", MessageType.Error);
-                }
-                if (eventRepeatVLabelName)
-                {
-                    EditorGUILayout.HelpBox("Arugment label cannot be repeat", MessageType.Error);
-                }
-                HGroupStart();
-                if (GUILayout.Button("Add Arugment"))
-                {
-                    b.blueprintEvent.customEvent[i].arugments.Add(new BlueprintVariable());
-                }
-                if (GUILayout.Button("Clear Arugment"))
-                {
-                    b.blueprintEvent.customEvent[i].arugments.Clear();
-                }
-                if (GUILayout.Button("Delete Custom Event"))
-                {
-                    b.DeleteCustomEvent(i);
-                    b.blueprintEvent.customEvent.RemoveAt(i);
-                    return;
-                }
-                HGroupEnd();
-                VGroupEnd();
+            }
+            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(b);
+            if (b.Inherit != null)
+            {
+                DrawTitle3("Inherit Custom Event");
                 EditorGUILayout.Space();
-                #endregion
+                List<BlueprintCustomEvent> bufferC = b.GetInheritEvent();
+                foreach (var i in b.blueprintEvent.customEvent)
+                {
+                    bufferC.Remove(i);
+                }
+                for (int i = 0; i < bufferC.Count; i++)
+                {
+                    BlueprintCustomEvent targetC = bufferC[i];
+                    targetC.fold = EditorGUILayout.Foldout(targetC.fold, targetC.eventName);
+                    if (targetC.fold)
+                    {
+                        GUI.enabled = false;
+                        targetC.eventName =
+                            EditorGUILayout.TextField("Event Name", targetC.eventName);
+                        targetC.accessAbility =
+                            (AccessAbility)EditorGUILayout.EnumPopup("Access Ability", targetC.accessAbility);
+                        targetC.returnType =
+                            (FieldType)EditorGUILayout.EnumPopup("Return Type", targetC.returnType);
+
+                        HGroupStart();
+                        EditorGUILayout.LabelField("Label", GUILayout.MinWidth(100));
+                        EditorGUILayout.LabelField("Type", GUILayout.MinWidth(100));
+                        HGroupEnd();
+                        for (int j = 0; j < targetC.arugments.Count; j++)
+                        {
+                            HGroupStart();
+                            BlueprintVariable bufferCV = targetC.arugments[j];
+                            bufferCV.label = EditorGUILayout.TextField(bufferCV.label);
+                            bufferCV.type = (FieldType)EditorGUILayout.EnumPopup(bufferCV.type);
+                            HGroupEnd();
+                        }
+                        GUI.enabled = true;
+                    }
+                }
             }
             HGroupStart();
             if (GUILayout.Button("Add Custom Event"))
@@ -171,32 +219,73 @@ namespace ETool
             #region Custom Variable
             VGroupStart();
             HGroupStart();
+            EditorGUILayout.LabelField("Access", GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Label", GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Type", GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Default variable", GUILayout.MinWidth(100));
             HGroupEnd();
-            for (int i = 0; i < b.blueprintVariables.Count; i++)
+            /* Private custom variable */
+            EditorGUI.BeginChangeCheck();
             {
-                HGroupStart();
-                b.blueprintVariables[i].label = EditorGUILayout.TextField(b.blueprintVariables[i].label);
-                b.blueprintVariables[i].type = (FieldType)EditorGUILayout.EnumPopup(b.blueprintVariables[i].type);
-                b.blueprintVariables[i].variable = DrawFieldHelper(b.blueprintVariables[i].variable, Field.GetTypeByFieldType(b.blueprintVariables[i].type).FullName);
-                if (GUILayout.Button("-"))
+                for (int i = 0; i < b.blueprintVariables.Count; i++)
                 {
-                    b.blueprintVariables.RemoveAt(i);
-                }
-                if (b.blueprintVariables[i].label == "" || b.blueprintVariables[i].label == null) anyVariableLabelEmpty = true;
-
-                bool repeat = false;
-                for(int k = i + 1; k < b.blueprintVariables.Count; k++)
-                {
-                    if(b.blueprintVariables[i].label == b.blueprintVariables[k].label)
+                    HGroupStart();
+                    b.blueprintVariables[i].accessAbility = (AccessAbility)EditorGUILayout.EnumPopup(b.blueprintVariables[i].accessAbility);
+                    b.blueprintVariables[i].label = EditorGUILayout.TextField(b.blueprintVariables[i].label);
+                    EditorGUI.BeginChangeCheck();
+                    b.blueprintVariables[i].type = (FieldType)EditorGUILayout.EnumPopup(b.blueprintVariables[i].type);
+                    if (EditorGUI.EndChangeCheck())
                     {
-                        repeat = true;
+                        b.ChangeCustomVariableType(i);
+                    }
+                    b.blueprintVariables[i].variable = Field.DrawFieldHelper(b.blueprintVariables[i].variable, b.blueprintVariables[i].type);
+                    if (GUILayout.Button("-"))
+                    {
+                        b.DeleteCustomVariable(i);
+                        b.blueprintVariables.RemoveAt(i);
+                        continue;
+                    }
+                    if (b.blueprintVariables[i].label == "" || b.blueprintVariables[i].label == null) anyVariableLabelEmpty = true;
+                    bool repeat = false;
+                    for (int k = i + 1; k < b.blueprintVariables.Count; k++)
+                    {
+                        if (b.blueprintVariables[i].label == b.blueprintVariables[k].label)
+                        {
+                            repeat = true;
+                        }
+                    }
+                    if (repeat) repeatVLabelName = true;
+                    HGroupEnd();
+                }
+            }
+            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(b);
+
+            /* Inherit custom variable */
+            if (b.Inherit != null)
+            {
+                EditorGUI.BeginChangeCheck();
+                {
+                    List<BlueprintVariable> bufferV = b.GetInheritVariable();
+                    foreach (var i in b.blueprintVariables)
+                    {
+                        bufferV.Remove(i);
+                    }
+
+                    for (int i = 0; i < bufferV.Count; i++)
+                    {
+                        HGroupStart();
+                        BlueprintVariable variable = bufferV[i];
+                        if (variable.accessAbility == AccessAbility.Private) continue;
+                        GUI.enabled = false;
+                        variable.accessAbility = (AccessAbility)EditorGUILayout.EnumPopup(variable.accessAbility);
+                        variable.label = EditorGUILayout.TextField(variable.label);
+                        variable.type = (FieldType)EditorGUILayout.EnumPopup(variable.type);
+                        GUI.enabled = true;
+                        variable.variable = Field.DrawFieldHelper(variable.variable, variable.type);
+                        HGroupEnd();
                     }
                 }
-                if (repeat) repeatVLabelName = true;
-                HGroupEnd();
+                if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(b.Inherit);
             }
             HGroupStart();
             if (GUILayout.Button("Add Custom Variable"))
@@ -217,6 +306,14 @@ namespace ETool
                 EditorGUILayout.HelpBox("Variable label cannot be repeat", MessageType.Error);
             }
             VGroupEnd();
+            #endregion
+            EditorGUILayout.Space();
+            DrawTitle2("Inherit");
+            EditorGUILayout.Space();
+            #region Inherit
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("Inherit"));
+            if (EditorGUI.EndChangeCheck()) EditorUtility.SetDirty(b);
             #endregion
             EditorGUILayout.Space(); EditorGUILayout.Space();
             EditorGUILayout.Space();

@@ -23,7 +23,7 @@ namespace ETool.ANode
         public GameObject GameAllChild(BlueprintInput data)
         {
             GameObject go = (GameObject)GetFieldOrLastInputField(1, data);
-            return go.transform.GetChild(fields[0].target.target_Int).gameObject;
+            return go.transform.GetChild((Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)).gameObject;
         }
     }
 }

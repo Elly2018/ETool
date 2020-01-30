@@ -28,6 +28,11 @@ namespace ETool.ANode
             GetFieldDone(data);
         }
 
+        public override void DynamicFieldInitialize(BlueprintInput data)
+        {
+            GetFieldDone(data);
+        }
+
         public override void FieldUpdate()
         {
             GetFieldDone();
@@ -39,7 +44,7 @@ namespace ETool.ANode
             try
             {
                 NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[1]);
-                fields[1] = new Field(bv[fields[0].target.target_Int].type, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
+                fields[1] = new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
             }
             catch { }
         }
@@ -48,7 +53,7 @@ namespace ETool.ANode
         {
             try
             {
-                fields[1] = new Field(data.blueprintVariables[fields[0].target.target_Int].type, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
+                fields[1] = new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
             }
             catch { }
         }
@@ -56,7 +61,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(object), 1)]
         public object GetMyVariable(BlueprintInput data)
         {
-            return Field.GetObjectByFieldType(data.blueprintVariables[fields[0].target.target_Int].type, data.blueprintVariables[fields[0].target.target_Int].variable);
+            return Field.GetObjectByFieldType(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type, data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].variable);
         }
     }
 }

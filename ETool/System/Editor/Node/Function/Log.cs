@@ -23,8 +23,7 @@ namespace ETool.ANode
         {
             fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventBoth, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.String, "Message", ConnectionType.DataInput, this, FieldContainer.Object));
-
-            fields[1].target.target_String = "New String";
+            Field.SetObjectByFieldType(FieldType.String, fields[1].target, "New String");
         }
     }
 }

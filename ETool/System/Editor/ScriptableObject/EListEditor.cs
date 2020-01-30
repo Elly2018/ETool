@@ -14,12 +14,12 @@ namespace ETool
             EList myTarget = (EList)target;
             List<ListElement> le = myTarget.listBase.listElements;
             VGroupStart();
-            myTarget.listType = DrawElementDataType(myTarget.listType, "Data type");
+            myTarget.listType = (FieldType)EditorGUILayout.EnumPopup(myTarget.listType);
             for(int i = 0; i < le.Count; i++)
             {
                 HGroupStart();
                 EditorGUILayout.LabelField(i.ToString(), GUILayout.MaxWidth(40));
-                le[i].target = DrawFieldHelper(le[i].target, myTarget.listType);
+                le[i].target = Field.DrawFieldHelper(le[i].target, myTarget.listType);
                 if (GUILayout.Button("-", GUILayout.Width(30)))
                     myTarget.listBase.listElements.RemoveAt(i);
                 HGroupEnd();

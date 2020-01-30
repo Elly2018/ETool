@@ -16,14 +16,14 @@ namespace ETool.ANode
         public override void ProcessCalling(BlueprintInput data)
         {
             GameObject v1 = (GameObject)GetFieldOrLastInputField(1, data);
-            GameObject v2 = (GameObject)GetFieldOrLastInputField(2, data);
+            Transform v2 = (Transform)GetFieldOrLastInputField(2, data);
             if (v1 != null && v2 == null)
             {
                 go = GameObject.Instantiate(v1);
             }
             else if (v1 != null && v2 != null)
             {
-                go = GameObject.Instantiate(v1, v2.transform);
+                go = GameObject.Instantiate(v1, v2);
             }
             ActiveNextEvent(0, data);
         }
@@ -32,7 +32,7 @@ namespace ETool.ANode
         {
             fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventBoth, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.GameObject, "Target", ConnectionType.DataBoth, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.GameObject, "Parent", ConnectionType.DataInput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Transform, "Parent", ConnectionType.DataInput, this, FieldContainer.Object));
         }
 
         [NodePropertyGet(typeof(GameObject), 1)]

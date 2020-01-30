@@ -16,10 +16,10 @@ namespace ETool.ANode
             fields.Add(new Field(FieldType.Boolean, "Boolean", ConnectionType.DataOutput, this, FieldContainer.Object));
         }
 
-        [NodePropertyGet(typeof(Single), 0)]
-        public bool GetFloat(BlueprintInput data)
+        [NodePropertyGet(typeof(Boolean), 0)]
+        public Boolean GetFloat(BlueprintInput data)
         {
-            return fields[0].target.target_Boolean;
+            return (Boolean)Field.GetObjectByFieldType(FieldType.Boolean, fields[0].target);
         }
     }
 }

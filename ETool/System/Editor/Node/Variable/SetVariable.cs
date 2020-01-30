@@ -17,7 +17,7 @@ namespace ETool.ANode
             if (fields.Count == 3)
             {
                 object o = GetFieldOrLastInputField(2, data);
-                Field.SetObjectByFieldType(fields[2].fieldType, data.blueprintVariables[fields[1].target.target_Int].variable, o);
+                Field.SetObjectByFieldType(fields[2].fieldType, data.blueprintVariables[(Int32)fields[1].GetValue(FieldType.Int)].variable, o);
             }
 
             ActiveNextEvent(0, data);
@@ -39,6 +39,11 @@ namespace ETool.ANode
             GetFieldDone(data);
         }
 
+        public override void DynamicFieldInitialize(BlueprintInput data)
+        {
+            GetFieldDone(data);
+        }
+
         public override void FieldUpdate()
         {
             GetFieldDone();
@@ -50,14 +55,14 @@ namespace ETool.ANode
 
             if(fields.Count == 2)
             {
-                fields.Add(new Field(bv[fields[1].target.target_Int].type, "Result", ConnectionType.DataBoth, true, this, FieldContainer.Object));
+                fields.Add(new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type, "Result", ConnectionType.DataBoth, this, FieldContainer.Object));
             }
             else if(fields.Count == 3)
             {
-                if (bv[fields[1].target.target_Int].type != fields[2].fieldType)
+                if (bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type != fields[2].fieldType)
                 {
                     NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[2]);
-                    fields[2] = new Field(bv[fields[1].target.target_Int].type, "Result", ConnectionType.DataBoth, true, this, FieldContainer.Object);
+                    fields[2] = new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type, "Result", ConnectionType.DataBoth, this, FieldContainer.Object);
                 }
             }
 
@@ -67,14 +72,14 @@ namespace ETool.ANode
         {
             if (fields.Count == 2)
             {
-                fields.Add(new Field(data.blueprintVariables[fields[1].target.target_Int].type, "Result", ConnectionType.DataBoth, true, this, FieldContainer.Object));
+                fields.Add(new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type, "Result", ConnectionType.DataBoth, this, FieldContainer.Object));
             }
             else if (fields.Count == 3)
             {
-                if (data.blueprintVariables[fields[1].target.target_Int].type != fields[2].fieldType)
+                if (data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type != fields[2].fieldType)
                 {
                     NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[2]);
-                    fields[2] = new Field(data.blueprintVariables[fields[1].target.target_Int].type, "Result", ConnectionType.DataBoth, true, this, FieldContainer.Object);
+                    fields[2] = new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type, "Result", ConnectionType.DataBoth, this, FieldContainer.Object);
                 }
             }
 
@@ -83,7 +88,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(object), 2)]
         public object GetMyVariable(BlueprintInput data)
         {
-            return Field.GetObjectByFieldType(data.blueprintVariables[fields[1].target.target_Int].type, data.blueprintVariables[fields[1].target.target_Int].variable);
+            return Field.GetObjectByFieldType(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type, data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].variable);
         }
     }
 }

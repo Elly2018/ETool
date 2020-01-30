@@ -18,10 +18,9 @@ namespace ETool.ANode
         }
 
         [NodePropertyGet(typeof(Boolean), 1)]
-        public bool GetResult(BlueprintInput data)
+        public Boolean GetResult(BlueprintInput data)
         {
-            Debug.Log(Input.GetKeyDown((KeyCode)fields[0].target.target_Int));
-            return Input.GetKeyDown((KeyCode)fields[0].target.target_Int);
+            return Input.GetKeyDown((KeyCode)Field.GetObjectByFieldType(FieldType.Key, fields[0].target));
         }
     }
 }

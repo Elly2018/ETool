@@ -8,10 +8,11 @@ using UnityEngine;
 namespace ETool
 {
     [System.Serializable]
-    public class NodeBase : Node, INode
+    public class NodeBase : Node, INodeStyle
     {
         public int normal;
         public int select;
+        public int hover;
         public int in_point;
         public int out_point;
 
@@ -27,10 +28,31 @@ namespace ETool
         /// </summary>
         public void Draw()
         {
-            if(isSelected)
+            if(nodeErrors.Count != 0)
+            {
+                if (isSelected)
+                {
+                    GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle(StyleType.Select_Error_Node));
+                }
+                else
+                {
+                    GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle(StyleType.Error_Node));
+                }
+                DrawField(fields);
+                return;
+            }
+            if (isSelected)
+            {
                 GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle((StyleType)select));
-            else
+            }
+            else if(!isSelected && isHover)
+            {
+                GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle((StyleType)hover));
+            }
+            else if(!isSelected && !isHover)
+            {
                 GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle((StyleType)normal));
+            }
             DrawField(fields);
         }
 
@@ -142,6 +164,12 @@ namespace ETool
             }
         }
 
+        protected void ActiveInheritCustomEvent(BlueprintInput data, object[] obj)
+        {
+            bool eventExist = data.inherit.CallCustomEvent(data.inherit, title, obj);
+            if (!eventExist) Debug.LogWarning("Cannot find event for calling method");
+        }
+
         protected bool CheckIfConnectionExist(int fieldIndex, BlueprintInput data, bool input)
         {
             List<NodeBase> nl = data.allNode.ToList();
@@ -207,43 +235,7 @@ namespace ETool
                             return i.Invoke(this, new object[] { data, index });
                     }
                 }
-                return Casting(fields[index].target, fields[index].fieldType);
-            }
-            return null;
-        }
-
-        private object Casting(GenericObject target, FieldType ft)
-        {
-            switch (ft)
-            {
-                case FieldType.Event:
-                    return null;
-                case FieldType.Int:
-                    return target.target_Int;
-                case FieldType.Float:
-                    return target.target_Float;
-                case FieldType.String:
-                    return target.target_String;
-                case FieldType.Boolean:
-                    return target.target_Boolean;
-                case FieldType.Double:
-                    return target.target_Boolean;
-                case FieldType.GameObject:
-                    return target.target_GameObject;
-                case FieldType.Vector2:
-                    return target.target_Vector2;
-                case FieldType.Vector3:
-                    return target.target_Vector3;
-                case FieldType.Vector4:
-                    return target.target_Vector4;
-                case FieldType.Rect:
-                    return target.target_Rect;
-                case FieldType.Color:
-                    return target.target_Color;
-                case FieldType.Type:
-                    return target.target_Type;
-                case FieldType.Variable:
-                    break;
+                return Field.GetObjectByFieldType(fields[index].fieldType, fields[index].target);
             }
             return null;
         }

@@ -17,9 +17,9 @@ namespace ETool.ANode
         }
 
         [NodePropertyGet(typeof(Int32), 0)]
-        public int GetFloat(BlueprintInput data)
+        public Int32 GetFloat(BlueprintInput data)
         {
-            return fields[0].target.target_Int;
+            return (Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target);
         }
     }
 }

@@ -5,6 +5,7 @@ using UnityEditor;
 using System;
 using ETool.ANode;
 using System.Linq;
+using UnityEditor.SceneManagement;
 
 /// <summary>
 /// The base of node editor window
@@ -14,28 +15,70 @@ namespace ETool
 {
     public class NodeBasedEditor : EditorWindow
     {
-        /* Define connect point */
+        /// <summary>
+        /// Define select input point
+        /// </summary>
         private ConnectionPoint selectedInPoint = null;
-        private ConnectionPoint selectedOutPoint = null;
-        private GreyB GreyBackground;
 
-        /* Select ablueprint */
+        /// <summary>
+        /// Define select output point
+        /// </summary>
+        private ConnectionPoint selectedOutPoint = null;
+
+        /// <summary>
+        /// Define background data <br />
+        /// Use for show message in screen
+        /// </summary>
+        private GreyBackground GreyBackground;
+
+        /// <summary>
+        /// Editor select blueprint
+        /// </summary>
         public EBlueprint selectBlueprint;
-        private List<NodeBase> clipBorad = null;
+
+        /// <summary>
+        /// Define clipboard nodes and connection
+        /// </summary>
+        private Clipborad clipBorad = null;
+
+        /// <summary>
+        /// Define current page selected index
+        /// </summary>
         private int selectionPage;
 
-        /* Define the left panel */
+        /// <summary>
+        /// Define top menu button size
+        /// </summary>
         private Vector2 sizeLimit;
 
-        /* Define Background offset */
+        /// <summary>
+        /// Define background grid offset
+        /// </summary>
         private Vector2 offset;
+
+        /// <summary>
+        /// Define background grid drag delta
+        /// </summary>
         private Vector2 drag;
 
-        /* Define local use variable for editing */
+        /// <summary>
+        /// Define local use variable for adding node buffer
+        /// </summary>
         private Type addNode;
+
+        /// <summary>
+        /// Define current execute assembly
+        /// </summary>
         private Assembly assmbly;
 
+        /// <summary>
+        /// Define GUI theme
+        /// </summary>
         public static GUITheme uITheme;
+
+        /// <summary>
+        /// Define singleton node base editor
+        /// </summary>
         private static NodeBasedEditor NBE;
         public static NodeBasedEditor Instance
         {
@@ -72,8 +115,8 @@ namespace ETool
             if (selectBlueprint != null)
             {
                 PreventRepeatInstance();
-                DrawNodes();
                 DrawConnections();
+                DrawNodes();
                 ProcessNodeEvents(Event.current);
             }
             ProcessEvents(Event.current);
@@ -131,6 +174,7 @@ namespace ETool
                 {
                     customNameList.Add(selectBlueprint.blueprintEvent.customEvent[i].eventName);
                 }
+
                 EditorGUI.BeginChangeCheck();
                 selectionPage = EditorGUI.Popup(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), selectionPage, customNameList.ToArray());
                 if (selectionPage > customNameList.Count - 1) selectionPage = 0;
@@ -146,7 +190,7 @@ namespace ETool
                     "Hotkey Map: \n\n" +
                     "Ctrl + C \t Center Page\n" +
                     "Ctrl + F \t Center Selected Nodes\n";
-                GreyBackground = new GreyB() { Okbutton = true, Message = message };
+                GreyBackground = new GreyBackground() { Okbutton = true, Message = message };
             }
             ButtonPadding++;
             if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Cancel"))
@@ -222,7 +266,6 @@ namespace ETool
                     {
                         nb.Draw();
                     }
-                        
                 }
             }
         }
@@ -237,6 +280,7 @@ namespace ETool
                 if (selectBlueprint.connections[i].page == selectionPage)
                 {
                     selectBlueprint.connections[i].Draw();
+                    selectBlueprint.connections[i].ProcessEvents(Event.current);
                 }
             }
         }
@@ -295,7 +339,7 @@ namespace ETool
         /// <param name="message"></param>
         public void GreyBackgroundOkButton(string message)
         {
-            GreyBackground = new GreyB() { Message = message, Okbutton = true };
+            GreyBackground = new GreyBackground() { Message = message, Okbutton = true };
         }
         #endregion
 
@@ -311,10 +355,40 @@ namespace ETool
         private void ProcessEvents(Event e)
         {
             EBlueprint target = Selection.activeObject as EBlueprint;
-            if (target != null)
-                selectBlueprint = target;
+            GameObject targetN = Selection.activeObject as GameObject;
 
-            if(GreyBackground == null)
+            if (target != null)
+            {
+                if(target != selectBlueprint)
+                {
+                    selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
+                    selectBlueprint.nodes,
+                    selectBlueprint.blueprintVariables,
+                    selectBlueprint.blueprintEvent.customEvent);
+                }
+                selectBlueprint = target;
+                GUI.changed = true;
+            }
+            if (targetN != null)
+            {
+                if (targetN.GetComponent<NodeComponent>() != null)
+                {
+                    if (targetN.GetComponent<NodeComponent>().ABlueprint != null)
+                    {
+                        if (targetN.GetComponent<NodeComponent>().ABlueprint != selectBlueprint)
+                        {
+                            selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
+                            selectBlueprint.nodes,
+                            selectBlueprint.blueprintVariables,
+                            selectBlueprint.blueprintEvent.customEvent);
+                        }
+                        selectBlueprint = targetN.GetComponent<NodeComponent>().ABlueprint;
+                        GUI.changed = true;
+                    }
+                }
+            }
+
+            if (GreyBackground == null)
             {
                 drag = Vector2.zero;
                 switch (e.type)
@@ -404,6 +478,8 @@ namespace ETool
 
             for (int i = selectBlueprint.nodes.Count - 1; i >= 0; i--)
             {
+                selectBlueprint.nodes[i].isHover = selectBlueprint.nodes[i].rect.Contains(e.mousePosition);
+
                 if (selectBlueprint.nodes[i].rect.Contains(e.mousePosition) &&
                     e.type == EventType.MouseDown && e.button == 0)
                 {
@@ -422,6 +498,15 @@ namespace ETool
             }
 
             if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) CleanNodeSelection();
+        }
+
+        public bool IfAnyOtherNodeAreDrag(Node node)
+        {
+            foreach(var i in selectBlueprint.nodes)
+            {
+                if (i != node && i.isSelected) return true; 
+            }
+            return false;
         }
 
         /// <summary>
@@ -444,12 +529,20 @@ namespace ETool
             GenericMenu genericMenu = new GenericMenu();
             Type[] allTypes = assmbly.GetTypes();
 
+            List<ForNodeNameSort> search = new List<ForNodeNameSort>();
+            foreach (var i in allTypes)
+            {
+                NodePath np = i.GetCustomAttribute<NodePath>();
+                if (np != null)
+                    search.Add(new ForNodeNameSort() { type = i, nodepath = np.Path });
+            }
+
             /* Sort by type name */
             List<Type> sorted = new List<Type>();
-            var order = from e in allTypes orderby e.Name select e;
+            var order = from e in search orderby e.nodepath select e;
             foreach(var i in order)
             {
-                sorted.Add(i);
+                sorted.Add(i.type);
             }
             allTypes = sorted.ToArray();
 
@@ -471,9 +564,36 @@ namespace ETool
             for(int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
             {
                 genericMenu.AddItem(new GUIContent("Add Node/Custom Event/" + selectBlueprint.blueprintEvent.customEvent[i].eventName),
-                    false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, selectBlueprint.blueprintEvent.customEvent[i].eventName, i + 2));
+                    false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, selectBlueprint.blueprintEvent.customEvent[i], selectBlueprint.blueprintEvent.customEvent[i].eventName, i + EBlueprint.DefaultPageCount));
             }
 
+            /* Adding inherit custom event into menu */
+            if(selectBlueprint.Inherit != null)
+            {
+                List<BlueprintCustomEvent> buffer = selectBlueprint.Inherit.blueprintEvent.customEvent;
+                for (int i = 0; i < buffer.Count; i++)
+                {
+                    genericMenu.AddItem(new GUIContent("Add Node/Custom Event/" + buffer[i].eventName),
+                        false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, buffer[i], buffer[i].eventName, 0));
+                }
+            }
+
+            /* Adding edit button */
+            if(CheckAnyConnectionSelect() || CheckAnyNodeSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Copy Selected"), false, OnClickCopy);
+                genericMenu.AddItem(new GUIContent("Delete Selected"), false, DeleteSelection);
+            }
+            if (CheckAnyNodeSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Delete Selected Node"), false, OnClickRemoveSelectionNode);
+            }
+            if (CheckAnyConnectionSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Delete Selected Connection"), false, OnDeleteSelectedConnection);
+            }
+
+            /* Paste command */
             if (clipBorad != null)
                 genericMenu.AddItem(new GUIContent("Paste"), false, OnClickPasteNodes, new PasteClickEvent(mousePosition));
             else
@@ -481,6 +601,30 @@ namespace ETool
 
             /* Draw content on screen */
             genericMenu.ShowAsContext();
+        }
+
+        public bool CheckAnyConnectionSelect()
+        {
+            foreach(var i in selectBlueprint.connections)
+            {
+                if (i.isSelected) return true;
+            }
+            return false;
+        }
+
+        public bool CheckAnyNodeSelect()
+        {
+            foreach (var i in selectBlueprint.nodes)
+            {
+                if (i.isSelected) return true;
+            }
+            return false;
+        }
+
+        public void DeleteSelection()
+        {
+            OnDeleteSelectedConnection();
+            OnClickRemoveSelectionNode();
         }
 
         /// <summary>
@@ -501,6 +645,18 @@ namespace ETool
             }
 
             GUI.changed = true;
+        }
+
+        private void OnDeleteSelectedConnection()
+        {
+            for(int i = 0; i < selectBlueprint.connections.Count; i++)
+            {
+                if (selectBlueprint.connections[i].isSelected)
+                {
+                    OnClickRemoveConnection(selectBlueprint.connections[i]);
+                    i--;
+                }
+            }
         }
 
         /// <summary>
@@ -526,6 +682,7 @@ namespace ETool
             {
                 nec.targetPage = ace.page;
                 nec.title = ace.addEventName;
+                nec.SetCustomEvent(ace.bce);
             }
         }
         /// <summary>
@@ -534,11 +691,11 @@ namespace ETool
         /// local variable: addnode will change to target
         /// </summary>
         /// <param name="addEvent">Target node (Strcut)AddClickEvent </param>
-        private void OnClickAddNode(object addEvent, int page)
+        private NodeBase OnClickAddNode(object addEvent, int page)
         {
             AddClickEvent ace = (AddClickEvent)addEvent;
             addNode = ace.add;
-            OnClickAddNode(ace.mousePosition, page);
+            return OnClickAddNode(ace.mousePosition, page);
         }
 
         /// <summary>
@@ -557,7 +714,9 @@ namespace ETool
             NodeBase n = (NodeBase)assmbly.CreateInstance(addNode.FullName, false, BindingFlags.Public | BindingFlags.Instance, null, _args.ToArray(), null, null);
             selectBlueprint.nodes.Add(n);
             n.Initialize();
+            n.PostFieldInitialize();
             n.page = selectionPage;
+            EditorUtility.SetDirty(selectBlueprint);
             return n;
         }
 
@@ -566,7 +725,7 @@ namespace ETool
         /// Create instance of target in this position on the grid
         /// </summary>
         /// <param name="mousePosition">Mouse pos</param>
-        private void OnClickAddNode(Vector2 mousePosition, int page)
+        private NodeBase OnClickAddNode(Vector2 mousePosition, int page)
         {
             /* Default */
             List<object> _args = new List<object>();
@@ -577,13 +736,16 @@ namespace ETool
             NodeBase n = (NodeBase)assmbly.CreateInstance(addNode.FullName, false, BindingFlags.Public | BindingFlags.Instance, null, _args.ToArray(), null, null);
             selectBlueprint.nodes.Add(n);
             n.Initialize();
+            n.PostFieldInitialize();
             n.page = page;
+            EditorUtility.SetDirty(selectBlueprint);
+            return n;
         }
 
         /// <summary>
         /// Delete selection nodes
         /// </summary>
-        public void OnClickRemoveSelectionNode()
+        private void OnClickRemoveSelectionNode()
         {
             List<NodeBase> nb = new List<NodeBase>();
             foreach(var i in selectBlueprint.nodes)
@@ -650,6 +812,7 @@ namespace ETool
         private void OnClickRemoveNode(NodeBase[] nodes)
         {
             foreach (var i in nodes) OnClickRemoveNode(i);
+            EditorUtility.SetDirty(selectBlueprint);
         }
 
         /// <summary>
@@ -706,21 +869,95 @@ namespace ETool
         {
             selectBlueprint.nodes[connection.inPointMark.x].fields[connection.inPointMark.y].onConnection = false;
             selectBlueprint.connections.Remove(connection);
+            EditorUtility.SetDirty(selectBlueprint);
         }
 
-        public void OnClickCopyNodes()
+        public void OnClickCopy()
         {
             List<NodeBase> nb = new List<NodeBase>();
-            foreach(var i in selectBlueprint.nodes)
+            List<Connection> c = new List<Connection>();
+            List<NodeBase> buffer = new List<NodeBase>();
+
+            for (int i = 0; i < selectBlueprint.nodes.Count; i++)
             {
-                if (i.isSelected) nb.Add(EBlueprint.MakeInstanceNode(i, selectBlueprint.blueprintVariables, selectBlueprint.blueprintEvent.customEvent));
+                if (selectBlueprint.nodes[i].isSelected)
+                {
+                    nb.Add(EBlueprint.MakeInstanceNode(selectBlueprint.nodes[i], selectBlueprint.blueprintVariables, selectBlueprint.blueprintEvent.customEvent));
+                    buffer.Add(selectBlueprint.nodes[i]);
+                }
             }
-            clipBorad = nb;
+
+            for (int i = 0; i < selectBlueprint.connections.Count; i++)
+            {
+                if (selectBlueprint.connections[i].isSelected)
+                {
+                    if (buffer.Contains(selectBlueprint.nodes[selectBlueprint.connections[i].inPointMark.x]) &&
+                            buffer.Contains(selectBlueprint.nodes[selectBlueprint.connections[i].outPointMark.x]))
+                    {
+                        Vector2Int In_P = new Vector2Int(buffer.IndexOf(selectBlueprint.nodes[selectBlueprint.connections[i].inPointMark.x]), selectBlueprint.connections[i].inPointMark.y);
+                        Vector2Int Out_P = new Vector2Int(buffer.IndexOf(selectBlueprint.nodes[selectBlueprint.connections[i].outPointMark.x]), selectBlueprint.connections[i].outPointMark.y);
+                        Connection bufferc = new Connection(In_P, Out_P, false);
+                        bufferc.fieldType = selectBlueprint.connections[i].fieldType;
+                        c.Add(bufferc);
+                    }
+                }
+            }
+
+            clipBorad = new Clipborad();
+            clipBorad.nodeBases = nb;
+            clipBorad.connections = c;
         }
 
         public void OnClickPasteNodes(object pasteEvent)
         {
             PasteClickEvent pasteClickEvent = (PasteClickEvent)pasteEvent;
+            List<NodeBase> buffer = new List<NodeBase>();
+
+            float max_x = -9999;
+            float max_y = -9999;
+            float min_x = 9999;
+            float min_y = 9999;
+
+            foreach (var i in clipBorad.nodeBases)
+            {
+                if (i.rect.position.x > max_x) max_x = i.rect.position.x;
+                if (i.rect.position.y > max_y) max_y = i.rect.position.y;
+
+                if (i.rect.position.x < min_x) min_x = i.rect.position.x;
+                if (i.rect.position.y < min_y) min_y = i.rect.position.y;
+            }
+
+            Vector2 OgMin = new Vector2(min_x, min_y);
+            Vector2 OgMax = new Vector2(max_x, max_y);
+            Vector2 OgcenterP = new Vector2((max_x + min_x) / 2, (min_y + max_y) / 2);
+            Vector2 Diff = pasteClickEvent.mousePosition - OgcenterP;
+
+            /* Spawn nodes */
+            for (int i = 0; i < clipBorad.nodeBases.Count; i++)
+            {
+                AddClickEvent a = new AddClickEvent() { add = Type.GetType(clipBorad.nodeBases[i].NodeType), mousePosition = clipBorad.nodeBases[i].rect.position + Diff };
+                NodeBase n = OnClickAddNode(a, selectionPage);
+                for(int j = 0; j < n.fields.Count; j++)
+                {
+                    n.fields[j].target = new GenericObject(clipBorad.nodeBases[i].fields[j].target);
+                }
+                buffer.Add(n);
+                n.isSelected = true;
+            }
+
+            /* Spawn connection */
+            for(int i = 0; i < clipBorad.connections.Count; i++)
+            {
+                NodeBase in_node = buffer[clipBorad.connections[i].inPointMark.x];
+                NodeBase out_node = buffer[clipBorad.connections[i].outPointMark.x];
+                Vector2Int In_P = new Vector2Int(selectBlueprint.nodes.IndexOf(in_node), clipBorad.connections[i].inPointMark.y);
+                Vector2Int Out_P = new Vector2Int(selectBlueprint.nodes.IndexOf(out_node), clipBorad.connections[i].outPointMark.y);
+                Connection bufferc = new Connection(In_P, Out_P, false);
+                selectBlueprint.connections.Add(bufferc);
+                bufferc.fieldType = clipBorad.connections[i].fieldType;
+                bufferc.page = selectionPage;
+                bufferc.isSelected = true;
+            }
 
         }
 
@@ -733,6 +970,7 @@ namespace ETool
             if (selectBlueprint.nodes[_in.x].fields[_in.y].fieldType != selectBlueprint.nodes[_out.x].fields[_out.y].fieldType ||
                 selectBlueprint.nodes[_in.x].fields[_in.y].fieldContainer != selectBlueprint.nodes[_out.x].fields[_out.y].fieldContainer)
             {
+
                 Debug.LogWarning("Type mismatch");
                 return;
             }
@@ -756,7 +994,7 @@ namespace ETool
             selectBlueprint.nodes[_in.x].fields[_in.y].onConnection = true;
 
             selectBlueprint.connections.Add(c);
-            
+            EditorUtility.SetDirty(selectBlueprint);
         }
 
         private void ClearConnectionSelection()
@@ -792,7 +1030,7 @@ namespace ETool
         {
             if (selectBlueprint == null)
             {
-                GreyBackground = new GreyB() { Message = "Please select blueprint", Okbutton = false };
+                GreyBackground = new GreyBackground() { Message = "Please select blueprint", Okbutton = false };
             }
             else
             {
@@ -877,17 +1115,59 @@ namespace ETool
             else if (!selectBlueprint.blueprintEvent.physicsEvent.onCollisionStay && CheckEventNodeExist(EventNodeType.onCollisionStay))
                 OnClickRemoveNode(GetEventNode(EventNodeType.onCollisionStay));
 
-            /* OnDestory */
-            if (selectBlueprint.blueprintEvent.onDestroyEvent && !CheckEventNodeExist(EventNodeType.OnDestory))
-                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnDestory)), 0);
-            else if (!selectBlueprint.blueprintEvent.onDestroyEvent && CheckEventNodeExist(EventNodeType.OnDestory))
-                OnClickRemoveNode(GetEventNode(EventNodeType.OnDestory));
+            /* OnCollisionEnter2D */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onCollisionEnter2D && !CheckEventNodeExist(EventNodeType.onCollisionEnter2D))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnCollisionEnter2D)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onCollisionEnter2D && CheckEventNodeExist(EventNodeType.onCollisionEnter2D))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onCollisionEnter2D));
 
-            /* OnDestory */
-            if (selectBlueprint.blueprintEvent.onDestroyEvent && !CheckEventNodeExist(EventNodeType.OnDestory))
-                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnDestory)), 0);
-            else if (!selectBlueprint.blueprintEvent.onDestroyEvent && CheckEventNodeExist(EventNodeType.OnDestory))
-                OnClickRemoveNode(GetEventNode(EventNodeType.OnDestory));
+            /* OnCollisionExit2D */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onCollisionExit2D && !CheckEventNodeExist(EventNodeType.onCollisionExit2D))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnCollisionExit2D)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onCollisionExit2D && CheckEventNodeExist(EventNodeType.onCollisionExit2D))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onCollisionExit2D));
+
+            /* OnCollisionStay2D */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onCollisionStay2D && !CheckEventNodeExist(EventNodeType.onCollisionStay2D))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnCollisionStay2D)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onCollisionStay2D && CheckEventNodeExist(EventNodeType.onCollisionStay2D))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onCollisionStay2D));
+
+            /* OnTriggerEnter */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onTriggerEnter && !CheckEventNodeExist(EventNodeType.onTriggerEnter))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnTriggerEnter)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onTriggerEnter && CheckEventNodeExist(EventNodeType.onTriggerEnter))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onTriggerEnter));
+
+            /* OnTriggerExit */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onTriggerExit && !CheckEventNodeExist(EventNodeType.onTriggerExit))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnTriggerExit)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onTriggerExit && CheckEventNodeExist(EventNodeType.onTriggerExit))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onTriggerExit));
+
+            /* OnTriggerStay */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onTriggerStay && !CheckEventNodeExist(EventNodeType.onTriggerStay))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnTriggerStay)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onTriggerStay && CheckEventNodeExist(EventNodeType.onTriggerStay))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onTriggerStay));
+
+            /* OnTriggerEnter2D */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onTriggerEnter2D && !CheckEventNodeExist(EventNodeType.onTriggerEnter2D))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnTriggerEnter2D)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onTriggerEnter2D && CheckEventNodeExist(EventNodeType.onTriggerEnter2D))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onTriggerEnter2D));
+
+            /* OnTriggerExit2D */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onTriggerExit2D && !CheckEventNodeExist(EventNodeType.onTriggerExit2D))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnTriggerExit2D)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onTriggerExit2D && CheckEventNodeExist(EventNodeType.onTriggerExit2D))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onTriggerExit2D));
+
+            /* OnTriggerStay2D */
+            if (selectBlueprint.blueprintEvent.physicsEvent.onTriggerStay2D && !CheckEventNodeExist(EventNodeType.onTriggerStay2D))
+                OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(AOnTriggerStay2D)), 2);
+            else if (!selectBlueprint.blueprintEvent.physicsEvent.onTriggerStay2D && CheckEventNodeExist(EventNodeType.onTriggerStay2D))
+                OnClickRemoveNode(GetEventNode(EventNodeType.onTriggerStay2D));
 
             /* OnDestory */
             if (selectBlueprint.blueprintEvent.onDestroyEvent && !CheckEventNodeExist(EventNodeType.OnDestory))
@@ -898,33 +1178,105 @@ namespace ETool
 
         private void StateCheck_CustomEvent()
         {
-            for (int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
+            /* Buffer */
+            List<ACustomEvent> buffer_ce = new List<ACustomEvent>();
+            List<ACustomEventCall> buffer_cec = new List<ACustomEventCall>();
+
+            /* Get all custom event related nodes */
+            foreach (var i in selectBlueprint.nodes)
             {
-                if (CheckCustomEventNodeExist(i + EBlueprint.DefaultPageCount))
+                if(i.GetType() == typeof(ACustomEvent))
                 {
-                    ACustomEvent customBuffer = GetCustomEventNode(i + EBlueprint.DefaultPageCount);
-                    if (customBuffer.title != selectBlueprint.blueprintEvent.customEvent[i].eventName)
-                        customBuffer.title = selectBlueprint.blueprintEvent.customEvent[i].eventName;
-                    if (!ACustomEvent.CheckArugmentsMatch(selectBlueprint.blueprintEvent.customEvent[i].arugments, customBuffer))
-                        customBuffer.DynamicFieldInitialize(new BlueprintInput(null, null, null, null, selectBlueprint.blueprintEvent.customEvent));
+                    buffer_ce.Add(i as ACustomEvent);
                 }
-                else
+
+                if (i.GetType() == typeof(ACustomEventCall))
                 {
-                    OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(ACustomEvent)), i + EBlueprint.DefaultPageCount);
+                    buffer_cec.Add(i as ACustomEventCall);
                 }
             }
 
-            for (int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
+            foreach (var i in buffer_ce)
             {
-                NodeBase[] nb = GetAllCustomEventCallNode(i + EBlueprint.DefaultPageCount);
-                foreach (var j in nb)
+                if(i.page >= EBlueprint.DefaultPageCount)
                 {
-                    if (j.title != selectBlueprint.blueprintEvent.customEvent[i].eventName)
-                        j.title = selectBlueprint.blueprintEvent.customEvent[i].eventName;
-                    if (!ACustomEvent.CheckArugmentsMatch(selectBlueprint.blueprintEvent.customEvent[i].arugments, j))
-                        j.DynamicFieldInitialize(new BlueprintInput(null, null, null, null, selectBlueprint.blueprintEvent.customEvent));
+                    /* Handle private */
+                    foreach(var j in selectBlueprint.blueprintEvent.customEvent)
+                    {
+                        if(i.page == selectBlueprint.blueprintEvent.customEvent.IndexOf(j) + EBlueprint.DefaultPageCount)
+                        {
+                            i.title = j.eventName;
+                        }
+                    }
                 }
             }
+            foreach (var i in buffer_cec)
+            {
+                if (i.targetPage >= EBlueprint.DefaultPageCount)
+                {
+                    /* Handle private */
+                }
+                else
+                {
+                    /* Handle inherit */
+                    bool exist = false;
+                    bool errorexist = false;
+                    NodeError ne = null;
+                    foreach(var j in selectBlueprint.GetInheritEvent())
+                    {
+                        if (j.eventName == i.title) exist = true;
+                    }
+                    foreach (var j in i.nodeErrors)
+                    {
+                        if (j.errorType == NodeErrorType.Custom_Event_Does_Not_Exist)
+                        {
+                            errorexist = true;
+                            ne = j;
+                        }
+                    }
+                    if (exist && errorexist)
+                    {
+                        i.nodeErrors.Remove(ne);
+                    }
+                    if(!exist && !errorexist)
+                    {
+                        i.nodeErrors.Add(new NodeError() { errorType = NodeErrorType.Custom_Event_Does_Not_Exist, errorString = "The event name can not be found" });
+                    }
+                }
+            }
+
+
+            /* Pervent private node disappear */
+            for (int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
+            {
+                if (!CheckCustomEventNodeExist(i + EBlueprint.DefaultPageCount))
+                {
+                    NodeBase n = OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(ACustomEvent)), i + EBlueprint.DefaultPageCount);
+                    n.title = selectBlueprint.blueprintEvent.customEvent[i].eventName;
+                    (n as ACustomEvent).SetCustomEvent(selectBlueprint.blueprintEvent.customEvent[i]);
+                }
+            }
+        }
+
+        public AddCustomEvent[] GetAllCustomEventName()
+        {
+            List<AddCustomEvent> result = new List<AddCustomEvent>();
+            for(int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
+            {
+                result.Add(new AddCustomEvent(Vector2.zero, selectBlueprint.blueprintEvent.customEvent[i], selectBlueprint.blueprintEvent.customEvent[i].eventName, i + EBlueprint.DefaultPageCount));
+            }
+            return result.ToArray();
+        }
+
+        public string[] GetAllInheritCustomEventName()
+        {
+            List<string> result = new List<string>();
+            foreach (var i in selectBlueprint.GetInheritEvent())
+            {
+                if(!selectBlueprint.blueprintEvent.customEvent.Contains(i))
+                    result.Add(i.eventName);
+            }
+            return result.ToArray();
         }
 
         private bool CheckCustomEventNodeExist(int page)
@@ -995,6 +1347,33 @@ namespace ETool
                     case EventNodeType.onCollisionStay:
                         if (i.NodeType == typeof(AOnCollisionStay).FullName) return true;
                         break;
+                    case EventNodeType.onCollisionEnter2D:
+                        if (i.NodeType == typeof(AOnCollisionEnter2D).FullName) return true;
+                        break;
+                    case EventNodeType.onCollisionExit2D:
+                        if (i.NodeType == typeof(AOnCollisionExit2D).FullName) return true;
+                        break;
+                    case EventNodeType.onCollisionStay2D:
+                        if (i.NodeType == typeof(AOnCollisionStay2D).FullName) return true;
+                        break;
+                    case EventNodeType.onTriggerEnter:
+                        if (i.NodeType == typeof(AOnTriggerEnter).FullName) return true;
+                        break;
+                    case EventNodeType.onTriggerExit:
+                        if (i.NodeType == typeof(AOnTriggerExit).FullName) return true;
+                        break;
+                    case EventNodeType.onTriggerStay:
+                        if (i.NodeType == typeof(AOnTriggerStay).FullName) return true;
+                        break;
+                    case EventNodeType.onTriggerEnter2D:
+                        if (i.NodeType == typeof(AOnTriggerEnter2D).FullName) return true;
+                        break;
+                    case EventNodeType.onTriggerExit2D:
+                        if (i.NodeType == typeof(AOnTriggerExit2D).FullName) return true;
+                        break;
+                    case EventNodeType.onTriggerStay2D:
+                        if (i.NodeType == typeof(AOnTriggerStay2D).FullName) return true;
+                        break;
                 }
             }
             return false;
@@ -1039,6 +1418,33 @@ namespace ETool
                         break;
                     case EventNodeType.onCollisionStay:
                         if (i.GetType() == typeof(AOnCollisionStay)) result.Add(i);
+                        break;
+                    case EventNodeType.onCollisionEnter2D:
+                        if (i.GetType() == typeof(AOnCollisionEnter2D)) result.Add(i);
+                        break;
+                    case EventNodeType.onCollisionExit2D:
+                        if (i.GetType() == typeof(AOnCollisionExit2D)) result.Add(i);
+                        break;
+                    case EventNodeType.onCollisionStay2D:
+                        if (i.GetType() == typeof(AOnCollisionStay2D)) result.Add(i);
+                        break;
+                    case EventNodeType.onTriggerEnter:
+                        if (i.GetType() == typeof(AOnTriggerEnter)) result.Add(i);
+                        break;
+                    case EventNodeType.onTriggerExit:
+                        if (i.GetType() == typeof(AOnTriggerExit)) result.Add(i);
+                        break;
+                    case EventNodeType.onTriggerStay:
+                        if (i.GetType() == typeof(AOnTriggerStay)) result.Add(i);
+                        break;
+                    case EventNodeType.onTriggerEnter2D:
+                        if (i.GetType() == typeof(AOnTriggerEnter2D)) result.Add(i);
+                        break;
+                    case EventNodeType.onTriggerExit2D:
+                        if (i.GetType() == typeof(AOnTriggerExit2D)) result.Add(i);
+                        break;
+                    case EventNodeType.onTriggerStay2D:
+                        if (i.GetType() == typeof(AOnTriggerStay2D)) result.Add(i);
                         break;
                 }
             }
@@ -1148,12 +1554,14 @@ namespace ETool
     public struct AddCustomEvent
     {
         public Vector2 mousePosition;
+        public BlueprintCustomEvent bce;
         public string addEventName;
         public int page;
 
-        public AddCustomEvent(Vector2 mousePosition, string addEventName, int page)
+        public AddCustomEvent(Vector2 mousePosition, BlueprintCustomEvent bce, string addEventName, int page)
         {
             this.mousePosition = mousePosition;
+            this.bce = bce;
             this.addEventName = addEventName;
             this.page = page;
         }
@@ -1196,12 +1604,24 @@ namespace ETool
 
     public enum GUITheme
     {
-        Light, Dark
+        Dark, Light
     }
 
-    public class GreyB
+    public class GreyBackground
     {
         public bool Okbutton;
         public string Message;
+    }
+
+    public class ForNodeNameSort
+    {
+        public Type type;
+        public string nodepath;
+    }
+
+    public class Clipborad
+    {
+        public List<NodeBase> nodeBases;
+        public List<Connection> connections;
     }
 }

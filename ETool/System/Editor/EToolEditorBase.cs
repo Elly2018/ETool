@@ -71,46 +71,13 @@ namespace ETool
             EditorGUILayout.LabelField(message, style);
         }
 
-        protected GenericObject DrawFieldHelper(GenericObject o, string t)
+        protected void DrawTitle3(string message)
         {
-            // Int
-            if(t == typeof(Int32).FullName)
-                o.target_Int = EditorGUILayout.IntField(o.target_Int);
-            // Single
-            else if (t == typeof(Single).FullName)
-                o.target_Float = EditorGUILayout.FloatField(o.target_Float);
-            // String
-            else if (t == typeof(String).FullName)
-                o.target_String = EditorGUILayout.TextField(o.target_String);
-            // Double
-            else if (t == typeof(Double).FullName)
-                o.target_Double = EditorGUILayout.DoubleField(o.target_Double);
-            // Bool
-            else if (t == typeof(Boolean).FullName)
-                o.target_Boolean = EditorGUILayout.Toggle(o.target_Boolean);
-            // Color
-            else if (t == typeof(Color).FullName)
-                o.target_Color = EditorGUILayout.ColorField(o.target_Color);
-            // Vector2
-            else if (t == typeof(Vector2).FullName)
-                o.target_Vector2 = EditorGUILayout.Vector2Field("", o.target_Vector2);
-            // Vector3
-            else if (t == typeof(Vector3).FullName)
-                o.target_Vector3 = EditorGUILayout.Vector3Field("", o.target_Vector3);
-            // Vector4
-            else if (t == typeof(Vector4).FullName)
-                o.target_Vector4 = EditorGUILayout.Vector4Field("", o.target_Vector4);
-            // Rect
-            else if (t == typeof(Rect).FullName)
-                o.target_Rect = EditorGUILayout.RectField(o.target_Rect);
-            // Vector4
-            else if (t == typeof(FieldType).FullName)
-                o.target_Type = (int)((FieldType)EditorGUILayout.EnumPopup((FieldType)o.target_Type));
-            // GameObject
-            else if (t == typeof(GameObject).FullName)
-                o.target_GameObject = (GameObject)EditorGUILayout.ObjectField((GameObject)o.target_GameObject, typeof(GameObject), true);
-
-            return o;
+            GUIStyle style = new GUIStyle();
+            style.fontStyle = FontStyle.Bold;
+            style.fontSize = 10;
+            style.alignment = TextAnchor.MiddleLeft;
+            EditorGUILayout.LabelField(message, style);
         }
 
         /// <summary>
@@ -161,16 +128,13 @@ namespace ETool
         protected Type[] GetAllType()
         {
             List<Type> test = new List<Type>();
-            test.Add(typeof(Int32));
-            test.Add(typeof(Single));
-            test.Add(typeof(String));
-            test.Add(typeof(Boolean));
-            test.Add(typeof(Color));
-            test.Add(typeof(Vector2));
-            test.Add(typeof(Vector3));
-            test.Add(typeof(Vector4));
-            test.Add(typeof(GameObject));
-            test.AddRange(OtherType());
+            string[] array = Enum.GetNames(typeof(FieldType));
+            
+            foreach(var i in array)
+            {
+                test.Add(Field.GetTypeByFieldType((FieldType)Enum.Parse(typeof(FieldType), i)));
+            }
+
             return test.ToArray();
         }
 

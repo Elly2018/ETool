@@ -17,9 +17,9 @@ namespace ETool.ANode
         }
 
         [NodePropertyGet(typeof(String), 0)]
-        public string GetString(BlueprintInput data)
+        public String GetString(BlueprintInput data)
         {
-            return fields[0].target.target_String;
+            return (String)Field.GetObjectByFieldType(FieldType.String, fields[0].target);
         }
     }
 }

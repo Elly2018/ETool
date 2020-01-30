@@ -4,49 +4,181 @@ using UnityEngine;
 
 namespace ETool
 {
+    /// <summary>
+    /// The object that usually store in blueprint <br />
+    /// Because unity doesn't support much about generic data type <br />
+    /// </summary>
     [System.Serializable]
     public class GenericObject
     {
-        public int target_Int = 0;
-        public float target_Float = 0.0f;
-        public string target_String = "";
-        public bool target_Boolean = true;
-        public double target_Double = 0;
+        /* Basic data type */
+        public GenericBasicType genericBasicType = null;
 
-        public GameObject target_GameObject = null;
-        public Transform target_Transform = null;
-        public Vector2 target_Vector2 = Vector2.zero;
-        public Vector3 target_Vector3 = Vector3.zero;
-        public Vector4 target_Vector4 = Vector4.zero;
-        public Rect target_Rect = Rect.zero;
+        /* Unity data type */
+        public GenericUnityType genericUnityType = null;
 
-        public Color target_Color = Color.white;
-        public int target_Type = 0;
-        public UnityEngine.Object target_UnityObject = null;
-        public Quaternion target_Quaternion = Quaternion.identity;
+        /* Component data type */
+        public GenericComponent target_Component = null;
 
         public GenericObject()
         {
-            target_String = "";
+            genericBasicType = new GenericBasicType();
+            genericUnityType = new GenericUnityType();
+            target_Component = new GenericComponent();
         }
 
         public GenericObject(GenericObject reference)
         {
+            genericBasicType = new GenericBasicType(reference.genericBasicType);
+            genericUnityType = new GenericUnityType(reference.genericUnityType);
+            target_Component = new GenericComponent(reference.target_Component);
+        }
+
+        public T GetUnityComponent<T>() where T : UnityEngine.Object
+        {
+            FieldInfo[] memberInfos = target_Component.GetType().GetFields();
+            int memberIndexMatch = -1;
+            for(int i = 0; i < memberInfos.Length; i++)
+            {
+                if(memberInfos[i].GetType() == typeof(T))
+                {
+                    memberIndexMatch = i;
+                }
+            }
+            return target_Component.GetType().GetFields()[memberIndexMatch].GetValue(target_Component) as T;
+        }
+    }
+
+    /// <summary>
+    /// The basic system data type
+    /// </summary>
+    [System.Serializable]
+    public class GenericBasicType
+    {
+        public int target_Int; // 10
+        public long target_Long; // 11
+        public float target_Float; // 12
+        public string target_String; // 13
+        public bool target_Boolean; // 14
+        public double target_Double; // 15
+
+        public GenericBasicType()
+        {
+            target_Int = 0;
+            target_Long = 0;
+            target_Float = 0.0f;
+            target_String = string.Empty;
+            target_Boolean = false;
+            target_Double = 0;
+        }
+
+        public GenericBasicType(GenericBasicType reference)
+        {
             target_Int = reference.target_Int;
+            target_Long = reference.target_Long;
             target_Float = reference.target_Float;
             target_String = reference.target_String;
             target_Boolean = reference.target_Boolean;
             target_Double = reference.target_Double;
+        }
+    }
 
+    /// <summary>
+    /// The basic unity data type
+    /// </summary>
+    [System.Serializable]
+    public class GenericUnityType
+    {
+        public GameObject target_GameObject; // 50
+        public Transform target_Transform; // 51
+        public Vector2 target_Vector2; // 52
+        public Vector3 target_Vector3; // 53
+        public Vector4 target_Vector4; // 54
+        public Rect target_Rect = Rect.zero; // 55
+        public Color target_Color = Color.white; // 56
+        public Texture target_Texture = null; // 57
+        public Texture2D target_Texture2D = null; // 58
+        public Texture3D target_Texture3D = null; // 59
+        public Material target_Material = null; // 60
+        public Quaternion target_Quaternion = Quaternion.identity; // 61
+
+        public GenericUnityType()
+        {
+            target_GameObject = null;
+            target_Transform = null;
+            target_Vector2 = Vector2.zero;
+            target_Vector3 = Vector3.zero;
+            target_Vector4 = Vector4.zero;
+            target_Rect = Rect.zero;
+            target_Color = Color.white;
+            target_Texture = null;
+            target_Texture2D = null;
+            target_Texture3D = null;
+            target_Material = null;
+            target_Quaternion = Quaternion.identity;
+        }
+
+        public GenericUnityType(GenericUnityType reference)
+        {
             target_GameObject = reference.target_GameObject;
+            target_Transform = reference.target_Transform;
             target_Vector2 = reference.target_Vector2;
             target_Vector3 = reference.target_Vector3;
             target_Vector4 = reference.target_Vector4;
             target_Rect = reference.target_Rect;
-
             target_Color = reference.target_Color;
-            target_Type = reference.target_Type;
-            target_UnityObject = reference.target_UnityObject;
+            target_Texture = reference.target_Texture;
+            target_Texture2D = reference.target_Texture2D;
+            target_Texture3D = reference.target_Texture3D;
+            target_Material = reference.target_Material;
+            target_Quaternion = reference.target_Quaternion;
+        }
+    }
+
+    /// <summary>
+    /// The basic component often use
+    /// </summary>
+    [System.Serializable]
+    public class GenericComponent
+    {
+        public Rigidbody rigidbody; // 200
+        public Rigidbody2D rigidbody2D; // 201
+        public Collision collision; // 202
+        public Collision2D collision2D; // 203
+        public Collider collider; // 204
+        public Collider2D collider2D; // 205
+        public MeshFilter meshFilter; // 206
+        public MeshRenderer meshRenderer; // 207
+        public Animator animator; // 208
+        public EBlueprint blueprint; // 209
+        public EGameData gameData; // 210
+
+        public GenericComponent()
+        {
+            rigidbody = null;
+            rigidbody2D = null;
+            collision = null;
+            collision2D = null;
+            collider = null;
+            collider2D = null;
+            meshFilter = null;
+            meshRenderer = null;
+            animator = null;
+            blueprint = null;
+        }
+
+        public GenericComponent(GenericComponent reference)
+        {
+            rigidbody = reference.rigidbody;
+            rigidbody2D = reference.rigidbody2D;
+            collision = reference.collision;
+            collision2D = reference.collision2D;
+            collider = reference.collider;
+            collider2D = reference.collider2D;
+            meshFilter = reference.meshFilter;
+            meshRenderer = reference.meshRenderer;
+            animator = reference.animator;
+            blueprint = reference.blueprint;
         }
     }
 
