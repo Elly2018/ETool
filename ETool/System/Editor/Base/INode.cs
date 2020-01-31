@@ -6,5 +6,7 @@
         StyleType GetNodeSelectStyle();
         StyleType GetInPointStyle();
         StyleType GetOutPointStyle();
+        StyleType GetInPointArrayStyle();
+        StyleType GetOutPointArrayStyle();
     }
 }

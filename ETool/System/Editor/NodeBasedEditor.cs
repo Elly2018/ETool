@@ -15,6 +15,7 @@ namespace ETool
 {
     public class NodeBasedEditor : EditorWindow
     {
+        #region Variable
         /// <summary>
         /// Define select input point
         /// </summary>
@@ -62,6 +63,22 @@ namespace ETool
         private Vector2 drag;
 
         /// <summary>
+        /// Define the position buffer <br />
+        /// When user is using search menu
+        /// </summary>
+        private Vector2 searchPosition;
+
+        /// <summary>
+        /// Define the scroll view position
+        /// </summary>
+        private Vector2 searchScrollPosition;
+
+        /// <summary>
+        /// Define search struct
+        /// </summary>
+        private SearchStruct searchStruct = null;
+
+        /// <summary>
         /// Define local use variable for adding node buffer
         /// </summary>
         private Type addNode;
@@ -70,6 +87,11 @@ namespace ETool
         /// Define current execute assembly
         /// </summary>
         private Assembly assmbly;
+
+        /// <summary>
+        /// Define all nodebase type
+        /// </summary>
+        private Type[] allTypes;
 
         /// <summary>
         /// Define GUI theme
@@ -90,7 +112,11 @@ namespace ETool
                 return NBE;
             }
         }
+        #endregion
 
+        /// <summary>
+        /// When user open node window
+        /// </summary>
         [MenuItem("Window/ETool/Component Node Editor")]
         public static void OpenWindow()
         {
@@ -99,6 +125,10 @@ namespace ETool
             NodeBasedEditor.NBE.titleContent = new GUIContent("Component Node Editor");
         }
 
+        /// <summary>
+        /// When GUI enable <br />
+        /// Initialize content
+        /// </summary>
         private void OnEnable()
         {
             assmbly = Assembly.GetExecutingAssembly();
@@ -109,6 +139,9 @@ namespace ETool
                     selectBlueprint.blueprintEvent.customEvent);
         }
 
+        /// <summary>
+        /// This will called when gui is using
+        /// </summary>
         private void OnGUI()
         {
             DrawBG();
@@ -341,12 +374,96 @@ namespace ETool
         {
             GreyBackground = new GreyBackground() { Message = message, Okbutton = true };
         }
+
+        /// <summary>
+        /// When search struct is not null <br />
+        /// GUI will freeze all movement <br />
+        /// User can only click button or select element or enter inputfield text
+        /// </summary>
+        public void DrawSearchMenu()
+        {
+            float borderGap = 50;
+            float fieldWidth = 15;
+
+            Rect inputFieldTextRect = new Rect(borderGap, 70, position.width - (borderGap * 2), fieldWidth);
+            Rect inputFieldRect = new Rect(borderGap, 100, position.width - (borderGap * 2), fieldWidth);
+            Rect selectButton = new Rect(borderGap, position.height - 100, position.width / 2 - borderGap * 2, fieldWidth * 3);
+            Rect cancelButton = new Rect(position.width / 2 + borderGap, position.height - 100, position.width - (position.width / 2 + borderGap * 2), fieldWidth * 3);
+            Rect scrollRect = new Rect(borderGap, 200, position.width - borderGap * 2, position.height - 400);
+
+            GUIStyle SearchMenuTitle = new GUIStyle();
+            SearchMenuTitle.alignment = TextAnchor.MiddleCenter;
+            SearchMenuTitle.richText = true;
+            SearchMenuTitle.fontStyle = FontStyle.Bold;
+            SearchMenuTitle.fontSize = 13;
+
+            GUIStyle SelectedNode = new GUIStyle();
+            SelectedNode.fontStyle = FontStyle.Bold;
+            SelectedNode.richText = true;
+
+            GUIStyle UnSelectedNode = new GUIStyle();
+            UnSelectedNode.fontStyle = FontStyle.Normal;
+            UnSelectedNode.richText = true;
+
+            EditorGUI.LabelField(inputFieldTextRect, "<color=white>Input Field</color>", SearchMenuTitle);
+            EditorGUI.BeginChangeCheck();
+            searchStruct.inputField = EditorGUI.TextField(inputFieldRect, searchStruct.inputField);
+            if (EditorGUI.EndChangeCheck())
+            {
+                searchScrollPosition = Vector2.zero;
+            }
+
+            searchScrollPosition = GUI.BeginScrollView(scrollRect, searchScrollPosition, new Rect(0, 0, scrollRect.width - scrollRect.x, allTypes.Length * 25), false, true);
+            for(int i = 0; i < allTypes.Length; i++)
+            {
+                NodePath np = allTypes[i].GetCustomAttribute<NodePath>();
+                if(np != null)
+                {
+                    if (!np.Path.ToUpper().Contains(searchStruct.inputField.ToUpper()) && searchStruct.inputField.Length != 0) continue;
+
+                    GUILayout.BeginHorizontal();
+
+                    if(allTypes[i] == searchStruct.type)
+                    {
+                        EditorGUILayout.LabelField("<color=yellow>" + np.Path + "</color>", SelectedNode);
+                    }
+                    else
+                    {
+                        EditorGUILayout.LabelField("<color=white>" + np.Path + "</color>", UnSelectedNode);
+                    }
+                    if (GUILayout.Button("Select Me"))
+                    {
+                        searchStruct.type = allTypes[i];
+                    }
+                    GUILayout.EndHorizontal();
+                }
+            }
+            GUI.EndScrollView();
+
+            GUI.enabled = searchStruct.type != null;
+            if (GUI.Button(selectButton, "Select"))
+            {
+                OnClickAddNode(new AddClickEvent(searchPosition, searchStruct.type), selectionPage);
+                searchStruct = null;
+            }
+            GUI.enabled = true;
+
+            if (GUI.Button(cancelButton, "Cancel"))
+            {
+                searchStruct = null;
+            }
+        }
         #endregion
 
         ///
         /// Event function collection
         ///
         #region Event Related
+
+        ///
+        /// Event (editor)
+        ///
+        #region Editor Event
         /// <summary>
         /// Receive gui event <br />
         /// This function is editor related
@@ -354,36 +471,37 @@ namespace ETool
         /// <param name="e">GUI event object</param>
         private void ProcessEvents(Event e)
         {
+            if (searchStruct != null) return;
             EBlueprint target = Selection.activeObject as EBlueprint;
             GameObject targetN = Selection.activeObject as GameObject;
 
             if (target != null)
             {
-                if(target != selectBlueprint)
+                if(selectBlueprint == null || target != selectBlueprint)
                 {
+                    selectBlueprint = target;
                     selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
                     selectBlueprint.nodes,
                     selectBlueprint.blueprintVariables,
                     selectBlueprint.blueprintEvent.customEvent);
+                    GUI.changed = true;
                 }
-                selectBlueprint = target;
-                GUI.changed = true;
             }
             if (targetN != null)
             {
-                if (targetN.GetComponent<NodeComponent>() != null)
+                if (selectBlueprint == null || targetN.GetComponent<NodeComponent>() != null)
                 {
                     if (targetN.GetComponent<NodeComponent>().ABlueprint != null)
                     {
                         if (targetN.GetComponent<NodeComponent>().ABlueprint != selectBlueprint)
                         {
+                            selectBlueprint = targetN.GetComponent<NodeComponent>().ABlueprint;
                             selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
                             selectBlueprint.nodes,
                             selectBlueprint.blueprintVariables,
                             selectBlueprint.blueprintEvent.customEvent);
+                            GUI.changed = true;
                         }
-                        selectBlueprint = targetN.GetComponent<NodeComponent>().ABlueprint;
-                        GUI.changed = true;
                     }
                 }
             }
@@ -416,6 +534,109 @@ namespace ETool
 
             if (e.keyCode == KeyCode.F && e.control && e.type == EventType.KeyDown)
                 CenterSelectionNodes();
+        }
+
+        /// <summary>
+        /// Receive gui event <br />
+        /// Passing event to child node <br />
+        /// This function is node and connection related
+        /// </summary>
+        /// <param name="e">GUI event object</param>
+        private void ProcessNodeEvents(Event e)
+        {
+            if (searchStruct != null) return;
+            bool ClickAnyNode = false;
+
+            for (int i = selectBlueprint.nodes.Count - 1; i >= 0; i--)
+            {
+                selectBlueprint.nodes[i].isHover = selectBlueprint.nodes[i].rect.Contains(e.mousePosition);
+
+                if (selectBlueprint.nodes[i].rect.Contains(e.mousePosition) &&
+                    e.type == EventType.MouseDown && e.button == 0)
+                {
+                    ClickAnyNode = true;
+                }
+
+                if (selectBlueprint.nodes[i].page == selectionPage)
+                {
+                    bool guiChanged = selectBlueprint.nodes[i].ProcessEvents(e);
+
+                    if (guiChanged)
+                    {
+                        GUI.changed = true;
+                    }
+                }
+            }
+
+            if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) CleanNodeSelection();
+        }
+
+        /// <summary>
+        /// Right click event in the editor
+        /// </summary>
+        /// <param name="mousePosition">Right click position</param>
+        private void ProcessContextMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            /* Adding content into menu */
+            for (int i = 0; i < allTypes.Length; i++)
+            {
+                if (allTypes[i].IsSubclassOf(typeof(Node)))
+                {
+                    NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                    if (nodePath != null)
+                    {
+                        addNode = allTypes[i];
+                        genericMenu.AddItem(new GUIContent(nodePath.Path), false, OnClickAddNode, new AddClickEvent(mousePosition, allTypes[i]));
+                    }
+                }
+            }
+
+            /* Adding search button into menu */
+            genericMenu.AddItem(new GUIContent("Search Node"), false, OnClickSearchNode, mousePosition);
+
+            /* Adding custom event into menu */
+            for (int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
+            {
+                genericMenu.AddItem(new GUIContent("Add Node/Custom Event/" + selectBlueprint.blueprintEvent.customEvent[i].eventName),
+                    false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, selectBlueprint.blueprintEvent.customEvent[i], selectBlueprint.blueprintEvent.customEvent[i].eventName, i + EBlueprint.DefaultPageCount));
+            }
+
+            /* Adding inherit custom event into menu */
+            if (selectBlueprint.Inherit != null)
+            {
+                List<BlueprintCustomEvent> buffer = selectBlueprint.Inherit.blueprintEvent.customEvent;
+                for (int i = 0; i < buffer.Count; i++)
+                {
+                    genericMenu.AddItem(new GUIContent("Add Node/Custom Event/" + buffer[i].eventName),
+                        false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, buffer[i], buffer[i].eventName, 0));
+                }
+            }
+
+            /* Adding edit button */
+            if (CheckAnyConnectionSelect() || CheckAnyNodeSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Copy Selected"), false, OnClickCopy);
+                genericMenu.AddItem(new GUIContent("Delete Selected"), false, DeleteSelection);
+            }
+            if (CheckAnyNodeSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Delete Selected Node"), false, OnClickRemoveSelectionNode);
+            }
+            if (CheckAnyConnectionSelect())
+            {
+                genericMenu.AddItem(new GUIContent("Delete Selected Connection"), false, OnDeleteSelectedConnection);
+            }
+
+            /* Paste command */
+            if (clipBorad != null)
+                genericMenu.AddItem(new GUIContent("Paste"), false, OnClickPasteNodes, new PasteClickEvent(mousePosition));
+            else
+                genericMenu.AddDisabledItem(new GUIContent("Paste"));
+
+            /* Draw content on screen */
+            genericMenu.ShowAsContext();
         }
 
         /// <summary>
@@ -467,49 +688,6 @@ namespace ETool
         }
 
         /// <summary>
-        /// Receive gui event <br />
-        /// Passing event to child node <br />
-        /// This function is node and connection related
-        /// </summary>
-        /// <param name="e">GUI event object</param>
-        private void ProcessNodeEvents(Event e)
-        {
-            bool ClickAnyNode = false;
-
-            for (int i = selectBlueprint.nodes.Count - 1; i >= 0; i--)
-            {
-                selectBlueprint.nodes[i].isHover = selectBlueprint.nodes[i].rect.Contains(e.mousePosition);
-
-                if (selectBlueprint.nodes[i].rect.Contains(e.mousePosition) &&
-                    e.type == EventType.MouseDown && e.button == 0)
-                {
-                    ClickAnyNode = true;
-                }
-
-                if(selectBlueprint.nodes[i].page == selectionPage)
-                {
-                    bool guiChanged = selectBlueprint.nodes[i].ProcessEvents(e);
-
-                    if (guiChanged)
-                    {
-                        GUI.changed = true;
-                    }
-                }
-            }
-
-            if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) CleanNodeSelection();
-        }
-
-        public bool IfAnyOtherNodeAreDrag(Node node)
-        {
-            foreach(var i in selectBlueprint.nodes)
-            {
-                if (i != node && i.isSelected) return true; 
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Clean all node selection
         /// </summary>
         private void CleanNodeSelection()
@@ -519,90 +697,32 @@ namespace ETool
                 selectBlueprint.nodes[i].isSelected = false;
             }
         }
+        #endregion
 
+        ///
+        /// Event (state check)
+        ///
+        #region Event State Check
         /// <summary>
-        /// Right click event in the editor
+        /// Check if any other node are selected <br />
+        /// This is use for multiple node drag
         /// </summary>
-        /// <param name="mousePosition">Right click position</param>
-        private void ProcessContextMenu(Vector2 mousePosition)
+        /// <param name="node">Source node</param>
+        /// <returns></returns>
+        public bool IfAnyOtherNodeAreSelected(Node node)
         {
-            GenericMenu genericMenu = new GenericMenu();
-            Type[] allTypes = assmbly.GetTypes();
-
-            List<ForNodeNameSort> search = new List<ForNodeNameSort>();
-            foreach (var i in allTypes)
+            foreach (var i in selectBlueprint.nodes)
             {
-                NodePath np = i.GetCustomAttribute<NodePath>();
-                if (np != null)
-                    search.Add(new ForNodeNameSort() { type = i, nodepath = np.Path });
+                if (i != node && i.isSelected) return true;
             }
-
-            /* Sort by type name */
-            List<Type> sorted = new List<Type>();
-            var order = from e in search orderby e.nodepath select e;
-            foreach(var i in order)
-            {
-                sorted.Add(i.type);
-            }
-            allTypes = sorted.ToArray();
-
-            /* Adding content into menu */
-            for (int i = 0; i < allTypes.Length; i++)
-            {
-                if (allTypes[i].IsSubclassOf(typeof(Node)))
-                {
-                    NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
-                    if (nodePath != null)
-                    {
-                        addNode = allTypes[i];
-                        genericMenu.AddItem(new GUIContent(nodePath.Path), false, OnClickAddNode, new AddClickEvent(mousePosition, allTypes[i]));
-                    }
-                }
-            }
-
-            /* Adding custom event into menu */
-            for(int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
-            {
-                genericMenu.AddItem(new GUIContent("Add Node/Custom Event/" + selectBlueprint.blueprintEvent.customEvent[i].eventName),
-                    false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, selectBlueprint.blueprintEvent.customEvent[i], selectBlueprint.blueprintEvent.customEvent[i].eventName, i + EBlueprint.DefaultPageCount));
-            }
-
-            /* Adding inherit custom event into menu */
-            if(selectBlueprint.Inherit != null)
-            {
-                List<BlueprintCustomEvent> buffer = selectBlueprint.Inherit.blueprintEvent.customEvent;
-                for (int i = 0; i < buffer.Count; i++)
-                {
-                    genericMenu.AddItem(new GUIContent("Add Node/Custom Event/" + buffer[i].eventName),
-                        false, OnClickAddCustomEvent, new AddCustomEvent(mousePosition, buffer[i], buffer[i].eventName, 0));
-                }
-            }
-
-            /* Adding edit button */
-            if(CheckAnyConnectionSelect() || CheckAnyNodeSelect())
-            {
-                genericMenu.AddItem(new GUIContent("Copy Selected"), false, OnClickCopy);
-                genericMenu.AddItem(new GUIContent("Delete Selected"), false, DeleteSelection);
-            }
-            if (CheckAnyNodeSelect())
-            {
-                genericMenu.AddItem(new GUIContent("Delete Selected Node"), false, OnClickRemoveSelectionNode);
-            }
-            if (CheckAnyConnectionSelect())
-            {
-                genericMenu.AddItem(new GUIContent("Delete Selected Connection"), false, OnDeleteSelectedConnection);
-            }
-
-            /* Paste command */
-            if (clipBorad != null)
-                genericMenu.AddItem(new GUIContent("Paste"), false, OnClickPasteNodes, new PasteClickEvent(mousePosition));
-            else
-                genericMenu.AddDisabledItem(new GUIContent("Paste"));
-
-            /* Draw content on screen */
-            genericMenu.ShowAsContext();
+            return false;
         }
 
+        /// <summary>
+        /// Check if any other connection is selected <br />
+        /// This will effect the right click menu
+        /// </summary>
+        /// <returns></returns>
         public bool CheckAnyConnectionSelect()
         {
             foreach(var i in selectBlueprint.connections)
@@ -612,6 +732,11 @@ namespace ETool
             return false;
         }
 
+        /// <summary>
+        /// Check if any other node is selected <br />
+        /// This will effect the right click menu
+        /// </summary>
+        /// <returns></returns>
         public bool CheckAnyNodeSelect()
         {
             foreach (var i in selectBlueprint.nodes)
@@ -621,12 +746,26 @@ namespace ETool
             return false;
         }
 
-        public void DeleteSelection()
+        /// <summary>
+        /// Check the input connection type match anything in the list
+        /// </summary>
+        /// <param name="_in">Input mark</param>
+        /// <param name="_out">Output mark</param>
+        /// <returns></returns>
+        private bool CheckConnectionExist(Vector2Int _in, Vector2 _out)
         {
-            OnDeleteSelectedConnection();
-            OnClickRemoveSelectionNode();
+            foreach (var i in selectBlueprint.connections)
+            {
+                if (i.inPointMark == _in && i.outPointMark == _out) return true;
+            }
+            return false;
         }
+        #endregion
 
+        ///
+        /// Event (on click)
+        ///
+        #region On Click Event
         /// <summary>
         /// Editor drag event <br />
         /// When drag the editor, trying to moving the viewer
@@ -647,18 +786,17 @@ namespace ETool
             GUI.changed = true;
         }
 
-        private void OnDeleteSelectedConnection()
+        /// <summary>
+        /// Pop up search menu <br />
+        /// For user to search the node it want
+        /// </summary>
+        private void OnClickSearchNode(object pos)
         {
-            for(int i = 0; i < selectBlueprint.connections.Count; i++)
-            {
-                if (selectBlueprint.connections[i].isSelected)
-                {
-                    OnClickRemoveConnection(selectBlueprint.connections[i]);
-                    i--;
-                }
-            }
+            searchPosition = (Vector2)pos;
+            searchStruct = new SearchStruct() { inputField = "", type = null };
         }
 
+        #region Node Related Event
         /// <summary>
         /// When the right click menu active <br />
         /// And user is click add node <br />
@@ -743,22 +881,6 @@ namespace ETool
         }
 
         /// <summary>
-        /// Delete selection nodes
-        /// </summary>
-        private void OnClickRemoveSelectionNode()
-        {
-            List<NodeBase> nb = new List<NodeBase>();
-            foreach(var i in selectBlueprint.nodes)
-            {
-                if (i.isSelected) nb.Add(i);
-            }
-            foreach(var i in nb)
-            {
-                OnClickRemoveNode(i);
-            }
-        }
-
-        /// <summary>
         /// This will send as delegate to all node <br />
         /// When node need to be delete <br />
         /// this event will called
@@ -840,21 +962,6 @@ namespace ETool
                     ClearConnectionSelection();
                 }
             }
-        }
-
-        /// <summary>
-        /// Check the input connection type match anything in the list
-        /// </summary>
-        /// <param name="_in">Input mark</param>
-        /// <param name="_out">Output mark</param>
-        /// <returns></returns>
-        private bool CheckConnectionExist(Vector2Int _in, Vector2 _out)
-        {
-            foreach(var i in selectBlueprint.connections)
-            {
-                if (i.inPointMark == _in && i.outPointMark == _out) return true;
-            }
-            return false;
         }
 
         public void OnClickOutPoint(ConnectionPoint outPoint)
@@ -961,23 +1068,41 @@ namespace ETool
 
         }
 
+        private void OnDeleteSelectedConnection()
+        {
+            for (int i = 0; i < selectBlueprint.connections.Count; i++)
+            {
+                if (selectBlueprint.connections[i].isSelected)
+                {
+                    OnClickRemoveConnection(selectBlueprint.connections[i]);
+                    i--;
+                }
+            }
+        }
+        #endregion
+
+        #region Connection Related Event
         private void CreateConnection()
         {
             Vector2Int _in = GetConnectionInfo(selectedInPoint);
             Vector2Int _out = GetConnectionInfo(selectedOutPoint);
 
             /* Field type check */
-            if (selectBlueprint.nodes[_in.x].fields[_in.y].fieldType != selectBlueprint.nodes[_out.x].fields[_out.y].fieldType ||
-                selectBlueprint.nodes[_in.x].fields[_in.y].fieldContainer != selectBlueprint.nodes[_out.x].fields[_out.y].fieldContainer)
+            if (selectBlueprint.nodes[_in.x].fields[_in.y].fieldType != selectBlueprint.nodes[_out.x].fields[_out.y].fieldType)
             {
-
                 Debug.LogWarning("Type mismatch");
                 return;
             }
 
-            foreach(var i in selectBlueprint.connections)
+            if (selectBlueprint.nodes[_in.x].fields[_in.y].fieldContainer != selectBlueprint.nodes[_out.x].fields[_out.y].fieldContainer)
             {
-                if(i.inPointMark == _in)
+                Debug.LogWarning("Container mismatch");
+                return;
+            }
+
+            foreach (var i in selectBlueprint.connections)
+            {
+                if (i.inPointMark == _in)
                 {
                     Debug.LogWarning("Twice input detect");
                     return;
@@ -997,6 +1122,28 @@ namespace ETool
             EditorUtility.SetDirty(selectBlueprint);
         }
 
+        /// <summary>
+        /// Delete selection nodes
+        /// </summary>
+        private void OnClickRemoveSelectionNode()
+        {
+            List<NodeBase> nb = new List<NodeBase>();
+            foreach (var i in selectBlueprint.nodes)
+            {
+                if (i.isSelected) nb.Add(i);
+            }
+            foreach (var i in nb)
+            {
+                OnClickRemoveNode(i);
+            }
+        }
+
+        public void DeleteSelection()
+        {
+            OnDeleteSelectedConnection();
+            OnClickRemoveSelectionNode();
+        }
+
         private void ClearConnectionSelection()
         {
             if(selectedInPoint != null)
@@ -1006,10 +1153,11 @@ namespace ETool
             selectedInPoint = null;
             selectedOutPoint = null;
         }
-
+        #endregion
+        #endregion
         #endregion
 
-        #region Editor Event
+        #region Editor State
 
         private void PreventRepeatInstance()
         {
@@ -1028,6 +1176,10 @@ namespace ETool
 
         private void StateCheck()
         {
+            if (allTypes == null)
+            {
+                allTypes = GetAllNodebaseType();
+            }
             if (selectBlueprint == null)
             {
                 GreyBackground = new GreyBackground() { Message = "Please select blueprint", Okbutton = false };
@@ -1064,6 +1216,11 @@ namespace ETool
                 }
                 if(GreyBackground != null)
                     GreyBackgroundCenterText(GreyBackground.Message);
+            }
+            if(searchStruct != null)
+            {
+                DrawGreyBackground();
+                DrawSearchMenu();
             }
         }
 
@@ -1258,6 +1415,7 @@ namespace ETool
             }
         }
 
+        #region Getter
         public AddCustomEvent[] GetAllCustomEventName()
         {
             List<AddCustomEvent> result = new List<AddCustomEvent>();
@@ -1302,6 +1460,28 @@ namespace ETool
                 }
             }
             return result.ToArray();
+        }
+
+        private Type[] GetAllNodebaseType()
+        {
+            Type[] allTypes = assmbly.GetTypes();
+            List<ForNodeNameSort> search = new List<ForNodeNameSort>();
+            foreach (var i in allTypes)
+            {
+                NodePath np = i.GetCustomAttribute<NodePath>();
+                if (np != null)
+                    search.Add(new ForNodeNameSort() { type = i, nodepath = np.Path });
+            }
+
+            /* Sort by type name */
+            List<Type> sorted = new List<Type>();
+            var order = from e in search orderby e.nodepath select e;
+            foreach (var i in order)
+            {
+                sorted.Add(i.type);
+            }
+            allTypes = sorted.ToArray();
+            return allTypes;
         }
 
         private ACustomEvent GetCustomEventNode(int page)
@@ -1537,6 +1717,7 @@ namespace ETool
             }
         }
         #endregion
+        #endregion
     }
 
     public struct AddClickEvent
@@ -1611,6 +1792,13 @@ namespace ETool
     {
         public bool Okbutton;
         public string Message;
+    }
+
+    public class SearchStruct
+    {
+        public Type type;
+        public string inputField;
+        public string[] nodeBasesSearch;
     }
 
     public class ForNodeNameSort

@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace ETool
@@ -36,20 +37,56 @@ namespace ETool
                     /* Element */
                     for(int j = 0; j < bufferCate.gameDataElements.Count; j++)
                     {
-                        GameDataElement bufferElement =
+                        BlueprintVariable bufferElement = 
                             bufferCate.gameDataElements[j];
-
                         HGroupStart();
-                        bufferElement.label = EditorGUILayout.TextField(bufferElement.label);
-                        bufferElement.fieldType = (FieldType)EditorGUILayout.EnumPopup(bufferElement.fieldType);
-                        bufferElement.value = Field.DrawFieldHelper(bufferElement.value, bufferElement.fieldType);
+                        bufferElement.fieldContainer = (FieldContainer)EditorGUILayout.EnumPopup(bufferElement.fieldContainer);
                         HGroupEnd();
+
+                        VGroupStart();
+                        if(bufferElement.fieldContainer == FieldContainer.Object)
+                        {
+                            HGroupStart();
+                            bufferElement.label = EditorGUILayout.TextField(bufferElement.label);
+                            bufferElement.type = (FieldType)EditorGUILayout.EnumPopup(bufferElement.type);
+                            bufferElement.variable = Field.DrawFieldHelper(bufferElement.variable, bufferElement.type);
+                            HGroupEnd();
+                        }
+                        if (bufferElement.fieldContainer == FieldContainer.Array)
+                        {
+                            bufferElement.fold = EditorGUILayout.Foldout(bufferElement.fold, bufferElement.label);
+                            if (bufferElement.fold)
+                            {
+                                HGroupStart();
+                                bufferElement.label = EditorGUILayout.TextField(bufferElement.label);
+                                bufferElement.type = (FieldType)EditorGUILayout.EnumPopup(bufferElement.type);
+                                HGroupEnd();
+                                HGroupStart();
+                                bufferElement.variable.genericBasicType.target_Int = EditorGUILayout.IntField("Size", bufferElement.variable.genericBasicType.target_Int);
+                                if (bufferElement.variable.genericBasicType.target_Int < 0) bufferElement.variable.genericBasicType.target_Int = 0;
+                                HGroupEnd();
+                                Array.Resize(ref bufferElement.variable_Array, bufferElement.variable.genericBasicType.target_Int);
+                                for (int k = 0; k < bufferElement.variable_Array.Length; k++)
+                                {
+                                    HGroupStart();
+                                    try
+                                    {
+                                        bufferElement.variable_Array[k] = Field.DrawFieldHelper(bufferElement.variable_Array[k], bufferElement.type);
+                                    }
+                                    catch { }
+                                    HGroupEnd();
+                                }
+                            }
+                        }
+                        VGroupEnd();
+                        EditorGUILayout.Space();
+                        EditorGUILayout.Space();
                     }
 
                     HGroupStart();
                     if (GUILayout.Button("Add Element"))
                     {
-                        bufferCate.gameDataElements.Add(new GameDataElement());
+                        bufferCate.gameDataElements.Add(new BlueprintVariable());
                     }
                     if (GUILayout.Button("Clear Element"))
                     {

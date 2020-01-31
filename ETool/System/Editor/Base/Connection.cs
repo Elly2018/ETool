@@ -133,7 +133,7 @@ namespace ETool
             {
                 case EventType.MouseDown:
                     {
-                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreDrag(null) && e.button == 0)
+                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(null) && e.button == 0)
                         {
                             isSelected = false;
                         }

@@ -613,6 +613,7 @@ namespace ETool
             {
                 BlueprintVariable bv = new BlueprintVariable();
                 bv.label = source[i].label;
+                bv.fieldContainer = source[i].fieldContainer;
                 bv.type = source[i].type;
                 bv.variable = new GenericObject(source[i].variable);
                 result.Add(bv);
@@ -671,8 +672,11 @@ namespace ETool
     {
         public AccessAbility accessAbility;
         public FieldType type;
+        public FieldContainer fieldContainer;
         public string label;
+        public bool fold;
         public GenericObject variable = new GenericObject();
+        public GenericObject[] variable_Array = new GenericObject[0];
     }
 
     public class BlueprintInput
@@ -699,6 +703,23 @@ namespace ETool
             thisGameobject = gameobj;
             this.blueprintVariables = blueprintVariables;
             this.blueprintCustomEvents = blueprintCustomEvents;
+            InitArray();
+        }
+
+        private void InitArray()
+        {
+            foreach(var i in blueprintVariables)
+            {
+                if(i.fieldContainer == FieldContainer.Array)
+                {
+                    i.variable_Array = new GenericObject[i.variable.genericBasicType.target_Int];
+
+                    for(int j = 0;  j < i.variable_Array.Length; j++)
+                    {
+                        i.variable_Array[j] = new GenericObject();
+                    }
+                }
+            }
         }
     }
 

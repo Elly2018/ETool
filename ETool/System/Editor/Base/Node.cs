@@ -196,7 +196,7 @@ namespace ETool
                             }
                             else
                             {
-                                if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreDrag(this))
+                                if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(this))
                                 {
                                     isSelected = false;
                                 }

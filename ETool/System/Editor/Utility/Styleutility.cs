@@ -17,8 +17,11 @@ namespace ETool
         Select_Function_Node,
         Select_Error_Node,
 
-        In_Point = 60,
-        Out_Point = 61,
+        In_Point,
+        Out_Point,
+        In_Point_Array,
+        Out_Point_Array,
+
         Panel = 90,
         GUI_Title = 120,
         GUI_Properties = 121
@@ -94,13 +97,23 @@ namespace ETool
                 #endregion
 
                 case StyleType.In_Point: // 60
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left@2x.png") as Texture2D;
-                    result.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn left on@2x.png") as Texture2D;
+                    result.normal.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ObjectNode.png") as Texture2D;
+                    result.active.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ObjectNode.png") as Texture2D;
                     return result;
 
                 case StyleType.Out_Point: // 61
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right@2x.png") as Texture2D;
-                    result.active.background = EditorGUIUtility.Load("builtin skins/darkskin/images/btn right on@2x.png") as Texture2D;
+                    result.normal.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ObjectNode.png") as Texture2D;
+                    result.active.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ObjectNode.png") as Texture2D;
+                    return result;
+
+                case StyleType.In_Point_Array: // 62
+                    result.normal.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ArrayNode.png") as Texture2D;
+                    result.active.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ArrayNode.png") as Texture2D;
+                    return result;
+
+                case StyleType.Out_Point_Array: // 63
+                    result.normal.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ArrayNode.png") as Texture2D;
+                    result.active.background = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets\\ETool\\Texture2D\\ArrayNode.png") as Texture2D;
                     return result;
 
                 case StyleType.Panel: // 90

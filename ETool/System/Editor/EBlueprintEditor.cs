@@ -79,6 +79,7 @@ namespace ETool
                             eventRepeatName = true;
                         }
                     }
+                    
                     b.blueprintEvent.customEvent[i].fold = EditorGUILayout.Foldout(b.blueprintEvent.customEvent[i].fold, b.blueprintEvent.customEvent[i].eventName);
                     if (!b.blueprintEvent.customEvent[i].fold) continue;
                     VGroupStart();
@@ -222,13 +223,16 @@ namespace ETool
             EditorGUILayout.LabelField("Access", GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Label", GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Type", GUILayout.MinWidth(100));
-            EditorGUILayout.LabelField("Default variable", GUILayout.MinWidth(100));
+            EditorGUILayout.LabelField("Default variable/Size", GUILayout.MinWidth(100));
             HGroupEnd();
             /* Private custom variable */
             EditorGUI.BeginChangeCheck();
             {
                 for (int i = 0; i < b.blueprintVariables.Count; i++)
                 {
+                    HGroupStart();
+                    b.blueprintVariables[i].fieldContainer = (FieldContainer)EditorGUILayout.EnumPopup(b.blueprintVariables[i].fieldContainer);
+                    HGroupEnd();
                     HGroupStart();
                     b.blueprintVariables[i].accessAbility = (AccessAbility)EditorGUILayout.EnumPopup(b.blueprintVariables[i].accessAbility);
                     b.blueprintVariables[i].label = EditorGUILayout.TextField(b.blueprintVariables[i].label);
@@ -238,7 +242,12 @@ namespace ETool
                     {
                         b.ChangeCustomVariableType(i);
                     }
-                    b.blueprintVariables[i].variable = Field.DrawFieldHelper(b.blueprintVariables[i].variable, b.blueprintVariables[i].type);
+
+                    if (b.blueprintVariables[i].fieldContainer == FieldContainer.Object)
+                        b.blueprintVariables[i].variable = Field.DrawFieldHelper(b.blueprintVariables[i].variable, b.blueprintVariables[i].type);
+                    else
+                        b.blueprintVariables[i].variable.genericBasicType.target_Int = EditorGUILayout.IntField(b.blueprintVariables[i].variable.genericBasicType.target_Int);
+
                     if (GUILayout.Button("-"))
                     {
                         b.DeleteCustomVariable(i);

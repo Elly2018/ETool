@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace ETool
 {
@@ -13,16 +14,6 @@ namespace ETool
     {
         public string label = "New Category";
         public bool fold;
-        public List<GameDataElement> gameDataElements = new List<GameDataElement>();
-    }
-
-    [System.Serializable]
-    public class GameDataElement
-    {
-        public string label;
-
-        public FieldType fieldType;
-        public GenericObject value = new GenericObject();
-        public GenericObject[] value_array = new GenericObject[0];
+        public List<BlueprintVariable> gameDataElements = new List<BlueprintVariable>();
     }
 }

@@ -110,6 +110,16 @@ namespace ETool
         {
             return StyleType.Out_Point;
         }
+
+        public StyleType GetInPointArrayStyle()
+        {
+            return StyleType.In_Point_Array;
+        }
+
+        public StyleType GetOutPointArrayStyle()
+        {
+            return StyleType.Out_Point_Array;
+        }
         #endregion
 
         /// <summary>
@@ -199,6 +209,14 @@ namespace ETool
                 return Field.GetObjectByFieldType(fields[fieldIndex].fieldType, fields[fieldIndex].target);
         }
 
+        protected T GetFieldOrLastInputField<T>(int fieldIndex, BlueprintInput data)
+        {
+            if (CheckIfConnectionExist(fieldIndex, data, true))
+                return (T)GetFieldInputValue(fieldIndex, data);
+            else
+                return (T)Field.GetObjectByFieldType(fields[fieldIndex].fieldType, fields[fieldIndex].target);
+        }
+
         protected object GetFieldInputValue(int fieldIndex, BlueprintInput data)
         {
             List<NodeBase> nl = data.allNode.ToList();
@@ -239,5 +257,29 @@ namespace ETool
             }
             return null;
         }
+
+        #region Field modify
+
+        protected bool CheckFieldType(int index, FieldType ft)
+        {
+            if(index < 0 || index >= fields.Count)
+            {
+                Debug.LogWarning("Index out of range");
+                return false;
+            }
+            return fields[index].fieldType == ft;
+        }
+
+        protected bool CheckContainerType(int index, FieldContainer fc)
+        {
+            if (index < 0 || index >= fields.Count)
+            {
+                Debug.LogWarning("Index out of range");
+                return false;
+            }
+            return fields[index].fieldContainer == fc;
+        }
+
+        #endregion
     }
 }

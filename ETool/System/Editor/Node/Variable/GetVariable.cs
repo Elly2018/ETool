@@ -44,7 +44,10 @@ namespace ETool.ANode
             try
             {
                 NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[1]);
-                fields[1] = new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
+                fields[1] = new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type,
+                    "Result",
+                    ConnectionType.DataOutput,
+                    true, this, bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].fieldContainer);
             }
             catch { }
         }
@@ -53,7 +56,10 @@ namespace ETool.ANode
         {
             try
             {
-                fields[1] = new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
+                fields[1] = new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type,
+                    "Result",
+                    ConnectionType.DataOutput,
+                    true, this, data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].fieldContainer);
             }
             catch { }
         }
@@ -61,7 +67,19 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(object), 1)]
         public object GetMyVariable(BlueprintInput data)
         {
-            return Field.GetObjectByFieldType(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type, data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].variable);
+            if(fields[1].fieldContainer == FieldContainer.Object)
+            {
+                Debug.Log("Get Object");
+                return Field.GetObjectByFieldType
+                    (data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type,
+                    data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].variable);
+            }
+            else
+            {
+                return Field.GetObjectArrayByFieldType
+                    (data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type,
+                    data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].variable_Array);
+            }
         }
     }
 }

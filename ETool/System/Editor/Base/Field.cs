@@ -104,6 +104,7 @@ namespace ETool
         DetectionMode = 2006,
         CursorMode = 2007,
         CursorLockMode = 2008,
+        EnvironemntPath = 2009,
     }
 
     /// <summary>
@@ -185,8 +186,18 @@ namespace ETool
             this.title = title;
             this.connectionType = connectionType;
             _iNodeStyle = iNode;
-            inPoint = new ConnectionPoint(ConnectionPointType.In, StyleUtility.GetStyle(_iNodeStyle.GetInPointStyle()));
-            outPoint = new ConnectionPoint(ConnectionPointType.Out, StyleUtility.GetStyle(_iNodeStyle.GetOutPointStyle()));
+
+            if (fieldContainer == FieldContainer.Object)
+            {
+                inPoint = new ConnectionPoint(ConnectionPointType.In, StyleUtility.GetStyle(_iNodeStyle.GetInPointStyle()));
+                outPoint = new ConnectionPoint(ConnectionPointType.Out, StyleUtility.GetStyle(_iNodeStyle.GetOutPointStyle()));
+            }
+            if (fieldContainer == FieldContainer.Array)
+            {
+                inPoint = new ConnectionPoint(ConnectionPointType.In, StyleUtility.GetStyle(_iNodeStyle.GetInPointArrayStyle()));
+                outPoint = new ConnectionPoint(ConnectionPointType.Out, StyleUtility.GetStyle(_iNodeStyle.GetOutPointArrayStyle()));
+            }
+
             inPoint.fieldType = fieldType;
             outPoint.fieldType = fieldType;
             this.fieldContainer = fieldContainer;
@@ -208,8 +219,18 @@ namespace ETool
             this.title = title;
             this.connectionType = connectionType;
             _iNodeStyle = iNode;
-            inPoint = new ConnectionPoint(ConnectionPointType.In, StyleUtility.GetStyle(_iNodeStyle.GetInPointStyle()));
-            outPoint = new ConnectionPoint(ConnectionPointType.Out, StyleUtility.GetStyle(_iNodeStyle.GetOutPointStyle()));
+
+            if (fieldContainer == FieldContainer.Object)
+            {
+                inPoint = new ConnectionPoint(ConnectionPointType.In, StyleUtility.GetStyle(_iNodeStyle.GetInPointStyle()));
+                outPoint = new ConnectionPoint(ConnectionPointType.Out, StyleUtility.GetStyle(_iNodeStyle.GetOutPointStyle()));
+            }
+            if (fieldContainer == FieldContainer.Array)
+            {
+                inPoint = new ConnectionPoint(ConnectionPointType.In, StyleUtility.GetStyle(_iNodeStyle.GetInPointArrayStyle()));
+                outPoint = new ConnectionPoint(ConnectionPointType.Out, StyleUtility.GetStyle(_iNodeStyle.GetOutPointArrayStyle()));
+            }
+
             inPoint.fieldType = fieldType;
             outPoint.fieldType = fieldType;
             hideField = hide;
@@ -228,11 +249,21 @@ namespace ETool
             target_array = reference.target_array;
             connectionType = reference.connectionType;
             fieldType = reference.fieldType;
-            _iNodeStyle = reference._iNodeStyle;
             fieldContainer = reference.fieldContainer;
 
             inPoint = reference.inPoint;
             outPoint = reference.outPoint;
+
+            if (fieldContainer == FieldContainer.Object)
+            {
+                inPoint.style = StyleUtility.GetStyle(StyleType.In_Point);
+                outPoint.style = StyleUtility.GetStyle(StyleType.Out_Point);
+            }
+            if (fieldContainer == FieldContainer.Array)
+            {
+                inPoint.style = StyleUtility.GetStyle(StyleType.In_Point_Array);
+                outPoint.style = StyleUtility.GetStyle(StyleType.Out_Point_Array);
+            }
 
             onConnection = reference.onConnection;
             hideField = reference.hideField;
@@ -548,7 +579,7 @@ namespace ETool
 
                 case FieldType.Type:
                     {
-                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<FieldType>());
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, GetTypeEnumUseStruct());
                         break;
                     }
 
@@ -589,6 +620,12 @@ namespace ETool
                 case FieldType.CursorLockMode:
                     {
                         target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<CursorLockMode>());
+                        break;
+                    }
+
+                case FieldType.EnvironemntPath:
+                    {
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<Environment.SpecialFolder>());
                         break;
                     }
                     #endregion
@@ -698,6 +735,10 @@ namespace ETool
             return "(" + fieldType.ToString() + ")" + title;
         }
 
+        /// <summary>
+        /// Get custom variable array (only select blueprint)
+        /// </summary>
+        /// <returns></returns>
         private string[] GetVariableStringArray()
         {
             List<BlueprintVariable> bv = NodeBasedEditor.Instance.GetAllCustomVariable();
@@ -1023,6 +1064,8 @@ namespace ETool
                     return go.target_Component.animator; // 208
                 case FieldType.Blueprint:
                     return go.target_Component.blueprint; // 209
+                case FieldType.GameData:
+                    return go.target_Component.gameData; // 210
                 #endregion
 
                 #region Enum Type
@@ -1047,10 +1090,22 @@ namespace ETool
                 case FieldType.CursorLockMode:
                     return (CursorLockMode)go.genericBasicType.target_Int;
                 case FieldType.Dropdown:
-                    break;
+                    return (CursorLockMode)go.genericBasicType.target_Int;
+                case FieldType.EnvironemntPath:
+                    return (Environment.SpecialFolder)go.genericBasicType.target_Int;
                     #endregion
             }
             return typeof(Nullable);
+        }
+
+        public static object[] GetObjectArrayByFieldType(FieldType tf, GenericObject[] go)
+        {
+            object[] result = new object[go.Length];
+            for(int i = 0; i < go.Length; i++)
+            {
+                result[i] = GetObjectByFieldType(tf, go[i]);
+            }
+            return result;
         }
 
         public static object SetObjectByFieldType(FieldType tf, GenericObject go, object o)
@@ -1179,6 +1234,56 @@ namespace ETool
             return typeof(Nullable);
         }
 
+        public static GenericObject[] SetObjectArrayByField(FieldType tf, GenericObject[] go, object[] o)
+        {
+            if(go.Length == o.Length)
+            {
+                /* Just apply the value */
+                for(int i = 0; i < go.Length; i++)
+                {
+                    SetObjectByFieldType(tf, go[i], o[i]);
+                }
+            }
+            else if (go.Length > o.Length)
+            {
+                /* Go remove element */
+                int diff = go.Length - o.Length;
+                List<GenericObject> buffer = go.ToList();
+
+                for(int i = 0; i < diff; i++)
+                {
+                    buffer.RemoveAt(buffer.Count - 1);
+                }
+
+                for (int i = 0; i < buffer.Count; i++)
+                {
+                    SetObjectByFieldType(tf, buffer[i], o[i]);
+                }
+
+                go = buffer.ToArray();
+            }
+            else if (go.Length < o.Length)
+            {
+                /* Go adding element */
+                int diff = o.Length - go.Length;
+                List<GenericObject> buffer = go.ToList();
+
+                for (int i = 0; i < buffer.Count; i++)
+                {
+                    SetObjectByFieldType(tf, buffer[i], o[i]);
+                }
+
+                for(int i = 0; i < diff; i++)
+                {
+                    GenericObject bufferGO = new GenericObject();
+                    SetObjectByFieldType(tf, bufferGO, o[go.Length + i]);
+                    buffer.Add(bufferGO);
+                }
+                go = buffer.ToArray();
+            }
+            return go;
+        }
+
         public static GenericObject DrawFieldHelper(GenericObject o, FieldType type)
         {
             switch (type)
@@ -1298,17 +1403,12 @@ namespace ETool
 
         public static EnumUseStruct[] GetComponentEnumUseStruct()
         {
-            List<EnumUseStruct> result = new List<EnumUseStruct>();
-            string[] FieldTypeString = Enum.GetNames(typeof(FieldType));
-            foreach(var i in FieldTypeString)
-            {
-                FieldType type = (FieldType)Enum.Parse(typeof(FieldType), i);
-                if ((int)type >= 200 && (int)type <= 1999)
-                {
-                    result.Add(new EnumUseStruct() { fieldIndex = (int)type, fieldName = i });
-                }
-            }
-            return result.ToArray();
+            return GetFieldTypeEnumUseStruct(200, 1999);
+        }
+
+        public static EnumUseStruct[] GetTypeEnumUseStruct()
+        {
+            return GetFieldTypeEnumUseStruct(10, 9999);
         }
 
         public static EnumUseStruct[] FormExistEnumStruct<T>() where T : Enum
@@ -1319,6 +1419,21 @@ namespace ETool
             {
                 object type = (T)Enum.Parse(typeof(T), i);
                 result.Add(new EnumUseStruct() { fieldIndex = (int)type, fieldName = i });
+            }
+            return result.ToArray();
+        }
+
+        private static EnumUseStruct[] GetFieldTypeEnumUseStruct(int min, int max)
+        {
+            List<EnumUseStruct> result = new List<EnumUseStruct>();
+            string[] FieldTypeString = Enum.GetNames(typeof(FieldType));
+            foreach (var i in FieldTypeString)
+            {
+                FieldType type = (FieldType)Enum.Parse(typeof(FieldType), i);
+                if ((int)type >= min && (int)type <= max)
+                {
+                    result.Add(new EnumUseStruct() { fieldIndex = (int)type, fieldName = i });
+                }
             }
             return result.ToArray();
         }
