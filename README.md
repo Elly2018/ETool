@@ -1,10 +1,10 @@
-# Rebirth
+# ETool
 
 > The unity plugin for interactive design
 
 ![image](Image/Preview.PNG)
 
-## Why use Rebirth
+## Why use ETool
 
 - Great tool to make game logic <br />
   <p>the user don't have to understand programming</p>
