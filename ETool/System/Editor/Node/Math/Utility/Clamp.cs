@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Clamp(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Clamp";
+            unlocalTitle = "Clamp";
         }
 
         public override void FieldInitialize()

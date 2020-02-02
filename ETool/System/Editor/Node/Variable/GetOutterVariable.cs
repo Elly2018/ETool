@@ -11,7 +11,7 @@ namespace ETool.ANode
 
         public GetOutterVariable(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Get External Variable";
+            unlocalTitle = "Get External Variable";
         }
 
         public override void FieldInitialize()

@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Pi(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Pi";
+            unlocalTitle = "Pi";
         }
 
         public override void FieldInitialize()

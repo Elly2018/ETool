@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public QuaternionFromEular(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Quaternion From Eular";
+            unlocalTitle = "Quaternion From Eular";
         }
 
         public override void FieldInitialize()

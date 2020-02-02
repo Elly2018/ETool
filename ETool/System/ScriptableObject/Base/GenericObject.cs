@@ -101,6 +101,7 @@ namespace ETool
         public Texture3D target_Texture3D = null; // 59
         public Material target_Material = null; // 60
         public Quaternion target_Quaternion = Quaternion.identity; // 61
+        public AudioClip target_AudioClip = null; // 61
 
         public GenericUnityType()
         {
@@ -116,6 +117,7 @@ namespace ETool
             target_Texture3D = null;
             target_Material = null;
             target_Quaternion = Quaternion.identity;
+            target_AudioClip = null;
         }
 
         public GenericUnityType(GenericUnityType reference)
@@ -152,33 +154,26 @@ namespace ETool
         public Animator animator; // 208
         public EBlueprint blueprint; // 209
         public EGameData gameData; // 210
+        public AudioSource audioSource; //211
 
         public GenericComponent()
         {
-            rigidbody = null;
-            rigidbody2D = null;
-            collision = null;
-            collision2D = null;
-            collider = null;
-            collider2D = null;
-            meshFilter = null;
-            meshRenderer = null;
-            animator = null;
-            blueprint = null;
         }
 
         public GenericComponent(GenericComponent reference)
         {
-            rigidbody = reference.rigidbody;
-            rigidbody2D = reference.rigidbody2D;
-            collision = reference.collision;
-            collision2D = reference.collision2D;
-            collider = reference.collider;
-            collider2D = reference.collider2D;
-            meshFilter = reference.meshFilter;
-            meshRenderer = reference.meshRenderer;
-            animator = reference.animator;
-            blueprint = reference.blueprint;
+            rigidbody = reference.rigidbody; // 200
+            rigidbody2D = reference.rigidbody2D; // 201
+            collision = reference.collision; // 202
+            collision2D = reference.collision2D; // 203
+            collider = reference.collider; // 204
+            collider2D = reference.collider2D; // 205
+            meshFilter = reference.meshFilter; // 206
+            meshRenderer = reference.meshRenderer; // 207
+            animator = reference.animator; // 208
+            blueprint = reference.blueprint; // 209
+            gameData = reference.gameData; // 210
+            audioSource = reference.audioSource; // 211
         }
     }
 

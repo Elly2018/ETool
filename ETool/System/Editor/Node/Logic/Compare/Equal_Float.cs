@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Equal_Float(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Equal";
+            unlocalTitle = "Equal";
         }
 
         public override void FieldInitialize()

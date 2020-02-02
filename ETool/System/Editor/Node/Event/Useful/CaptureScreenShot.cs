@@ -2,12 +2,12 @@
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Event/Capture ScreenShot")]
+    [NodePath("Add Node/Event/Method/CaptureScreenShot")]
     public class CaptureScreenShot : NodeBase
     {
         public CaptureScreenShot(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Capture ScreenShot";
+            unlocalTitle = "Capture ScreenShot";
         }
 
         public override void ProcessCalling(BlueprintInput data)

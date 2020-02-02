@@ -131,12 +131,23 @@ namespace ETool
         /// </summary>
         private void OnEnable()
         {
+            InitalizeContent();
+        }
+
+        private void OnFocus()
+        {
+            InitalizeContent();
+        }
+
+        private void InitalizeContent()
+        {
             assmbly = Assembly.GetExecutingAssembly();
             if (selectBlueprint != null)
                 selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
                     selectBlueprint.nodes,
                     selectBlueprint.blueprintVariables,
                     selectBlueprint.blueprintEvent.customEvent);
+            StyleUtility.Initialize();
         }
 
         /// <summary>
@@ -224,6 +235,11 @@ namespace ETool
                     "Ctrl + C \t Center Page\n" +
                     "Ctrl + F \t Center Selected Nodes\n";
                 GreyBackground = new GreyBackground() { Okbutton = true, Message = message };
+            }
+            ButtonPadding++;
+            if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Refresh"))
+            {
+                InitalizeContent();
             }
             ButtonPadding++;
             if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Cancel"))
@@ -480,10 +496,7 @@ namespace ETool
                 if(selectBlueprint == null || target != selectBlueprint)
                 {
                     selectBlueprint = target;
-                    selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
-                    selectBlueprint.nodes,
-                    selectBlueprint.blueprintVariables,
-                    selectBlueprint.blueprintEvent.customEvent);
+                    InitalizeContent();
                     GUI.changed = true;
                 }
             }
@@ -496,10 +509,7 @@ namespace ETool
                         if (targetN.GetComponent<NodeComponent>().ABlueprint != selectBlueprint)
                         {
                             selectBlueprint = targetN.GetComponent<NodeComponent>().ABlueprint;
-                            selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
-                            selectBlueprint.nodes,
-                            selectBlueprint.blueprintVariables,
-                            selectBlueprint.blueprintEvent.customEvent);
+                            InitalizeContent();
                             GUI.changed = true;
                         }
                     }
@@ -819,7 +829,7 @@ namespace ETool
             if(nec != null)
             {
                 nec.targetPage = ace.page;
-                nec.title = ace.addEventName;
+                nec.unlocalTitle = ace.addEventName;
                 nec.SetCustomEvent(ace.bce);
             }
         }
@@ -1362,7 +1372,7 @@ namespace ETool
                     {
                         if(i.page == selectBlueprint.blueprintEvent.customEvent.IndexOf(j) + EBlueprint.DefaultPageCount)
                         {
-                            i.title = j.eventName;
+                            i.unlocalTitle = j.eventName;
                         }
                     }
                 }
@@ -1381,7 +1391,7 @@ namespace ETool
                     NodeError ne = null;
                     foreach(var j in selectBlueprint.GetInheritEvent())
                     {
-                        if (j.eventName == i.title) exist = true;
+                        if (j.eventName == i.unlocalTitle) exist = true;
                     }
                     foreach (var j in i.nodeErrors)
                     {
@@ -1409,7 +1419,7 @@ namespace ETool
                 if (!CheckCustomEventNodeExist(i + EBlueprint.DefaultPageCount))
                 {
                     NodeBase n = OnClickAddNode(new AddClickEvent(new Vector2(position.width / 2, position.height / 2), typeof(ACustomEvent)), i + EBlueprint.DefaultPageCount);
-                    n.title = selectBlueprint.blueprintEvent.customEvent[i].eventName;
+                    n.unlocalTitle = selectBlueprint.blueprintEvent.customEvent[i].eventName;
                     (n as ACustomEvent).SetCustomEvent(selectBlueprint.blueprintEvent.customEvent[i]);
                 }
             }
@@ -1469,7 +1479,7 @@ namespace ETool
             foreach (var i in allTypes)
             {
                 NodePath np = i.GetCustomAttribute<NodePath>();
-                if (np != null)
+                if (np != null && i.GetCustomAttribute<NodeHide>() == null)
                     search.Add(new ForNodeNameSort() { type = i, nodepath = np.Path });
             }
 

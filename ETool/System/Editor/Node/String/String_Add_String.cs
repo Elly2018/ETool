@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public String_Add_String(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "String + String";
+            unlocalTitle = "String + String";
         }
 
         public override void FieldInitialize()

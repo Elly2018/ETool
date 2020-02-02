@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Cos(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Cos";
+            unlocalTitle = "Cos";
         }
 
         public override void FieldInitialize()

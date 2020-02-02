@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Vector3_Mul_Vector3(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Vector3 * Vector3";
+            unlocalTitle = "Vector3 * Vector3";
         }
 
         public override void FieldInitialize()

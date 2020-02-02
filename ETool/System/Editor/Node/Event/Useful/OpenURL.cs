@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Event/Open URL")]
+    [NodePath("Add Node/Event/Method/OpenURL")]
     public class OpenURL : NodeBase
     {
         public OpenURL(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Open URL";
+            unlocalTitle = "Open URL";
         }
 
         public override void ProcessCalling(BlueprintInput data)

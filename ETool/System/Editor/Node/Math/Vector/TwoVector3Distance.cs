@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public TwoVector3Distance(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Two Vector3 Distance";
+            unlocalTitle = "Two Vector3 Distance";
         }
 
         public override void FieldInitialize()

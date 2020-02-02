@@ -9,7 +9,7 @@ namespace ETool.ANode
     {
         public SetVariable(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Set Variable";
+            unlocalTitle = "Set Variable";
         }
 
         public override void ProcessCalling(BlueprintInput data)

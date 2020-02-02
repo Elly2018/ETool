@@ -1,5 +1,7 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace ETool
 {
@@ -22,15 +24,26 @@ namespace ETool
         In_Point_Array,
         Out_Point_Array,
 
-        Panel = 90,
-        GUI_Title = 120,
-        GUI_Properties = 121
+        Panel,
+        GUI_Title,
+        GUI_Properties,
     }
 
     /* Define how sisters getting draw hehe */
     public class StyleUtility
     {
-        public static GUIStyle GetStyle(StyleType select)
+        private static GUIStyle[] m_GUIStyle = new GUIStyle[0];
+
+        public static void Initialize()
+        {
+            m_GUIStyle = new GUIStyle[Enum.GetNames(typeof(StyleType)).Length];
+            for(int i = 0; i < m_GUIStyle.Length; i++)
+            {
+                m_GUIStyle[i] = CreateStyle((StyleType)i);
+            }
+        }
+
+        private static GUIStyle CreateStyle(StyleType select)
         {
             string themeColorString = string.Empty;
 
@@ -123,14 +136,38 @@ namespace ETool
                 case StyleType.GUI_Title: // 120
                     result.alignment = TextAnchor.MiddleCenter;
                     result.fontStyle = FontStyle.Bold;
+                    result.wordWrap = true;
                     return result;
 
                 case StyleType.GUI_Properties: // 121
                     result.alignment = TextAnchor.MiddleCenter;
-                    result.normal.background = new Texture2D(10, 10);
+                    result.normal.background = GetTexBG();
                     return result;
             }
             return result;
+        }
+
+        private static Texture2D GetTexBG()
+        {
+            Texture2D t = new Texture2D(5, 5);
+            for (int y = 0; y < t.height; y++)
+                for (int x = 0; x < t.width; x++)
+                    t.SetPixel(x, y, new Color(0.8f, 0.8f, 0.8f, 0.5f));
+            t.Apply();
+            return t;
+        }
+
+        public static GUIStyle GetStyle(StyleType select)
+        {
+            if(m_GUIStyle.Length == 0 || m_GUIStyle == null)
+            {
+                Initialize();
+            }
+            if (m_GUIStyle[(int)select] == null) 
+            {
+                m_GUIStyle[(int)select] = CreateStyle(select);
+            }
+            return m_GUIStyle[(int)select];
         }
 
     }

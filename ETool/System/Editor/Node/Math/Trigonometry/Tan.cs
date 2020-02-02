@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Tan(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Tan";
+            unlocalTitle = "Tan";
         }
 
         public override void FieldInitialize()

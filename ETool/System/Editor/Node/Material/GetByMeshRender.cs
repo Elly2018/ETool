@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public GetByMeshRender(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Get By Mesh Renderer";
+            unlocalTitle = "Get By Mesh Renderer";
         }
 
         public override void FieldInitialize()

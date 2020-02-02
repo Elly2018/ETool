@@ -2,15 +2,15 @@
 
 namespace ETool.ANode
 {
-    [System.Serializable]
+    [NodePath("Add Node/Event/OnTriggerExit2D")]
+    [NodeHide]
     public class AOnTriggerExit2D : NodeBase
     {
         private Collider2D collision;
 
         public AOnTriggerExit2D(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "OnTriggerExit2D";
-            description = "";
+            unlocalTitle = "OnTriggerExit2D";
         }
 
         public override void ProcessCalling(BlueprintInput data)

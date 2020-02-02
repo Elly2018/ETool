@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Int_Add_Int(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Int + Int";
+            unlocalTitle = "Int + Int";
         }
 
         public override void FieldInitialize()

@@ -1386,7 +1386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8f74cb29486e2445810e0660c038cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ABlueprint: {fileID: 11400000, guid: 49033713d81d5d04d88e6ea0cece64bc, type: 2}
+  ABlueprint: {fileID: 11400000, guid: 6c999eb27d4ef3f4b828e1853b5d9f39, type: 2}
   blueprintGameobjectRegister:
   - label: Camera
     target: {fileID: 1348651131}

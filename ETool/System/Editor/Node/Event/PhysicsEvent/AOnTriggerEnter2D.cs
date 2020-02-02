@@ -2,15 +2,15 @@
 
 namespace ETool.ANode
 {
-    [System.Serializable]
+    [NodePath("Add Node/Event/OnTriggerEnter2D")]
+    [NodeHide]
     public class AOnTriggerEnter2D : NodeBase
     {
         private Collider2D collision;
 
         public AOnTriggerEnter2D(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "OnTriggerEnter2D";
-            description = "";
+            unlocalTitle = "OnTriggerEnter2D";
         }
 
         public override void ProcessCalling(BlueprintInput data)

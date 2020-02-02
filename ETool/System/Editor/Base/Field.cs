@@ -78,6 +78,13 @@ namespace ETool
         Texture3D = 59,
         Material = 60,
         Quaternion = 61,
+        AudioClip = 62,
+        AnimatorStateInfo = 63,
+        AnimatorClipInfo = 64,
+        Blueprint = 65,
+        GameData = 66,
+        AudioMixer = 67,
+        Touch = 68,
 
         // Component
         // Range: 200 - 1999
@@ -90,8 +97,9 @@ namespace ETool
         MeshFilter = 206,
         MeshRenderer = 207,
         Animator = 208,
-        Blueprint = 209,
-        GameData = 210,
+        NodeComponent = 209,
+        Light = 210,
+        AudioSource = 211,
 
         // Useful enum type
         // Range: 2000 - NaN
@@ -105,6 +113,7 @@ namespace ETool
         CursorMode = 2007,
         CursorLockMode = 2008,
         EnvironemntPath = 2009,
+        AvatarIKGoal = 2010,
     }
 
     /// <summary>
@@ -124,6 +133,7 @@ namespace ETool
     [System.Serializable]
     public class Field
     {
+        #region Variable
         /// <summary>
         /// Field drawing rect
         /// </summary>
@@ -170,6 +180,7 @@ namespace ETool
 
         public bool onConnection = false;
         public bool hideField = false;
+        #endregion
 
         /// <summary>
         /// This contructor use for default field <br />
@@ -286,6 +297,7 @@ namespace ETool
             /* Check field update */
             /* When update, it will trigger node method: FieldUpdate() */
             EditorGUI.BeginChangeCheck();
+            
             switch (fieldType)
             {
                 case FieldType.Event: // 0
@@ -305,7 +317,7 @@ namespace ETool
 
                 case FieldType.Dropdown:
                     {
-                        EditorGUI.LabelField(Top, title, StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        EditorGUI.LabelField(Top, EToolString.GetString_Node(title, "Dropdown"), StyleUtility.GetStyle(StyleType.GUI_Properties));
                         if (target_array.Length != 0)
                         {
                             string[] e = new string[target_array.Length];
@@ -488,6 +500,12 @@ namespace ETool
                         target.genericUnityType.target_Material = ObjectField<Material>(target.genericUnityType.target_Material, Top, Bottom);
                         break;
                     }
+
+                case FieldType.AudioClip: // 61
+                {
+                        target.genericUnityType.target_AudioClip = ObjectField<AudioClip>(target.genericUnityType.target_AudioClip, Top, Bottom);
+                        break;
+                    }
                 #endregion
 
                 #region Component Type Draw
@@ -556,6 +574,12 @@ namespace ETool
                 case FieldType.GameData: // 210
                     {
                         target.target_Component.gameData = ObjectField<EGameData>(target.target_Component.gameData, Top, Bottom);
+                        break;
+                    }
+
+                case FieldType.AudioSource: // 211
+                    {
+                        target.target_Component.audioSource = ObjectField<AudioSource>(target.target_Component.audioSource, Top, Bottom);
                         break;
                     }
                 #endregion
@@ -629,6 +653,7 @@ namespace ETool
                         break;
                     }
                     #endregion
+
             }
 
             /* If user change gui value */
@@ -898,6 +923,8 @@ namespace ETool
                     break;
                 case FieldType.Object:
                     return typeof(object);
+                case FieldType.Dropdown:
+                    break;
 
                 #region Basic Type
                 case FieldType.Int:
@@ -939,6 +966,8 @@ namespace ETool
                     return typeof(Material); // 60
                 case FieldType.Quaternion:
                     return typeof(Quaternion); // 61
+                case FieldType.AudioClip:
+                    return typeof(AudioClip); // 62
                 #endregion
 
                 #region Component Type
@@ -960,6 +989,12 @@ namespace ETool
                     return typeof(MeshRenderer); // 207
                 case FieldType.Animator:
                     return typeof(Animator); // 208
+                case FieldType.Blueprint:
+                    return typeof(EBlueprint); // 209
+                case FieldType.GameData:
+                    return typeof(EGameData); // 210
+                case FieldType.AudioSource:
+                    return typeof(AudioSource); // 211
                 #endregion
 
                 #region Enum type
@@ -981,6 +1016,8 @@ namespace ETool
                     return typeof(CursorMode); // 2007
                 case FieldType.CursorLockMode:
                     return typeof(CursorLockMode); // 2008
+                case FieldType.EnvironemntPath:
+                    break;
                     #endregion
             }
             return typeof(Nullable);
@@ -1041,6 +1078,8 @@ namespace ETool
                     return go.genericUnityType.target_Material; // 60
                 case FieldType.Quaternion:
                     return go.genericUnityType.target_Quaternion; // 61
+                case FieldType.AudioClip:
+                    return go.genericUnityType.target_AudioClip; // 62
                 #endregion
 
                 #region Component Type
@@ -1066,6 +1105,8 @@ namespace ETool
                     return go.target_Component.blueprint; // 209
                 case FieldType.GameData:
                     return go.target_Component.gameData; // 210
+                case FieldType.AudioSource:
+                    return go.target_Component.audioSource; // 211
                 #endregion
 
                 #region Enum Type
@@ -1205,6 +1246,15 @@ namespace ETool
                 case FieldType.Animator:
                     go.target_Component.animator = (Animator)o; // 208
                     return go.target_Component.animator;
+                case FieldType.Blueprint:
+                    go.target_Component.blueprint = (EBlueprint)o; // 209
+                    return go.target_Component.blueprint;
+                case FieldType.GameData:
+                    go.target_Component.gameData = (EGameData)o; // 210
+                    return go.target_Component.gameData;
+                case FieldType.AudioSource:
+                    go.target_Component.audioSource = (AudioSource)o; // 211
+                    return go.target_Component.audioSource;
                 #endregion
 
                 #region Enum Type
@@ -1229,6 +1279,16 @@ namespace ETool
                 case FieldType.DetectionMode:
                     go.genericBasicType.target_Int = (Int32)o;
                     return go.genericBasicType.target_Int;
+                case FieldType.Object:
+                    break;
+                case FieldType.Dropdown:
+                    break;
+                case FieldType.CursorMode:
+                    break;
+                case FieldType.CursorLockMode:
+                    break;
+                case FieldType.EnvironemntPath:
+                    break;
                     #endregion
             }
             return typeof(Nullable);
@@ -1385,6 +1445,28 @@ namespace ETool
                 case FieldType.Variable:
                     break;
                 case FieldType.Key:
+                    break;
+                case FieldType.Object:
+                    break;
+                case FieldType.Dropdown:
+                    break;
+                case FieldType.Animator:
+                    break;
+                case FieldType.Blueprint:
+                    break;
+                case FieldType.GameData:
+                    break;
+                case FieldType.AudioSource:
+                    break;
+                case FieldType.Interpolation:
+                    break;
+                case FieldType.DetectionMode:
+                    break;
+                case FieldType.CursorMode:
+                    break;
+                case FieldType.CursorLockMode:
+                    break;
+                case FieldType.EnvironemntPath:
                     break;
             }
             return o;

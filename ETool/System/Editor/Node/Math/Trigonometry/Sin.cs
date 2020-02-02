@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Sin(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Sin";
+            unlocalTitle = "Sin";
         }
 
         public override void FieldInitialize()

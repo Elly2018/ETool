@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public Absolute(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Absolute";
+            unlocalTitle = "Absolute";
         }
 
         public override void FieldInitialize()

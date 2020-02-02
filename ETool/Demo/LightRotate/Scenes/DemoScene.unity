@@ -165,7 +165,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8f74cb29486e2445810e0660c038cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ABlueprint: {fileID: 11400000, guid: 66ff6b1a193e36946bfbd436f7ba36df, type: 2}
+  ABlueprint: {fileID: 11400000, guid: f2d6336994a2fc042890896633254cde, type: 2}
   blueprintGameobjectRegister: []
 --- !u!1 &635084829
 GameObject:

@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Event/Quit")]
+    [NodePath("Add Node/Event/Method/Quit")]
     public class Quit : NodeBase
     {
         public Quit(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Editor Stop";
+            unlocalTitle = "Quit";
         }
 
         public override void ProcessCalling(BlueprintInput data)

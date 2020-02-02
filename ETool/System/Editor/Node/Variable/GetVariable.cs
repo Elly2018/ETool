@@ -9,7 +9,7 @@ namespace ETool.ANode
     {
         public GetVariable(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Get Variable";
+            unlocalTitle = "Get Variable";
         }
 
         public override void FieldInitialize()

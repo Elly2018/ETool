@@ -2,15 +2,15 @@
 
 namespace ETool.ANode
 {
-    [System.Serializable]
+    [NodePath("Add Node/Event/OnTriggerStay2D")]
+    [NodeHide]
     public class AOnTriggerStay2D : NodeBase
     {
         private Collider2D collision;
 
         public AOnTriggerStay2D(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "OnTriggerStay2D";
-            description = "";
+            unlocalTitle = "OnTriggerStay2D";
         }
 
         public override void ProcessCalling(BlueprintInput data)

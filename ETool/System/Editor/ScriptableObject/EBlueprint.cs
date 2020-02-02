@@ -537,12 +537,9 @@ namespace ETool
                     null);
 
             nb.page = soruce.page;
+            nb.title = soruce.title;
+            nb.unlocalTitle = soruce.unlocalTitle;
             nb.targetPage = soruce.targetPage;
-
-            if(nb.GetType() == typeof(ACustomEventCall))
-            {
-                nb.title = soruce.title;
-            }
 
             /* Node first time initialize */
             nb.Initialize();

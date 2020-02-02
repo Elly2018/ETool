@@ -28,6 +28,11 @@ namespace ETool
         public string title;
 
         /// <summary>
+        /// Node title string
+        /// </summary>
+        public string unlocalTitle;
+
+        /// <summary>
         /// Node description <br />
         /// After click right click menu will show on screen
         /// </summary>
@@ -159,8 +164,12 @@ namespace ETool
         /// <param name="fs">Target field list</param>
         public void DrawField(List<Field> fs)
         {
-            GUI.Label(rect, title, StyleUtility.GetStyle(StyleType.GUI_Title));
-            for(int i = 0; i < fs.Count; i++)
+            GUIStyle ti = StyleUtility.GetStyle(StyleType.GUI_Title);
+            ti.padding.left = 7;
+            ti.padding.right = 7;
+            GUI.Label(rect, EToolString.GetString_Node(EToolString.GetNodeTitle(GetType()), unlocalTitle), ti);
+
+            for (int i = 0; i < fs.Count; i++)
             {
                 /* Update field */
                 fs[i].rect = new Rect(rect.x + 15f, rect.y + rect.height + (PropertiesHeight * i), rect.width - 30f, PropertiesHeight);
@@ -264,7 +273,7 @@ namespace ETool
             {
                 foreach(var i in NodeBasedEditor.Instance.GetAllCustomEventName())
                 {
-                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i), false, ChangeCustomEvent, i);
+                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i.addEventName), false, ChangeCustomEvent, i);
                 }
                 foreach(var i in NodeBasedEditor.Instance.GetAllInheritCustomEventName())
                 {
@@ -281,7 +290,7 @@ namespace ETool
             NodeBase nb = (NodeBase)this;
             if (nb != null)
             {
-                nb.title = target.addEventName;
+                nb.unlocalTitle = target.addEventName;
                 nb.targetPage = target.page;
             }
         }
@@ -292,7 +301,7 @@ namespace ETool
             NodeBase nb = (NodeBase)this;
             if (nb != null)
             {
-                nb.title = target;
+                nb.unlocalTitle = target;
                 nb.targetPage = 0;
             }   
         }
@@ -311,7 +320,7 @@ namespace ETool
         /// </summary>
         protected void OnClickDescription()
         {
-            NodeBasedEditor.Instance.GreyBackgroundOkButton(description);
+            NodeBasedEditor.Instance.GreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
         }
     }
 }

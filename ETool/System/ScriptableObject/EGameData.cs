@@ -55,6 +55,23 @@ namespace ETool
             Field.SetObjectByFieldType(type, g.variable, o);
         }
 
+        public void SetArrayData(string category, string element, object[] o, FieldType type)
+        {
+            GameDataCategory c = GetCate(category, gameDataStruct.gameDataCategories);
+            if (c == null)
+            {
+                Debug.LogWarning("Cannot data category find: " + category);
+                return;
+            }
+            BlueprintVariable g = GetElement(element, c.gameDataElements);
+            if (g == null)
+            {
+                Debug.LogWarning("Cannot data element find: " + element);
+                return;
+            }
+            Field.SetObjectArrayByField(type, g.variable_Array, o);
+        }
+
         public object GetData(string category, string element, FieldType type)
         {
             GameDataCategory c = GetCate(category, gameDataStruct.gameDataCategories);
@@ -70,6 +87,23 @@ namespace ETool
                 return null;
             }
             return Field.GetObjectByFieldType(type, g.variable);
+        }
+
+        public object[] GetArrayData(string category, string element, FieldType type)
+        {
+            GameDataCategory c = GetCate(category, gameDataStruct.gameDataCategories);
+            if (c == null)
+            {
+                Debug.LogWarning("Cannot data category find: " + category);
+                return null;
+            }
+            BlueprintVariable g = GetElement(element, c.gameDataElements);
+            if (g == null)
+            {
+                Debug.LogWarning("Cannot data element find: " + element);
+                return null;
+            }
+            return Field.GetObjectArrayByFieldType(type, g.variable_Array);
         }
 
         private GameDataCategory GetCate(string label, List<GameDataCategory> dataCategories)

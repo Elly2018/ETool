@@ -3,12 +3,12 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Blueprint/Get By GameObject")]
+    [NodePath("Add Node/Blueprint/GetByGameObject")]
     public class GetBPByGameObject : NodeBase
     {
         public GetBPByGameObject(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "BP Get By GameObject";
+            unlocalTitle = "BP Get By GameObject";
         }
 
         public override void FieldInitialize()

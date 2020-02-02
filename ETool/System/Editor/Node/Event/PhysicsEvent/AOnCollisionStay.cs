@@ -2,15 +2,15 @@
 
 namespace ETool.ANode
 {
-    [System.Serializable]
+    [NodePath("Add Node/Event/OnCollisionStay")]
+    [NodeHide]
     public class AOnCollisionStay : NodeBase
     {
         private Collision collision;
 
         public AOnCollisionStay(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "OnCollisionStay";
-            description = "";
+            unlocalTitle = "OnCollisionStay";
         }
 
         public override void ProcessCalling(BlueprintInput data)

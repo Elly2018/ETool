@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public BiggerThan_Float(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Float A > Float B";
+            unlocalTitle = "Float A > Float B";
         }
 
         public override void FieldInitialize()

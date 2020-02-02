@@ -28,30 +28,32 @@ namespace ETool
         /// </summary>
         public void Draw()
         {
-            if(nodeErrors.Count != 0)
+            float height = rect.height + ((fields.Count + 1) * PropertiesHeight);
+            float padding = 7;
+            if (nodeErrors.Count != 0)
             {
                 if (isSelected)
                 {
-                    GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle(StyleType.Select_Error_Node));
+                    GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle(StyleType.Select_Error_Node));
                 }
                 else
                 {
-                    GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle(StyleType.Error_Node));
+                    GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle(StyleType.Error_Node));
                 }
                 DrawField(fields);
                 return;
             }
             if (isSelected)
             {
-                GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle((StyleType)select));
+                GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)select));
             }
             else if(!isSelected && isHover)
             {
-                GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle((StyleType)hover));
+                GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)hover));
             }
             else if(!isSelected && !isHover)
             {
-                GUI.Box(new Rect(rect.x, rect.y, rect.width, rect.height + ((fields.Count + 1) * PropertiesHeight)), "", StyleUtility.GetStyle((StyleType)normal));
+                GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)normal));
             }
             DrawField(fields);
         }
@@ -278,6 +280,27 @@ namespace ETool
                 return false;
             }
             return fields[index].fieldContainer == fc;
+        }
+
+        protected void InsertField(Field field, int index)
+        {
+            fields.Insert(index, field);
+            for(int i = index; i < fields.Count; i++)
+            {
+                if(i != fields.Count - 2)
+                {
+                    if (fields[i].fieldType != fields[i + 1].fieldType)
+                    {
+                        NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[i]);
+                    }
+                }
+            }
+        }
+
+        protected void DeleteLastField()
+        {
+            NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[fields.Count - 1]);
+            fields.RemoveAt(fields.Count - 1);
         }
 
         #endregion

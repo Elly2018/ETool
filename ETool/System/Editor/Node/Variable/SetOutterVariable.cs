@@ -12,7 +12,7 @@ namespace ETool.ANode
 
         public SetOutterVariable(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Set External Variable";
+            unlocalTitle = "Set External Variable";
         }
 
         public override void ProcessCalling(BlueprintInput data)

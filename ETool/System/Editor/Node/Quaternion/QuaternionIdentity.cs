@@ -8,7 +8,7 @@ namespace ETool.ANode
     {
         public QuaternionIdentity(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "Identity";
+            unlocalTitle = "Identity";
         }
 
         public override void FieldInitialize()
