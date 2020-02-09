@@ -35,18 +35,29 @@ namespace ETool
 
         private void OnEnable()
         {
-            Load();
+            Init();
         }
 
         private void OnDisable()
         {
-            Save();
+            Init();
+        }
+
+        private void OnFocus()
+        {
+            Init();
         }
 
         private void OnValidate()
         {
             languageManager = _languageManager;
             Save();
+        }
+
+        private void Init()
+        {
+            Load();
+            languageManager = _languageManager;
         }
 
         private void OnGUI()
@@ -87,6 +98,7 @@ namespace ETool
             {
                 CreateDefault();
             }
+
             string o = File.ReadAllText(Path.Combine(Application.temporaryCachePath, "ETool_Language.json"));
             ELanguageManager t = JsonUtility.FromJson<ELanguageManager>(o);
 
@@ -104,7 +116,10 @@ namespace ETool
 
         public static void CreateDefault()
         {
-            string o = JsonUtility.ToJson(new ELanguageManager(), true);
+            ELanguageManager e = new ELanguageManager();
+            e.node_LanguageStructs.Add(AssetDatabase.LoadAssetAtPath<ELanguageStruct>("Assets/ETool/Language/Node/Node_EN.asset"));
+            e.node_LanguageStructs.Add(AssetDatabase.LoadAssetAtPath<ELanguageStruct>("Assets/ETool/Language/Node/Node_CH.asset"));
+            string o = JsonUtility.ToJson(e, true);
             File.WriteAllText(Path.Combine(Application.temporaryCachePath, "ETool_Language.json"), o);
         }
 

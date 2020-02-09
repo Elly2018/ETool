@@ -54,11 +54,6 @@ namespace ETool
         public bool isSelected;
 
         /// <summary>
-        /// Is node is in hover mode
-        /// </summary>
-        public bool isHover;
-
-        /// <summary>
         /// Is there error in the node
         /// </summary>
         public List<NodeError> nodeErrors = new List<NodeError>();
@@ -193,36 +188,39 @@ namespace ETool
             {
                 case EventType.MouseDown:
                     {
+                        /* Right mouse */
+                        if (e.button == 1 && isSelected && rect.Contains(e.mousePosition))
+                        {
+                            ProcessContextMenu();
+                            e.Use();
+                            //isSelected = false;
+                        }   
+
+                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(this) && !rect.Contains(e.mousePosition))
+                        {
+                            isSelected = false;
+                            SelectionChanged(isSelected);
+                            GUI.changed = true;
+                        }
+                        break;
+                    }
+
+                case EventType.MouseUp:
+                    {
+                        /* Left mouse */
                         if (e.button == 0)
                         {
                             if (rect.Contains(e.mousePosition))
                             {
                                 isDragged = true;
                                 GUI.changed = true;
+                                GUI.FocusControl(null);
                                 isSelected = true;
                                 SelectionChanged(isSelected);
                                 DragChanged(isDragged);
                             }
-                            else
-                            {
-                                if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(this))
-                                {
-                                    isSelected = false;
-                                }
-                                GUI.changed = true;
-                                SelectionChanged(isSelected);
-                            }
                         }
-                        if (e.button == 1 && isSelected && rect.Contains(e.mousePosition))
-                        {
-                            ProcessContextMenu();
-                            e.Use();
-                        }
-                        break;
-                    }
-                    
-                case EventType.MouseUp:
-                    {
+
                         isDragged = false;
                         DragChanged(isDragged);
                         break;
@@ -261,6 +259,7 @@ namespace ETool
             {
                 genericMenu.AddItem(new GUIContent("Delete Selected"), false, NodeBasedEditor.Instance.DeleteSelection);
             }
+
             if (nodeErrors.Count != 0)
             {
                 foreach(var i in nodeErrors)

@@ -49,10 +49,12 @@ namespace ETool.ANode
             FieldType ft = (FieldType)fields[1].GetValue(FieldType.Type);
             if (fields[2].fieldType != ft)
             {
+                NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[2]);
                 fields[2] = new Field(ft, "Select", ConnectionType.DataOutput, true, this, FieldContainer.Object);
             }
             if (fields[3].fieldType != ft)
             {
+                NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[3]);
                 fields[3] = new Field(ft, "Array", ConnectionType.DataInput, true, this, FieldContainer.Array);
             }
         }
@@ -60,6 +62,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(object), 2)]
         public object GetIndex(BlueprintInput data)
         {
+            Debug.Log("Get Call");
             return buffer;
         }
     }

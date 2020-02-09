@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace ETool
 {
@@ -60,9 +61,12 @@ namespace ETool
         Int = 10,
         Long = 11,
         Float = 12,
-        String = 13,
-        Boolean = 14,
-        Double = 15,
+        Double = 13,
+        String = 14,
+        Boolean = 15,
+        Number = 16,
+        Vector = 17,
+        Char = 18,
 
         // Unity basic data type
         // Range: 50 - 199
@@ -85,6 +89,9 @@ namespace ETool
         GameData = 66,
         AudioMixer = 67,
         Touch = 68,
+        Ray = 69,
+        Mesh = 70,
+        Flare = 71,
 
         // Component
         // Range: 200 - 1999
@@ -114,6 +121,8 @@ namespace ETool
         CursorLockMode = 2008,
         EnvironemntPath = 2009,
         AvatarIKGoal = 2010,
+        LightType = 2011,
+        ShadowType = 2012,
     }
 
     /// <summary>
@@ -297,9 +306,11 @@ namespace ETool
             /* Check field update */
             /* When update, it will trigger node method: FieldUpdate() */
             EditorGUI.BeginChangeCheck();
-            
+
             switch (fieldType)
             {
+                /* 0 - 10 */
+                #region Event
                 case FieldType.Event: // 0
                     {
                         GUI.Label(rect, title, StyleUtility.GetStyle(StyleType.GUI_Properties));
@@ -333,7 +344,9 @@ namespace ETool
                         }
                         break;
                     }
+                #endregion
 
+                /* 10 - 49 */
                 #region Basic Type Draw
                 case FieldType.Int: // 10
                     {
@@ -365,7 +378,17 @@ namespace ETool
                         break;
                     }
 
-                case FieldType.String: // 13
+                case FieldType.Double: // 13
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        if (PrintField())
+                            target.genericBasicType.target_Double = EditorGUI.DoubleField(Bottom, target.genericBasicType.target_Double);
+                        else
+                            EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
+
+                case FieldType.String: // 14
                     {
                         EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
                         if (PrintField())
@@ -375,7 +398,7 @@ namespace ETool
                         break;
                     }
 
-                case FieldType.Boolean: // 14
+                case FieldType.Boolean: // 15
                     {
                         EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
                         if (PrintField())
@@ -385,17 +408,33 @@ namespace ETool
                         break;
                     }
 
-                case FieldType.Double: // 15
+                case FieldType.Number: // 16
+                    {
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, GetNumberEnumUseStruct());
+                        break;
+                    }
+
+                case FieldType.Vector: //17
+                    {
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, GetVectorEnumUseStruct());
+                        break;
+                    }
+
+                case FieldType.Char: // 18
                     {
                         EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
                         if (PrintField())
-                            target.genericBasicType.target_Double = EditorGUI.DoubleField(Bottom, target.genericBasicType.target_Double);
+                        {
+                            target.genericBasicType.target_Char = EditorGUI.TextField(Bottom, target.genericBasicType.target_Char.ToString())[0];
+                        }
+
                         else
                             EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
                         break;
                     }
                 #endregion
 
+                /* 50 - 199 */
                 #region Unity Type Draw
                 case FieldType.GameObject: // 50
                     {
@@ -459,24 +498,6 @@ namespace ETool
                         break;
                     }
 
-                case FieldType.Quaternion: // 61
-                    {
-                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
-                        if (PrintField())
-                        {
-                            Vector4 q = new Vector4(
-                                target.genericUnityType.target_Quaternion.x,
-                                target.genericUnityType.target_Quaternion.y,
-                                target.genericUnityType.target_Quaternion.z,
-                                target.genericUnityType.target_Quaternion.w);
-                            Vector4 resultQ = EditorGUI.Vector4Field(Bottom, "", q);
-                            target.genericUnityType.target_Quaternion = new Quaternion(resultQ.x, resultQ.y, resultQ.z, resultQ.w);
-                        }
-                        else
-                            EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
-                        break;
-                    }
-
                 case FieldType.Texture: // 57
                     {
                         target.genericUnityType.target_Texture = ObjectField<Texture>(target.genericUnityType.target_Texture, Top, Bottom);
@@ -501,13 +522,90 @@ namespace ETool
                         break;
                     }
 
-                case FieldType.AudioClip: // 61
-                {
+                case FieldType.Quaternion: // 61
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        if (PrintField())
+                        {
+                            Vector4 q = new Vector4(
+                                target.genericUnityType.target_Quaternion.x,
+                                target.genericUnityType.target_Quaternion.y,
+                                target.genericUnityType.target_Quaternion.z,
+                                target.genericUnityType.target_Quaternion.w);
+                            Vector4 resultQ = EditorGUI.Vector4Field(Bottom, "", q);
+                            target.genericUnityType.target_Quaternion = new Quaternion(resultQ.x, resultQ.y, resultQ.z, resultQ.w);
+                        }
+                        else
+                            EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
+
+                case FieldType.AudioClip: // 62
+                    {
                         target.genericUnityType.target_AudioClip = ObjectField<AudioClip>(target.genericUnityType.target_AudioClip, Top, Bottom);
+                        break;
+                    }
+
+                case FieldType.AnimatorStateInfo: // 63
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
+
+                case FieldType.AnimatorClipInfo: // 64
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
+
+                case FieldType.Blueprint: // 65
+                    {
+                        target.genericUnityType.blueprint = ObjectField<EBlueprint>(target.genericUnityType.blueprint, Top, Bottom);
+                        break;
+                    }
+
+                case FieldType.GameData: // 66
+                    {
+                        target.genericUnityType.gameData = ObjectField<EGameData>(target.genericUnityType.gameData, Top, Bottom);
+                        break;
+                    }
+
+                case FieldType.AudioMixer: // 67
+                    {
+                        target.genericUnityType.target_AudioMixer = ObjectField<AudioMixer>(target.genericUnityType.target_AudioMixer, Top, Bottom);
+                        break;
+                    }
+
+                case FieldType.Touch: // 68
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
+
+                case FieldType.Ray: // 69
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
+
+                case FieldType.Mesh: // 70
+                    {
+                        target.genericUnityType.target_Mesh = ObjectField<Mesh>(target.genericUnityType.target_Mesh, Top, Bottom);
+                        break;
+                    }
+
+                case FieldType.Flare: // 71
+                    {
+                        target.genericUnityType.target_Flare = ObjectField<Flare>(target.genericUnityType.target_Flare, Top, Bottom);
                         break;
                     }
                 #endregion
 
+                /* 200 - 1999 */
                 #region Component Type Draw
                 case FieldType.Rigidbody: // 200
                     {
@@ -565,15 +663,15 @@ namespace ETool
                         break;
                     }
 
-                case FieldType.Blueprint: // 209
+                case FieldType.NodeComponent: // 209
                     {
-                        target.target_Component.blueprint = ObjectField<EBlueprint>(target.target_Component.blueprint, Top, Bottom);
+                        target.target_Component.nodeComponent = ObjectField<NodeComponent>(target.target_Component.nodeComponent, Top, Bottom);
                         break;
                     }
 
-                case FieldType.GameData: // 210
+                case FieldType.Light: // 210
                     {
-                        target.target_Component.gameData = ObjectField<EGameData>(target.target_Component.gameData, Top, Bottom);
+                        target.target_Component.light = ObjectField<Light>(target.target_Component.light, Top, Bottom);
                         break;
                     }
 
@@ -584,6 +682,7 @@ namespace ETool
                     }
                 #endregion
 
+                /* 2000 - Nan */
                 #region Enum Type
                 case FieldType.ForceMode:
                     {
@@ -650,6 +749,24 @@ namespace ETool
                 case FieldType.EnvironemntPath:
                     {
                         target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<Environment.SpecialFolder>());
+                        break;
+                    }
+
+                case FieldType.AvatarIKGoal:
+                    {
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<AvatarIKGoal>());
+                        break;
+                    }
+
+                case FieldType.LightType:
+                    {
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<LightType>());
+                        break;
+                    }
+
+                case FieldType.ShadowType:
+                    {
+                        target.genericBasicType.target_Int = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct<LightShadows>());
                         break;
                     }
                     #endregion
@@ -904,6 +1021,60 @@ namespace ETool
                     break;
                 case FieldType.Key:
                     break;
+                case FieldType.Object:
+                    break;
+                case FieldType.Dropdown:
+                    break;
+                case FieldType.Number:
+                    break;
+                case FieldType.Vector:
+                    break;
+                case FieldType.Char:
+                    break;
+                case FieldType.AudioClip:
+                    break;
+                case FieldType.AnimatorStateInfo:
+                    break;
+                case FieldType.AnimatorClipInfo:
+                    break;
+                case FieldType.Blueprint:
+                    break;
+                case FieldType.GameData:
+                    break;
+                case FieldType.AudioMixer:
+                    break;
+                case FieldType.Touch:
+                    break;
+                case FieldType.Ray:
+                    break;
+                case FieldType.Mesh:
+                    break;
+                case FieldType.Flare:
+                    break;
+                case FieldType.Animator:
+                    break;
+                case FieldType.NodeComponent:
+                    break;
+                case FieldType.Light:
+                    break;
+                case FieldType.AudioSource:
+                    break;
+                case FieldType.Interpolation:
+                    break;
+                case FieldType.DetectionMode:
+                    break;
+                case FieldType.CursorMode:
+                    break;
+                case FieldType.CursorLockMode:
+                    break;
+                case FieldType.EnvironemntPath:
+                    break;
+                case FieldType.AvatarIKGoal:
+                    break;
+                case FieldType.LightType:
+                    break;
+                case FieldType.ShadowType:
+                    break;
             }
             return new Color(c.r, c.g, c.b, alpha);
         }
@@ -917,6 +1088,7 @@ namespace ETool
         {
             switch (tf)
             {
+                #region Event
                 case FieldType.Event:
                     break;
                 case FieldType.Button:
@@ -925,6 +1097,7 @@ namespace ETool
                     return typeof(object);
                 case FieldType.Dropdown:
                     break;
+                #endregion
 
                 #region Basic Type
                 case FieldType.Int:
@@ -939,6 +1112,12 @@ namespace ETool
                     return typeof(Boolean); // 14
                 case FieldType.Double:
                     return typeof(Double); // 15
+                case FieldType.Number:
+                    break; // 16
+                case FieldType.Vector:
+                    break; // 17
+                case FieldType.Char:
+                    return typeof(char);
                 #endregion
 
                 #region Unity Type
@@ -968,6 +1147,24 @@ namespace ETool
                     return typeof(Quaternion); // 61
                 case FieldType.AudioClip:
                     return typeof(AudioClip); // 62
+                case FieldType.AnimatorStateInfo:
+                    return typeof(AnimatorStateInfo); // 63
+                case FieldType.AnimatorClipInfo:
+                    return typeof(AnimatorClipInfo); // 64
+                case FieldType.Blueprint:
+                    return typeof(EBlueprint); // 65
+                case FieldType.GameData:
+                    return typeof(EGameData); // 66
+                case FieldType.AudioMixer:
+                    return typeof(AudioMixer); // 67
+                case FieldType.Touch:
+                    return typeof(Touch); // 68
+                case FieldType.Ray:
+                    return typeof(Ray); // 69
+                case FieldType.Mesh:
+                    return typeof(Mesh); // 70
+                case FieldType.Flare:
+                    return typeof(Flare); // 71
                 #endregion
 
                 #region Component Type
@@ -989,10 +1186,10 @@ namespace ETool
                     return typeof(MeshRenderer); // 207
                 case FieldType.Animator:
                     return typeof(Animator); // 208
-                case FieldType.Blueprint:
-                    return typeof(EBlueprint); // 209
-                case FieldType.GameData:
-                    return typeof(EGameData); // 210
+                case FieldType.NodeComponent:
+                    return typeof(NodeComponent); // 209
+                case FieldType.Light:
+                    return typeof(Light); // 210
                 case FieldType.AudioSource:
                     return typeof(AudioSource); // 211
                 #endregion
@@ -1017,7 +1214,13 @@ namespace ETool
                 case FieldType.CursorLockMode:
                     return typeof(CursorLockMode); // 2008
                 case FieldType.EnvironemntPath:
-                    break;
+                    return typeof(Environment.SpecialFolder); // 2009
+                case FieldType.AvatarIKGoal:
+                    return typeof(AvatarIKGoal); // 2010
+                case FieldType.LightType:
+                    return typeof(LightType); // 2011
+                case FieldType.ShadowType:
+                    return typeof(LightShadows); // 2012
                     #endregion
             }
             return typeof(Nullable);
@@ -1045,12 +1248,18 @@ namespace ETool
                     return go.genericBasicType.target_Long; // 11
                 case FieldType.Float:
                     return go.genericBasicType.target_Float; // 12
-                case FieldType.String:
-                    return go.genericBasicType.target_String; // 13
-                case FieldType.Boolean:
-                    return go.genericBasicType.target_Boolean; // 14
                 case FieldType.Double:
-                    return go.genericBasicType.target_Double; // 15
+                    return go.genericBasicType.target_Double; // 13
+                case FieldType.String:
+                    return go.genericBasicType.target_String; // 14
+                case FieldType.Boolean:
+                    return go.genericBasicType.target_Boolean; // 15
+                case FieldType.Number:
+                    return go.genericBasicType.target_Int; // 16
+                case FieldType.Vector:
+                    break; // 17
+                case FieldType.Char:
+                    return go.genericBasicType.target_Char; // 18
                 #endregion
 
                 #region Unity Type
@@ -1080,6 +1289,24 @@ namespace ETool
                     return go.genericUnityType.target_Quaternion; // 61
                 case FieldType.AudioClip:
                     return go.genericUnityType.target_AudioClip; // 62
+                case FieldType.Blueprint:
+                    return go.genericUnityType.blueprint; // 65
+                case FieldType.GameData:
+                    return go.genericUnityType.gameData; // 66
+                case FieldType.AnimatorStateInfo:
+                    return go.genericUnityType.target_AnimatorStateInfo; // 67
+                case FieldType.AnimatorClipInfo:
+                    return go.genericUnityType.target_AnimatorClipInfo; // 68
+                case FieldType.AudioMixer:
+                    return go.genericUnityType.target_AudioMixer; // 69
+                case FieldType.Touch:
+                    return go.genericUnityType.target_Touch; // 70
+                case FieldType.Ray:
+                    return go.genericUnityType.target_Ray; // 71
+                case FieldType.Mesh:
+                    return go.genericUnityType.target_Mesh; // 72
+                case FieldType.Flare:
+                    return go.genericUnityType.target_Flare; // 73
                 #endregion
 
                 #region Component Type
@@ -1101,10 +1328,10 @@ namespace ETool
                     return go.target_Component.meshRenderer; // 207
                 case FieldType.Animator:
                     return go.target_Component.animator; // 208
-                case FieldType.Blueprint:
-                    return go.target_Component.blueprint; // 209
-                case FieldType.GameData:
-                    return go.target_Component.gameData; // 210
+                case FieldType.NodeComponent:
+                    return go.target_Component.nodeComponent; // 209
+                case FieldType.Light:
+                    return go.target_Component.light; // 210
                 case FieldType.AudioSource:
                     return go.target_Component.audioSource; // 211
                 #endregion
@@ -1125,7 +1352,7 @@ namespace ETool
                 case FieldType.DetectionMode:
                     return (CollisionDetectionMode)go.genericBasicType.target_Int;
                 case FieldType.Object:
-                    break;
+                    return typeof(object);
                 case FieldType.CursorMode:
                     return (CursorMode)go.genericBasicType.target_Int;
                 case FieldType.CursorLockMode:
@@ -1134,6 +1361,12 @@ namespace ETool
                     return (CursorLockMode)go.genericBasicType.target_Int;
                 case FieldType.EnvironemntPath:
                     return (Environment.SpecialFolder)go.genericBasicType.target_Int;
+                case FieldType.AvatarIKGoal:
+                    return (AvatarIKGoal)go.genericBasicType.target_Int;
+                case FieldType.LightType:
+                    return (LightType)go.genericBasicType.target_Int;
+                case FieldType.ShadowType:
+                    return (LightShadows)go.genericBasicType.target_Int;
                     #endregion
             }
             return typeof(Nullable);
@@ -1211,11 +1444,17 @@ namespace ETool
                     go.genericUnityType.target_Texture3D = (Texture3D)o; // 59
                     return go.genericUnityType.target_Texture3D;
                 case FieldType.Material:
-                    go.genericUnityType.target_Material = (Material)o; // 59
+                    go.genericUnityType.target_Material = (Material)o; // 60
                     return go.genericUnityType.target_Material;
                 case FieldType.Quaternion:
-                    go.genericUnityType.target_Quaternion = (Quaternion)o; // 59
+                    go.genericUnityType.target_Quaternion = (Quaternion)o; // 61
                     return go.genericUnityType.target_Quaternion;
+                case FieldType.Blueprint:
+                    go.genericUnityType.blueprint = (EBlueprint)o; // 65
+                    return go.genericUnityType.blueprint;
+                case FieldType.GameData:
+                    go.genericUnityType.gameData = (EGameData)o; // 66
+                    return go.genericUnityType.gameData;
                 #endregion
 
                 #region Component
@@ -1246,12 +1485,6 @@ namespace ETool
                 case FieldType.Animator:
                     go.target_Component.animator = (Animator)o; // 208
                     return go.target_Component.animator;
-                case FieldType.Blueprint:
-                    go.target_Component.blueprint = (EBlueprint)o; // 209
-                    return go.target_Component.blueprint;
-                case FieldType.GameData:
-                    go.target_Component.gameData = (EGameData)o; // 210
-                    return go.target_Component.gameData;
                 case FieldType.AudioSource:
                     go.target_Component.audioSource = (AudioSource)o; // 211
                     return go.target_Component.audioSource;
@@ -1486,6 +1719,16 @@ namespace ETool
         public static EnumUseStruct[] GetComponentEnumUseStruct()
         {
             return GetFieldTypeEnumUseStruct(200, 1999);
+        }
+
+        public static EnumUseStruct[] GetNumberEnumUseStruct()
+        {
+            return GetFieldTypeEnumUseStruct(10, 13);
+        }
+
+        public static EnumUseStruct[] GetVectorEnumUseStruct()
+        {
+            return GetFieldTypeEnumUseStruct(52, 54);
         }
 
         public static EnumUseStruct[] GetTypeEnumUseStruct()

@@ -23,7 +23,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(object[]), 4)]
         public object[] GetResult(BlueprintInput data)
         {
-            EGameData target = fields[0].target.target_Component.gameData;
+            EGameData target = fields[0].target.genericUnityType.gameData;
             if (target != null)
             {
                 string v1 = (string)GetFieldOrLastInputField(1, data);

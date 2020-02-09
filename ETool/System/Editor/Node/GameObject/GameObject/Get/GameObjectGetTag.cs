@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace ETool.ANode
@@ -18,7 +17,7 @@ namespace ETool.ANode
             fields.Add(new Field(FieldType.String, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
         }
 
-        [NodePropertyGet(typeof(String), 2)]
+        [NodePropertyGet(typeof(String), 1)]
         public string GameAllChild(BlueprintInput data)
         {
             GameObject go = (GameObject)GetFieldOrLastInputField(0, data);

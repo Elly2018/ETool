@@ -53,6 +53,11 @@ namespace ETool
         private Vector2 sizeLimit;
 
         /// <summary>
+        /// Define the zoom
+        /// </summary>
+        private int zoomLevel;
+
+        /// <summary>
         /// Define background grid offset
         /// </summary>
         private Vector2 offset;
@@ -79,6 +84,11 @@ namespace ETool
         private SearchStruct searchStruct = null;
 
         /// <summary>
+        /// Define how many search element are
+        /// </summary>
+        private int searchElementCount;
+
+        /// <summary>
         /// Define local use variable for adding node buffer
         /// </summary>
         private Type addNode;
@@ -87,6 +97,11 @@ namespace ETool
         /// Define current execute assembly
         /// </summary>
         private Assembly assmbly;
+
+        /// <summary>
+        /// Define what corner pop message is
+        /// </summary>
+        private string popMessage;
 
         /// <summary>
         /// Define all nodebase type
@@ -195,7 +210,32 @@ namespace ETool
         private void DrawMenuBar()
         {
             GUI.Box(new Rect(0, 0, position.width, 26), "");
+            sizeLimit = new Vector2(100.0f, 20.0f);
             DrawMenuButtons(10.0f);
+            DrawMenuZooming(10.0f);
+        }
+
+        /// <summary>
+        /// Zoom level range is 0 - 5
+        /// </summary>
+        /// <param name="rightOffset">Button Right Offset</param>
+        private void DrawMenuZooming(float rightOffset)
+        {
+            if (GUI.Button(new Rect(position.width - rightOffset - (sizeLimit.x / 3), 4f, (sizeLimit.x / 3), sizeLimit.y), "+"))
+            {
+                if(zoomLevel < 5)
+                {
+                    zoomLevel++;
+                }
+            }
+            if (GUI.Button(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 2) - 5f, 4f, (sizeLimit.x / 3), sizeLimit.y), "-"))
+            {
+                if(zoomLevel > 0)
+                {
+                    zoomLevel--;
+                }
+            }
+            GUI.Label(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 4) - 10f, 4f, (sizeLimit.x / 3) * 2, sizeLimit.y), "Zoom: " + zoomLevel.ToString());
         }
 
         /// <summary>
@@ -204,7 +244,6 @@ namespace ETool
         /// </summary>
         private void DrawMenuButtons(float leftOffset)
         {
-            sizeLimit = new Vector2(100.0f, 20.0f);
             int ButtonPadding = 1;
 
             if(selectBlueprint != null)
@@ -232,8 +271,11 @@ namespace ETool
             {
                 string message =
                     "Hotkey Map: \n\n" +
-                    "Ctrl + C \t Center Page\n" +
-                    "Ctrl + F \t Center Selected Nodes\n";
+                    "Shift + C \t\t Center Page\n" +
+                    "F \t\t Center Selected Nodes\n" +
+                    "Ctrl + C \t\t Copy Selection \n" +
+                    "Ctrl + V \t\t Paste Clipboard \n" +
+                    "Delete \t\t Delete Selection \n";
                 GreyBackground = new GreyBackground() { Okbutton = true, Message = message };
             }
             ButtonPadding++;
@@ -360,7 +402,8 @@ namespace ETool
             GUIStyle centerSkin = new GUIStyle();
             centerSkin.fontStyle = FontStyle.Bold;
             centerSkin.fontSize = 15;
-            centerSkin.alignment = TextAnchor.MiddleCenter;
+            centerSkin.alignment = TextAnchor.MiddleLeft;
+            centerSkin.padding.left = (int)(position.width / 3);
             centerSkin.normal.textColor = Color.white;
             GUI.Label(new Rect(0, 0, position.width, position.height), message, centerSkin);
         }
@@ -429,7 +472,8 @@ namespace ETool
                 searchScrollPosition = Vector2.zero;
             }
 
-            searchScrollPosition = GUI.BeginScrollView(scrollRect, searchScrollPosition, new Rect(0, 0, scrollRect.width - scrollRect.x, allTypes.Length * 25), false, true);
+            searchElementCount = GetCurrentSearchElement(allTypes, searchStruct.inputField);
+            searchScrollPosition = GUI.BeginScrollView(scrollRect, searchScrollPosition, new Rect(0, 0, scrollRect.width - scrollRect.x, searchElementCount * 20), false, true);
             for(int i = 0; i < allTypes.Length; i++)
             {
                 NodePath np = allTypes[i].GetCustomAttribute<NodePath>();
@@ -468,6 +512,47 @@ namespace ETool
             {
                 searchStruct = null;
             }
+        }
+
+        /// <summary>
+        /// Drawing pop message in the corner
+        /// </summary>
+        private void DrawPopMessage()
+        {
+            Rect messageBG = new Rect(50, position.height - (position.height / 6), position.width - 100, 40);
+            Rect messageButton = new Rect(position.width - 100 - 100, position.height - (position.height / 6) + 5, 80, 40 - 10);
+            GUIStyle center = new GUIStyle();
+            center.alignment = TextAnchor.MiddleCenter;
+            center.normal.textColor = Color.yellow;
+            center.fontSize = 14;
+            center.normal.background = new Texture2D(1, 1);
+            center.normal.background.SetPixel(0, 0, new Color(0.15f, 0.15f, 0.35f, 0.45f));
+            center.normal.background.Apply();
+            GUI.Box(messageBG, popMessage, center);
+            if (GUI.Button(messageButton, "OK"))
+            {
+                popMessage = "";
+            }
+        }
+
+        public void ShowPopMessage(string message)
+        {
+            popMessage = message;
+        }
+
+        private int GetCurrentSearchElement(Type[] alltype, string searchString)
+        {
+            int Result = 0;
+            for (int i = 0; i < allTypes.Length; i++)
+            {
+                NodePath np = allTypes[i].GetCustomAttribute<NodePath>();
+                if (np != null)
+                {
+                    if (!np.Path.ToUpper().Contains(searchString.ToUpper())) continue;
+                    Result++;
+                }
+            }
+            return Result;
         }
         #endregion
 
@@ -539,11 +624,29 @@ namespace ETool
             if (e.keyCode == KeyCode.Escape)
                 ClearConnectionSelection();
 
-            if (e.keyCode == KeyCode.C && e.control && e.type == EventType.KeyDown)
+            if (e.keyCode == KeyCode.C && e.shift && e.type == EventType.KeyDown)
                 CenterViewer();
 
-            if (e.keyCode == KeyCode.F && e.control && e.type == EventType.KeyDown)
+            if (e.keyCode == KeyCode.F && e.type == EventType.KeyDown)
                 CenterSelectionNodes();
+
+            if (e.keyCode == KeyCode.C && e.control && e.type == EventType.KeyDown)
+            {
+                OnClickCopy();
+                GUI.changed = true;
+            }
+
+            if (e.keyCode == KeyCode.V && e.control && e.type == EventType.KeyDown)
+            {
+                OnClickPasteNodes(new PasteClickEvent() { mousePosition = e.mousePosition });
+                GUI.changed = true;
+            }
+                
+            if (e.keyCode == KeyCode.Delete && e.type == EventType.KeyDown)
+            {
+                DeleteSelection();
+                GUI.changed = true;
+            }
         }
 
         /// <summary>
@@ -557,10 +660,8 @@ namespace ETool
             if (searchStruct != null) return;
             bool ClickAnyNode = false;
 
-            for (int i = selectBlueprint.nodes.Count - 1; i >= 0; i--)
+            for (int i = 0; i < selectBlueprint.nodes.Count; i++)
             {
-                selectBlueprint.nodes[i].isHover = selectBlueprint.nodes[i].rect.Contains(e.mousePosition);
-
                 if (selectBlueprint.nodes[i].rect.Contains(e.mousePosition) &&
                     e.type == EventType.MouseDown && e.button == 0)
                 {
@@ -578,7 +679,11 @@ namespace ETool
                 }
             }
 
-            if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) CleanNodeSelection();
+            if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) 
+            {
+                CleanNodeSelection();
+                GUI.FocusControl(null);
+            }
         }
 
         /// <summary>
@@ -1058,6 +1163,7 @@ namespace ETool
                 {
                     n.fields[j].target = new GenericObject(clipBorad.nodeBases[i].fields[j].target);
                 }
+                n.DynamicFieldInitialize(null);
                 buffer.Add(n);
                 n.isSelected = true;
             }
@@ -1100,12 +1206,14 @@ namespace ETool
             /* Field type check */
             if (selectBlueprint.nodes[_in.x].fields[_in.y].fieldType != selectBlueprint.nodes[_out.x].fields[_out.y].fieldType)
             {
+                NodeBasedEditor.Instance.ShowPopMessage("Type mismatch");
                 Debug.LogWarning("Type mismatch");
                 return;
             }
 
             if (selectBlueprint.nodes[_in.x].fields[_in.y].fieldContainer != selectBlueprint.nodes[_out.x].fields[_out.y].fieldContainer)
             {
+                NodeBasedEditor.Instance.ShowPopMessage("Container mismatch");
                 Debug.LogWarning("Container mismatch");
                 return;
             }
@@ -1114,6 +1222,7 @@ namespace ETool
             {
                 if (i.inPointMark == _in)
                 {
+                    NodeBasedEditor.Instance.ShowPopMessage("Twice input detect");
                     Debug.LogWarning("Twice input detect");
                     return;
                 }
@@ -1204,10 +1313,15 @@ namespace ETool
                     }
                 }
             }
+            if(popMessage.Length != 0)
+            {
+                DrawPopMessage();
+            }
             if(selectBlueprint != null)
             {
                 StateCheck_Main();
                 StateCheck_CustomEvent();
+                StateCheck_MulEvent();
             }
             if(GreyBackground != null)
             {
@@ -1233,6 +1347,7 @@ namespace ETool
                 DrawSearchMenu();
             }
         }
+
 
         private void StateCheck_Main()
         {
@@ -1423,6 +1538,11 @@ namespace ETool
                     (n as ACustomEvent).SetCustomEvent(selectBlueprint.blueprintEvent.customEvent[i]);
                 }
             }
+        }
+
+        private void StateCheck_MulEvent()
+        {
+
         }
 
         #region Getter

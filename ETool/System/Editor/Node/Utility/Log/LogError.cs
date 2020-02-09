@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Utility/Log Error")]
+    [NodePath("Add Node/Utility/Log/LogError")]
     public class LogError : NodeBase
     {
         public LogError(Vector2 position, float width, float height) : base(position, width, height)

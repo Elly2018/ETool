@@ -16,18 +16,11 @@ namespace ETool.ANode
             fields.Add(new Field(FieldType.String, "Result", ConnectionType.DataOutput, this, FieldContainer.Array));
         }
 
-        [NodePropertyGet(typeof(string[]), 1)]
-        public string[] GetString(BlueprintInput data)
+        [NodePropertyGet(typeof(char[]), 1)]
+        public char[] GetString(BlueprintInput data)
         {
             string o = GetFieldOrLastInputField<string>(0, data);
-            char[] t = o.ToCharArray();
-            string[] result = new string[t.Length];
-            for(int i = 0; i < result.Length; i++)
-            {
-                result[i] = t[i].ToString();
-            }
-
-            return result;
+            return o.ToCharArray();
         }
     }
 }

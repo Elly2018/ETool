@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Constant/Boolean")]
+    [NodePath("Add Node/Math/Constant/Boolean")]
     public class Constant_Boolean : NodeBase
     {
         public Constant_Boolean(Vector2 position, float width, float height) : base(position, width, height)

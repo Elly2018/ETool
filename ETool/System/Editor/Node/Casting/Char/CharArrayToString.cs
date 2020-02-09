@@ -12,20 +12,15 @@ namespace ETool.ANode
 
         public override void FieldInitialize()
         {
-            fields.Add(new Field(FieldType.String, "Char Array", ConnectionType.DataInput, this, FieldContainer.Array));
+            fields.Add(new Field(FieldType.Char, "Char Array", ConnectionType.DataInput, this, FieldContainer.Array));
             fields.Add(new Field(FieldType.String, "Result", ConnectionType.DataOutput, this, FieldContainer.Object));
         }
 
         [NodePropertyGet(typeof(string), 1)]
         public string GetString(BlueprintInput data)
         {
-            string[] array = GetFieldOrLastInputField<string[]>(0, data);
-            string result = "";
-            for(int i = 0; i < array.Length; i++)
-            {
-                result += array;
-            }
-            return result;
+            char[] array = GetFieldOrLastInputField<char[]>(0, data);
+            return array.ToString();
         }
     }
 }

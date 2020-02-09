@@ -23,7 +23,7 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            EGameData target = fields[1].target.target_Component.gameData;
+            EGameData target = fields[1].target.genericUnityType.gameData;
 
             if(target != null)
             {

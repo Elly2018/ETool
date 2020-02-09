@@ -2,7 +2,7 @@
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Constant/Vector3")]
+    [NodePath("Add Node/Math/Constant/Vector3")]
     public class Constant_Vector3 : NodeBase
     {
         public Constant_Vector3(Vector2 position, float width, float height) : base(position, width, height)

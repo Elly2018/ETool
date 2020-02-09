@@ -69,7 +69,6 @@ namespace ETool.ANode
         {
             if(fields[1].fieldContainer == FieldContainer.Object)
             {
-                Debug.Log("Get Object");
                 return Field.GetObjectByFieldType
                     (data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].type,
                     data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[0].target)].variable);

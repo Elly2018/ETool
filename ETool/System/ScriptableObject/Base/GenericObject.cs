@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Audio;
 
 namespace ETool
 {
@@ -61,6 +62,7 @@ namespace ETool
         public string target_String; // 13
         public bool target_Boolean; // 14
         public double target_Double; // 15
+        public char target_Char; // 16
 
         public GenericBasicType()
         {
@@ -70,6 +72,7 @@ namespace ETool
             target_String = string.Empty;
             target_Boolean = false;
             target_Double = 0;
+            target_Char = ' ';
         }
 
         public GenericBasicType(GenericBasicType reference)
@@ -101,7 +104,16 @@ namespace ETool
         public Texture3D target_Texture3D = null; // 59
         public Material target_Material = null; // 60
         public Quaternion target_Quaternion = Quaternion.identity; // 61
-        public AudioClip target_AudioClip = null; // 61
+        public AudioClip target_AudioClip = null; // 62
+        public AnimatorStateInfo target_AnimatorStateInfo; // 63
+        public AnimatorClipInfo target_AnimatorClipInfo; // 64
+        public EBlueprint blueprint = null; // 65
+        public EGameData gameData = null; // 66
+        public AudioMixer target_AudioMixer = null; // 67
+        public Touch target_Touch; // 68
+        public Ray target_Ray; // 69
+        public Mesh target_Mesh = null; // 70
+        public Flare target_Flare = null; // 71
 
         public GenericUnityType()
         {
@@ -118,6 +130,15 @@ namespace ETool
             target_Material = null;
             target_Quaternion = Quaternion.identity;
             target_AudioClip = null;
+            target_AnimatorStateInfo = new AnimatorStateInfo();
+            target_AnimatorClipInfo = new AnimatorClipInfo();
+            blueprint = null;
+            gameData = null;
+            target_AudioMixer = null;
+            target_Touch = new Touch();
+            target_Ray = new Ray();
+            target_Mesh = null;
+            target_Flare = null;
         }
 
         public GenericUnityType(GenericUnityType reference)
@@ -152,9 +173,9 @@ namespace ETool
         public MeshFilter meshFilter; // 206
         public MeshRenderer meshRenderer; // 207
         public Animator animator; // 208
-        public EBlueprint blueprint; // 209
-        public EGameData gameData; // 210
-        public AudioSource audioSource; //211
+        public NodeComponent nodeComponent; // 209
+        public Light light; // 210
+        public AudioSource audioSource; // 211
 
         public GenericComponent()
         {
@@ -171,8 +192,6 @@ namespace ETool
             meshFilter = reference.meshFilter; // 206
             meshRenderer = reference.meshRenderer; // 207
             animator = reference.animator; // 208
-            blueprint = reference.blueprint; // 209
-            gameData = reference.gameData; // 210
             audioSource = reference.audioSource; // 211
         }
     }

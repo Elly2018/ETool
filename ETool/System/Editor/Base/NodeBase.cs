@@ -12,7 +12,6 @@ namespace ETool
     {
         public int normal;
         public int select;
-        public int hover;
         public int in_point;
         public int out_point;
 
@@ -47,11 +46,7 @@ namespace ETool
             {
                 GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)select));
             }
-            else if(!isSelected && isHover)
-            {
-                GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)hover));
-            }
-            else if(!isSelected && !isHover)
+            else if(!isSelected)
             {
                 GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)normal));
             }
