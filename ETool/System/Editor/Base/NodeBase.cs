@@ -27,30 +27,40 @@ namespace ETool
         /// </summary>
         public void Draw()
         {
-            float height = rect.height + ((fields.Count + 1) * PropertiesHeight);
-            float padding = 7;
             if (nodeErrors.Count != 0)
             {
                 if (isSelected)
                 {
-                    GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle(StyleType.Select_Error_Node));
+                    GUI.Box(GetBoxRect(), "", StyleUtility.GetStyle(StyleType.Select_Error_Node));
                 }
                 else
                 {
-                    GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle(StyleType.Error_Node));
+                    GUI.Box(GetBoxRect(), "", StyleUtility.GetStyle(StyleType.Error_Node));
                 }
                 DrawField(fields);
                 return;
             }
             if (isSelected)
             {
-                GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)select));
+                GUI.Box(GetBoxRect(), "", StyleUtility.GetStyle((StyleType)select));
             }
             else if(!isSelected)
             {
-                GUI.Box(new Rect(rect.x - padding, rect.y, rect.width + padding * 2, height), "", StyleUtility.GetStyle((StyleType)normal));
+                GUI.Box(GetBoxRect(), "", StyleUtility.GetStyle((StyleType)normal));
             }
             DrawField(fields);
+        }
+
+        private Rect GetBoxRect()
+        {
+            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
+            float height = rect.height + ((fields.Count + 1) * PropertiesHeight);
+            float padding = 7;
+            return new Rect(
+                (rect.x - padding) * zoomLevel.ratio,
+                (rect.y) * zoomLevel.ratio,
+                (rect.width + padding * 2) * zoomLevel.ratio,
+                (height) * zoomLevel.ratio);
         }
 
         /// <summary>

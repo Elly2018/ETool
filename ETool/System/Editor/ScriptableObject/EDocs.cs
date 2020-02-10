@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace ETool
 {
@@ -7,5 +6,6 @@ namespace ETool
     public class EDocs : ScriptableObject
     {
         [SerializeField] public string Path = "Home";
+        [SerializeField] public int LanmIndex = 0;
     }
 }

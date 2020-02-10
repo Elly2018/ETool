@@ -13,7 +13,7 @@ namespace ETool
 
             if(es != null)
             {
-                foreach (var i in es.languageElements)
+                foreach (var i in es.languagePack.languageElements)
                 {
                     if (i.tag == tag)
                     {
@@ -37,7 +37,7 @@ namespace ETool
 
             if(es != null)
             {
-                foreach (var i in es.languageElements)
+                foreach (var i in es.languagePack.languageElements)
                 {
                     if (i.tag == tag)
                     {
@@ -61,7 +61,7 @@ namespace ETool
 
             if (es != null)
             {
-                foreach (var i in es.languageElements)
+                foreach (var i in es.languagePack.languageElements)
                 {
                     if (i.tag == tag)
                     {

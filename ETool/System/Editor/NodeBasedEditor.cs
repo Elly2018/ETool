@@ -158,10 +158,20 @@ namespace ETool
         {
             assmbly = Assembly.GetExecutingAssembly();
             if (selectBlueprint != null)
+            {
                 selectBlueprint.nodes = EBlueprint.InitializeBlueprint(
                     selectBlueprint.nodes,
                     selectBlueprint.blueprintVariables,
                     selectBlueprint.blueprintEvent.customEvent);
+
+                if(NBE != null)
+                {
+                    foreach(var i in selectBlueprint.nodes)
+                    {
+                        i.ConnectionUpdate();
+                    }
+                }
+            }
             StyleUtility.Initialize();
         }
 
@@ -230,12 +240,15 @@ namespace ETool
             }
             if (GUI.Button(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 2) - 5f, 4f, (sizeLimit.x / 3), sizeLimit.y), "-"))
             {
-                if(zoomLevel > 0)
+                if(zoomLevel > 1)
                 {
                     zoomLevel--;
                 }
             }
             GUI.Label(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 4) - 10f, 4f, (sizeLimit.x / 3) * 2, sizeLimit.y), "Zoom: " + zoomLevel.ToString());
+
+            if (zoomLevel < 1) zoomLevel = 1;
+            if (zoomLevel > 5) zoomLevel = 5;
         }
 
         /// <summary>
@@ -265,8 +278,6 @@ namespace ETool
                     CenterViewer();
             }
             ButtonPadding++;
-            uITheme = (GUITheme)EditorGUI.EnumPopup(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), uITheme);
-            ButtonPadding++;
             if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Help"))
             {
                 string message =
@@ -275,18 +286,12 @@ namespace ETool
                     "F \t\t Center Selected Nodes\n" +
                     "Ctrl + C \t\t Copy Selection \n" +
                     "Ctrl + V \t\t Paste Clipboard \n" +
-                    "Delete \t\t Delete Selection \n";
+                    "Delete \t\t Delete Selection \n" + 
+                    "[ \t\t Zoom Out \n" +
+                    "] \t\t Zoom In \n" +
+                    "A \t\t Select All \n" +
+                    "B \t\t Box Selection \n";
                 GreyBackground = new GreyBackground() { Okbutton = true, Message = message };
-            }
-            ButtonPadding++;
-            if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Refresh"))
-            {
-                InitalizeContent();
-            }
-            ButtonPadding++;
-            if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Cancel"))
-            {
-                selectBlueprint = null;
             }
         }
 
@@ -535,6 +540,10 @@ namespace ETool
             }
         }
 
+        /// <summary>
+        /// Show pop message on the gui bottom screen
+        /// </summary>
+        /// <param name="message"></param>
         public void ShowPopMessage(string message)
         {
             popMessage = message;
@@ -615,7 +624,7 @@ namespace ETool
                     case EventType.MouseDrag:
                         if (e.button == 2)
                         {
-                            OnDrag(e.delta);
+                            OnDrag(e.delta * (1 / GetZoomLevel().ratio));
                         }
                         break;
                 }
@@ -647,6 +656,39 @@ namespace ETool
                 DeleteSelection();
                 GUI.changed = true;
             }
+
+            if (e.keyCode == KeyCode.LeftBracket && e.type == EventType.KeyDown)
+            {
+                zoomLevel--;
+                GUI.changed = true;
+            }
+
+            if (e.keyCode == KeyCode.RightBracket && e.type == EventType.KeyDown)
+            {
+                zoomLevel++;
+                GUI.changed = true;
+            }
+
+            if(e.keyCode == KeyCode.A && !e.shift && !e.control && !e.alt && e.type == EventType.KeyDown)
+            {
+                foreach(var i in selectBlueprint.nodes)
+                {
+                    if(i.page == selectionPage)
+                    {
+                        i.isSelected = true;
+                    }
+                }
+                foreach(var i in selectBlueprint.connections)
+                {
+                    if(i.page == selectionPage)
+                    {
+                        i.isSelected = true;
+                    }
+                }
+                GUI.changed = true;
+            }
+
+
         }
 
         /// <summary>
@@ -662,7 +704,7 @@ namespace ETool
 
             for (int i = 0; i < selectBlueprint.nodes.Count; i++)
             {
-                if (selectBlueprint.nodes[i].rect.Contains(e.mousePosition) &&
+                if (selectBlueprint.nodes[i].MouseIn(e.mousePosition) &&
                     e.type == EventType.MouseDown && e.button == 0)
                 {
                     ClickAnyNode = true;
@@ -679,11 +721,22 @@ namespace ETool
                 }
             }
 
+            if (MouseInMenuBar(e.mousePosition))
+                ClickAnyNode = true;
+
             if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) 
             {
                 CleanNodeSelection();
+                CleanConnectionSelection();
+                ClearConnectionSelection();
                 GUI.FocusControl(null);
+                GUI.changed = true;
             }
+        }
+
+        public bool MouseInMenuBar(Vector2 mousePosition)
+        {
+            return new Rect(0, 0, position.width, 26).Contains(mousePosition);
         }
 
         /// <summary>
@@ -812,6 +865,17 @@ namespace ETool
                 selectBlueprint.nodes[i].isSelected = false;
             }
         }
+
+        /// <summary>
+        /// Clean all connection selection
+        /// </summary>
+        private void CleanConnectionSelection()
+        {
+            for(int i = 0; i < selectBlueprint.connections.Count; i++)
+            {
+                selectBlueprint.connections[i].isSelected = false;
+            }
+        }
         #endregion
 
         ///
@@ -843,6 +907,23 @@ namespace ETool
             foreach(var i in selectBlueprint.connections)
             {
                 if (i.isSelected) return true;
+            }
+            return false;
+        }
+
+        public bool CheckConnectionExist(NodeBase node, int field, bool input)
+        {
+            int n = selectBlueprint.nodes.IndexOf(node);
+            foreach(var i in selectBlueprint.connections)
+            {
+                if (input && i.inPointMark == new Vector2Int(n, field))
+                {
+                    return true;
+                }
+                if (!input && i.outPointMark == new Vector2Int(n, field))
+                {
+                    return true;
+                }
             }
             return false;
         }
@@ -1089,26 +1170,40 @@ namespace ETool
 
         public void OnClickRemoveConnection(Connection connection)
         {
+            int x = connection.inPointMark.x;
+            int y = connection.outPointMark.y;
             selectBlueprint.nodes[connection.inPointMark.x].fields[connection.inPointMark.y].onConnection = false;
             selectBlueprint.connections.Remove(connection);
+
+            selectBlueprint.nodes[x].ConnectionUpdate();
+            selectBlueprint.nodes[y].ConnectionUpdate();
+
+            Repaint();
             EditorUtility.SetDirty(selectBlueprint);
         }
 
+        /// <summary>
+        /// Copy selection node <br />
+        /// And delete the node that contain have [CanNotCopy]
+        /// </summary>
         public void OnClickCopy()
         {
             List<NodeBase> nb = new List<NodeBase>();
             List<Connection> c = new List<Connection>();
             List<NodeBase> buffer = new List<NodeBase>();
 
+            /* Search current nodes pool */
             for (int i = 0; i < selectBlueprint.nodes.Count; i++)
             {
-                if (selectBlueprint.nodes[i].isSelected)
+                /* Node must be selected and cannot contain [CanNotCopy] attribute */
+                if (selectBlueprint.nodes[i].isSelected && selectBlueprint.nodes[i].GetType().GetCustomAttribute<CanNotCopy>() == null)
                 {
                     nb.Add(EBlueprint.MakeInstanceNode(selectBlueprint.nodes[i], selectBlueprint.blueprintVariables, selectBlueprint.blueprintEvent.customEvent));
                     buffer.Add(selectBlueprint.nodes[i]);
                 }
             }
 
+            /* Search current connections pool */
             for (int i = 0; i < selectBlueprint.connections.Count; i++)
             {
                 if (selectBlueprint.connections[i].isSelected)
@@ -1238,6 +1333,12 @@ namespace ETool
             selectBlueprint.nodes[_in.x].fields[_in.y].onConnection = true;
 
             selectBlueprint.connections.Add(c);
+
+            selectBlueprint.nodes[_in.x].ConnectionUpdate();
+            selectBlueprint.nodes[_out.x].ConnectionUpdate();
+
+            Repaint();
+
             EditorUtility.SetDirty(selectBlueprint);
         }
 
@@ -1313,7 +1414,7 @@ namespace ETool
                     }
                 }
             }
-            if(popMessage.Length != 0)
+            if(popMessage != "")
             {
                 DrawPopMessage();
             }
@@ -1554,6 +1655,25 @@ namespace ETool
                 result.Add(new AddCustomEvent(Vector2.zero, selectBlueprint.blueprintEvent.customEvent[i], selectBlueprint.blueprintEvent.customEvent[i].eventName, i + EBlueprint.DefaultPageCount));
             }
             return result.ToArray();
+        }
+
+        public ZoomData GetZoomLevel()
+        {
+            switch (zoomLevel)
+            {
+                case 1:
+                    return new ZoomData() { ratio = 0.4f, field = false, title = true };
+                case 2:
+                    return new ZoomData() { ratio = 0.8f, field = true, title = true };
+                case 3:
+                    return new ZoomData() { ratio = 1.0f, field = true, title = true };
+                case 4:
+                    return new ZoomData() { ratio = 1.5f, field = true, title = true };
+                case 5:
+                    return new ZoomData() { ratio = 2.0f, field = true, title = true };
+
+            }
+            return new ZoomData() { ratio = 1.0f, field = true, title = true };
         }
 
         public string[] GetAllInheritCustomEventName()
@@ -1941,5 +2061,12 @@ namespace ETool
     {
         public List<NodeBase> nodeBases;
         public List<Connection> connections;
+    }
+
+    public struct ZoomData
+    {
+        public float ratio;
+        public bool title;
+        public bool field;
     }
 }

@@ -93,6 +93,7 @@ namespace ETool
                     HGroupStart();
                     EditorGUILayout.LabelField("Label", GUILayout.MinWidth(100));
                     EditorGUILayout.LabelField("Type", GUILayout.MinWidth(100));
+                    EditorGUILayout.LabelField("Container", GUILayout.MinWidth(100));
                     HGroupEnd();
 
                     for (int j = 0; j < b.blueprintEvent.customEvent[i].arugments.Count; j++)
@@ -102,6 +103,7 @@ namespace ETool
                         bmv.label = EditorGUILayout.TextField(bmv.label);
                         EditorGUI.BeginChangeCheck();
                         bmv.type = (FieldType)EditorGUILayout.EnumPopup(bmv.type);
+                        bmv.fieldContainer = (FieldContainer)EditorGUILayout.EnumPopup(bmv.fieldContainer);
                         if (EditorGUI.EndChangeCheck())
                         {
                             b.ChangeCustomEventArugment(i, j);

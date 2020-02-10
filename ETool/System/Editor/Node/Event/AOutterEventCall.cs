@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Event/External Call")]
+    [CanNotCopy]
     public class AOutterEventCall : NodeBase
     {
         private EBlueprint ETarget;

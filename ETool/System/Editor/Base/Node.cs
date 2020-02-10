@@ -140,6 +140,7 @@ namespace ETool
         /// This method will called
         /// </summary>
         public virtual void FieldUpdate() { }
+        public virtual void ConnectionUpdate() { }
         public virtual void SelectionChanged(bool change) { }
         public virtual void DragChanged(bool change) { }
         #endregion
@@ -159,19 +160,30 @@ namespace ETool
         /// <param name="fs">Target field list</param>
         public void DrawField(List<Field> fs)
         {
+            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
             GUIStyle ti = StyleUtility.GetStyle(StyleType.GUI_Title);
             ti.padding.left = 7;
             ti.padding.right = 7;
-            GUI.Label(rect, EToolString.GetString_Node(EToolString.GetNodeTitle(GetType()), unlocalTitle), ti);
+
+            GUI.Label(new Rect(
+                rect.x * zoomLevel.ratio,
+                rect.y * zoomLevel.ratio,
+                rect.width * zoomLevel.ratio,
+                rect.height * zoomLevel.ratio),
+                zoomLevel.title ? EToolString.GetString_Node(EToolString.GetNodeTitle(GetType()), unlocalTitle) : "...",
+                ti);
 
             for (int i = 0; i < fs.Count; i++)
             {
                 /* Update field */
-                fs[i].rect = new Rect(rect.x + 15f, rect.y + rect.height + (PropertiesHeight * i), rect.width - 30f, PropertiesHeight);
+                fs[i].rect = new Rect((rect.x + 15f) * zoomLevel.ratio, (rect.y + rect.height + (PropertiesHeight * i)) * zoomLevel.ratio, (rect.width - 30f) * zoomLevel.ratio, (PropertiesHeight) * zoomLevel.ratio);
                 fs[i].inPoint.rect = fs[i].rect;
                 fs[i].outPoint.rect = fs[i].rect;
 
-                fs[i].Draw();
+                if (zoomLevel.field)
+                    fs[i].Draw();
+                else
+                    fs[i].DrawBG();
             }
         }
 
@@ -184,19 +196,20 @@ namespace ETool
         /// <returns></returns>
         public bool ProcessEvents(Event e)
         {
+            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
             switch (e.type)
             {
                 case EventType.MouseDown:
                     {
                         /* Right mouse */
-                        if (e.button == 1 && isSelected && rect.Contains(e.mousePosition))
+                        if (e.button == 1 && isSelected && MouseIn(e.mousePosition))
                         {
                             ProcessContextMenu();
                             e.Use();
                             //isSelected = false;
                         }   
 
-                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(this) && !rect.Contains(e.mousePosition))
+                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(this) && !MouseIn(e.mousePosition) && !NodeBasedEditor.Instance.MouseInMenuBar(e.mousePosition) && e.button == 0)
                         {
                             isSelected = false;
                             SelectionChanged(isSelected);
@@ -210,14 +223,19 @@ namespace ETool
                         /* Left mouse */
                         if (e.button == 0)
                         {
-                            if (rect.Contains(e.mousePosition))
+                            if (MouseIn(e.mousePosition) && !isSelected && !isDragged)
                             {
-                                isDragged = true;
                                 GUI.changed = true;
                                 GUI.FocusControl(null);
                                 isSelected = true;
                                 SelectionChanged(isSelected);
-                                DragChanged(isDragged);
+                            }
+                            else if (MouseIn(e.mousePosition) && isSelected && !isDragged)
+                            {
+                                GUI.changed = true;
+                                GUI.FocusControl(null);
+                                isSelected = false;
+                                SelectionChanged(isSelected);
                             }
                         }
 
@@ -226,12 +244,20 @@ namespace ETool
                         break;
                     }
 
+                case EventType.MouseMove:
+                    {
+                        if (isSelected) isDragged = true;
+                        break;
+                    }
+
                 case EventType.MouseDrag:
                     {
                         if (e.button == 0 && isSelected)
                         {
+                            isDragged = true;
+                            DragChanged(isDragged);
                             EditorUtility.SetDirty(NodeBasedEditor.Instance);
-                            Drag(e.delta);
+                            Drag(e.delta * (1 / zoomLevel.ratio));
                             //e.Use();
                             return true;
                         }
@@ -240,6 +266,18 @@ namespace ETool
                     
             }
             return false;
+        }
+
+        public bool MouseIn(Vector2 pos)
+        {
+            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
+            Rect buffer = new Rect(
+                rect.x * zoomLevel.ratio,
+                rect.y * zoomLevel.ratio,
+                rect.width * zoomLevel.ratio,
+                rect.height * zoomLevel.ratio);
+
+            return buffer.Contains(pos);
         }
 
         /// <summary>
@@ -303,6 +341,31 @@ namespace ETool
                 nb.unlocalTitle = target;
                 nb.targetPage = 0;
             }   
+        }
+
+        public void AddNodeError(NodeError ne)
+        {
+            foreach(var i in nodeErrors)
+            {
+                if(i == ne)
+                {
+                    return;
+                }
+            }
+            nodeErrors.Add(ne);
+            GUI.changed = true;
+        }
+
+        public void DeleteNodeError(NodeError ne)
+        {
+            foreach (var i in nodeErrors)
+            {
+                if (i == ne)
+                {
+                    nodeErrors.Remove(i);
+                    return;
+                }
+            }
         }
 
         /// <summary>

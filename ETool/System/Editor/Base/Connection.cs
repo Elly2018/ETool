@@ -100,15 +100,12 @@ namespace ETool
                     isSelected ? Selected_Width : UnSelected_Width // Width
                 );
 
-                if (!isSelected)
+                /* Create curve center delete button */
+                if (Handles.Button((inPoint.rect.center + outPoint.rect.center) * 0.5f, Quaternion.identity, 10, 8, Handles.CircleHandleCap))
                 {
-                    /* Create curve center delete button */
-                    if (Handles.Button((inPoint.rect.center + outPoint.rect.center) * 0.5f, Quaternion.identity, 10, 8, Handles.CircleHandleCap))
-                    {
-                        /* When click the button, tell editor delete this connection */
-                        //NodeBasedEditor.Instance.OnClickRemoveConnection(this);
-                        isSelected = true;
-                    }
+                    /* When click the button, tell editor delete this connection */
+                    //NodeBasedEditor.Instance.OnClickRemoveConnection(this);
+                    isSelected = !isSelected;
                 }
             }
             /* If it's on connect connection */

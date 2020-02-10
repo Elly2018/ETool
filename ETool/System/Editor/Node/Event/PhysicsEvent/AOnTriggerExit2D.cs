@@ -4,6 +4,7 @@ namespace ETool.ANode
 {
     [NodePath("Add Node/Event/OnTriggerExit2D")]
     [NodeHide]
+    [CanNotCopy]
     public class AOnTriggerExit2D : NodeBase
     {
         private Collider2D collision;

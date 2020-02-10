@@ -4,6 +4,7 @@ namespace ETool.ANode
 {
     [NodePath("Add Node/Event/AStart")]
     [NodeHide]
+    [CanNotCopy]
     public class AStart : NodeBase
     {
         public AStart(Vector2 position, float width, float height) : base(position, width, height)

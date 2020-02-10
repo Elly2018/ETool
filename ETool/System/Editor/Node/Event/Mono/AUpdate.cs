@@ -5,6 +5,7 @@ namespace ETool.ANode
 {
     [NodePath("Add Node/Event/Update")]
     [NodeHide]
+    [CanNotCopy]
     public class AUpdate : NodeBase
     {
         public AUpdate(Vector2 position, float width, float height) : base(position, width, height)

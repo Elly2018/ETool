@@ -11,6 +11,7 @@ namespace ETool
         NoReturn,
         Varaible_Does_Not_Exist,
         Custom_Event_Does_Not_Exist,
+        ConnectionError,
     }
 
     [System.Serializable]
@@ -26,6 +27,22 @@ namespace ETool
                 if (i.errorType == type) return true;
             }
             return false;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj.GetType() != typeof(NodeError)) return false;
+            return errorString == ((NodeError)obj).errorString && errorType == ((NodeError)obj).errorType;
+        }
+
+        public static bool operator !=(NodeError a1, NodeError a2)
+        {
+            return a1.errorString != a2.errorString || a1.errorType != a2.errorType;
+        }
+
+        public static bool operator==(NodeError a1, NodeError a2)
+        {
+            return a1.errorString == a2.errorString && a1.errorType == a2.errorType;
         }
     }
 }

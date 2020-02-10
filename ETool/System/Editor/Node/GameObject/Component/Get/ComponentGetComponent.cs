@@ -32,6 +32,21 @@ namespace ETool.ANode
             }
         }
 
+        public override void ConnectionUpdate()
+        {
+            NodeError nodeError = new NodeError() { errorType = NodeErrorType.ConnectionError, errorString = "The Target field must link a gameobject" };
+            bool gameObjectConnection = NodeBasedEditor.Instance.CheckConnectionExist(this, 1, true);
+
+            if (!gameObjectConnection)
+            {
+                AddNodeError(nodeError);
+            }
+            else
+            {
+                DeleteNodeError(nodeError);
+            }
+        }
+
         [NodePropertyGet(typeof(Component), 2)]
         public object GetTargetComponent(BlueprintInput data)
         {

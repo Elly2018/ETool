@@ -4,6 +4,7 @@ namespace ETool.ANode
 {
     [NodePath("Add Node/Event/OnTriggerStay2D")]
     [NodeHide]
+    [CanNotCopy]
     public class AOnTriggerStay2D : NodeBase
     {
         private Collider2D collision;

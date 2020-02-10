@@ -4,6 +4,7 @@ namespace ETool.ANode
 {
     [NodePath("Add Node/Event/OnDestory")]
     [NodeHide]
+    [CanNotCopy]
     public class AOnDestory : NodeBase
     {
         public AOnDestory(Vector2 position, float width, float height) : base(position, width, height)

@@ -4,6 +4,7 @@ namespace ETool.ANode
 {
     [NodePath("Add Node/Event/OnCollisionEnter")]
     [NodeHide]
+    [CanNotCopy]
     public class AOnCollisionEnter : NodeBase
     {
         private Collision collision;

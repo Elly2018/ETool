@@ -20,7 +20,7 @@ namespace ETool
             get
             {
                 return (DocsEditor)Resources.FindObjectsOfTypeAll(typeof(DocsEditor)).FirstOrDefault();
-            } 
+            }
         }
 
         private void OnEnable()
@@ -32,9 +32,32 @@ namespace ETool
         public override void DrawEToolInformation()
         {
             VGroupStart();
+            LanRender();
             PathRender();
             if (page != null)
+            {
                 page.Render();
+                page.LanIndex = serializedObject.FindProperty("LanmIndex").intValue;
+            }
+                
+            HGroupEnd();
+        }
+
+        private void LanRender()
+        {
+            HGroupStart();
+            if (GUILayout.Button("EN"))
+            {
+                serializedObject.FindProperty("LanmIndex").intValue = 0;
+            }
+            if (GUILayout.Button("TW"))
+            {
+                serializedObject.FindProperty("LanmIndex").intValue = 1;
+            }
+            if (GUILayout.Button("CH"))
+            {
+                serializedObject.FindProperty("LanmIndex").intValue = 2;
+            }
             HGroupEnd();
         }
 
@@ -82,8 +105,10 @@ namespace ETool
                 if(i.GetCustomAttribute<DocsPath>().Path == path)
                 {
                     page = (DocsBase)ass.CreateInstance(i.FullName);
+                    return;
                 }
             }
+            Debug.LogWarning("cannot find page: " + path);
         }
     }
 }

@@ -144,6 +144,12 @@ namespace ETool
     {
         #region Variable
         /// <summary>
+        /// Define field gray background left and right padding
+        /// </summary>
+        private const float leftPadding = -3;
+        private const float rightPadding = -3;
+
+        /// <summary>
         /// Field drawing rect
         /// </summary>
         public Rect rect;
@@ -289,12 +295,22 @@ namespace ETool
             hideField = reference.hideField;
         }
 
+        public virtual void DrawBG()
+        {
+            Rect Full = new Rect(rect);
+            Full.x -= leftPadding;
+            Full.width += rightPadding + leftPadding;
+
+            GUI.Label(rect, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+        }
+
         /// <summary>
         /// Drawing method
         /// </summary>
         public virtual void Draw()
         {
             /* Create the instance of top part and bottom part */
+            Rect Full = new Rect(rect);
             Rect Top = new Rect(rect);
             Rect Bottom = new Rect(rect);
 
@@ -302,6 +318,13 @@ namespace ETool
             Top.height -= Top.height / 2;
             Bottom.height -= Bottom.height / 2;
             Bottom.y += Bottom.height;
+
+            Top.x -= leftPadding;
+            Bottom.x -= leftPadding;
+            Full.x -= leftPadding;
+            Top.width += rightPadding + leftPadding;
+            Bottom.width += rightPadding + leftPadding;
+            Full.width += rightPadding + leftPadding;
 
             /* Check field update */
             /* When update, it will trigger node method: FieldUpdate() */
@@ -313,7 +336,7 @@ namespace ETool
                 #region Event
                 case FieldType.Event: // 0
                     {
-                        GUI.Label(rect, title, StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        GUI.Label(Full, title, StyleUtility.GetStyle(StyleType.GUI_Properties));
                         break;
                     }
 
@@ -322,7 +345,7 @@ namespace ETool
 
                 case FieldType.Object: // 1
                     {
-                        GUI.Label(rect, title, StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        GUI.Label(Full, title, StyleUtility.GetStyle(StyleType.GUI_Properties));
                         break;
                     }
 
