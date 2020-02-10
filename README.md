@@ -45,3 +45,9 @@
 
 - Component type support <br />
   <p> there are little type this plugin support right now</p>
+
+- Node Error <br />
+  <p> When lost needs connection it will tell you</p>
+
+- Multiple language support <br />
+  <p> user can import or export your language package</p>
