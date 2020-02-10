@@ -12,6 +12,9 @@
 - Easy to use <br />
   <p>if user have problem with node, user can always right click check its description</p>
 
+- Clean <br />
+  <p>The editor is clean and intuitive, nothing fancy</p>
+
 ## Installation
 - Put ETool folder into (project folder)/assets/
 ## feature
@@ -31,14 +34,14 @@
 - Public Protected Private variable support <br />
   <p> user can create your own variable</p>
 
-- Array support (In Development) <br />
+- Array support <br />
   <p> data support array type</p>
 
 - Blueprint inherit (In Development) <br />
   <p> blueprint multiple inherit support</p>
 
-- GameData scriptable_object (In Development) <br />
+- GameData scriptable_object <br />
   <p> user can create a gamedata asset in scenes, make your own database. gamedata also support import and export</p>
 
-- Component type support (In Development) <br />
+- Component type support <br />
   <p> there are little type this plugin support right now</p>
