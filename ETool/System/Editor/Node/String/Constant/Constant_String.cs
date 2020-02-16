@@ -16,10 +16,10 @@ namespace ETool.ANode
             fields.Add(new Field(FieldType.String, "String", ConnectionType.DataOutput, this, FieldContainer.Object));
         }
 
-        [NodePropertyGet(typeof(String), 0)]
-        public String GetString(BlueprintInput data)
+        [NodePropertyGet(typeof(string), 0)]
+        public string GetString(BlueprintInput data)
         {
-            return (String)Field.GetObjectByFieldType(FieldType.String, fields[0].target);
+            return GetFieldOrLastInputField<string>(0, data);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace ETool.ANode
     [NodePath("Add Node/Event/OnCollisionStay")]
     [NodeHide]
     [CanNotCopy]
+    [CanNotDelete]
     public class AOnCollisionStay : NodeBase
     {
         private Collision collision;

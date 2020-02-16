@@ -5,6 +5,7 @@ namespace ETool.ANode
     [NodePath("Add Node/Event/OnTriggerStay")]
     [NodeHide]
     [CanNotCopy]
+    [CanNotDelete]
     public class AOnTriggerStay : NodeBase
     {
         private Collider collision;

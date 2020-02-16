@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections.Generic;
 using ETool.ANode;
+using System;
 
 namespace ETool
 {
@@ -44,14 +45,28 @@ namespace ETool
         public int page;
 
         /// <summary>
+        /// Define target event <br />
+        /// Format: [blueprint name].[event name]
+        /// </summary>
+        public string targetEventOrVar;
+
+        /// <summary>
+        /// Define if event is inherit or private
+        /// </summary>
+        public bool isInherit;
+
+
+        /// <summary>
         /// Is node is in drag mode
         /// </summary>
         public bool isDragged;
+
 
         /// <summary>
         /// Is node is in select mode
         /// </summary>
         public bool isSelected;
+
 
         /// <summary>
         /// Is there error in the node
@@ -67,11 +82,15 @@ namespace ETool
         /// </summary>
         public string NodeType;
 
+
         /// <summary>
         /// Define node fields <br />
         /// The most inportant variable in the node
         /// </summary>
         public List<Field> fields = new List<Field>();
+
+        public FieldType returnType;
+        public FieldContainer returnContainer;
 
         /// <summary>
         /// Constructor
@@ -84,6 +103,17 @@ namespace ETool
             rect = new Rect(position.x, position.y, width, height);
             NodeType = this.GetType().FullName;
             if (fields == null) fields = new List<Field>();
+        }
+        
+        public void GivenValue(Node soruce)
+        {
+            page = soruce.page;
+            title = soruce.title;
+            unlocalTitle = soruce.unlocalTitle;
+            returnType = soruce.returnType;
+            returnContainer = soruce.returnContainer;
+            targetEventOrVar = soruce.targetEventOrVar;
+            isInherit = soruce.isInherit;
         }
 
         /// <summary>
@@ -160,7 +190,7 @@ namespace ETool
         /// <param name="fs">Target field list</param>
         public void DrawField(List<Field> fs)
         {
-            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
+            ZoomData zoomLevel = NodeBasedEditor.Editor_Instance.GetZoomLevel();
             GUIStyle ti = StyleUtility.GetStyle(StyleType.GUI_Title);
             ti.padding.left = 7;
             ti.padding.right = 7;
@@ -196,7 +226,13 @@ namespace ETool
         /// <returns></returns>
         public bool ProcessEvents(Event e)
         {
-            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
+            ZoomData zoomLevel = NodeBasedEditor.Editor_Instance.GetZoomLevel();
+
+            foreach (var i in fields)
+            {
+                i.ProcessEvent(e);
+            }
+
             switch (e.type)
             {
                 case EventType.MouseDown:
@@ -209,7 +245,7 @@ namespace ETool
                             //isSelected = false;
                         }   
 
-                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(this) && !MouseIn(e.mousePosition) && !NodeBasedEditor.Instance.MouseInMenuBar(e.mousePosition) && e.button == 0)
+                        if (!e.shift && !NodeBasedEditor.Instance.Check_AnyOtherNodeAreSelected(this) && !MouseIn(e.mousePosition) && !NodeBasedEditor.Editor_Instance.MouseInMenuBar(e.mousePosition) && e.button == 0)
                         {
                             isSelected = false;
                             SelectionChanged(isSelected);
@@ -265,12 +301,13 @@ namespace ETool
                     }
                     
             }
+
             return false;
         }
 
         public bool MouseIn(Vector2 pos)
         {
-            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
+            ZoomData zoomLevel = NodeBasedEditor.Editor_Instance.GetZoomLevel();
             Rect buffer = new Rect(
                 rect.x * zoomLevel.ratio,
                 rect.y * zoomLevel.ratio,
@@ -286,35 +323,44 @@ namespace ETool
         public virtual void ProcessContextMenu()
         {
             GenericMenu genericMenu = new GenericMenu();
-            genericMenu.AddItem(new GUIContent("Description"), false, OnClickDescription);
 
-            if (NodeBasedEditor.Instance.CheckAnyNodeSelect())
+            /* Adding description */
             {
-                genericMenu.AddItem(new GUIContent("Copy selection"), false, NodeBasedEditor.Instance.OnClickCopy);
+                genericMenu.AddItem(new GUIContent("Description"), false, OnClickDescription);
             }
 
-            if (NodeBasedEditor.Instance.CheckAnyConnectionSelect() || NodeBasedEditor.Instance.CheckAnyNodeSelect())
+            /* Adding copy */
             {
-                genericMenu.AddItem(new GUIContent("Delete Selected"), false, NodeBasedEditor.Instance.DeleteSelection);
-            }
-
-            if (nodeErrors.Count != 0)
-            {
-                foreach(var i in nodeErrors)
+                if (NodeBasedEditor.Instance.Check_AnyNodeSelect())
                 {
-                    genericMenu.AddItem(new GUIContent("ErrorMessage: " + i.errorType.ToString()), false, OnClickErrorMessage, i.errorString);
+                    genericMenu.AddItem(new GUIContent("Copy selection"), false, NodeBasedEditor.Editor_Instance.OnClickCopy);
+                }
+            }
+
+            /* Adding delete selection */
+            {
+                if (NodeBasedEditor.Instance.Check_AnyConnectionSelect() || NodeBasedEditor.Instance.Check_AnyNodeSelect())
+                {
+                    genericMenu.AddItem(new GUIContent("Delete Selected"), false, NodeBasedEditor.Editor_Instance.DeleteSelection);
+                }
+            }
+
+            /* Adding error message */
+            {
+                if (nodeErrors.Count != 0)
+                {
+                    foreach (var i in nodeErrors)
+                    {
+                        genericMenu.AddItem(new GUIContent("ErrorMessage: " + i.errorType.ToString() + i.code.ToString()), false, OnClickErrorMessage, i.errorString);
+                    }
                 }
             }
 
             if(NodeType == typeof(ACustomEventCall).FullName)
             {
-                foreach(var i in NodeBasedEditor.Instance.GetAllCustomEventName())
+                foreach(var i in NodeBasedEditor.Instance.GetAllPublicEvent())
                 {
-                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i.addEventName), false, ChangeCustomEvent, i);
-                }
-                foreach(var i in NodeBasedEditor.Instance.GetAllInheritCustomEventName())
-                {
-                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i), false, ChangeInheritCustomEvent, i);
+                    genericMenu.AddItem(new GUIContent("Change Event =>/" + i.Item2.name + "." + i.Item1.eventName), false, ChangeCustomEvent, i);
                 }
             }
 
@@ -323,12 +369,12 @@ namespace ETool
 
         protected void ChangeCustomEvent(object o)
         {
-            AddCustomEvent target = (AddCustomEvent)o;
+            Tuple<BlueprintCustomEvent, EBlueprint> target = (Tuple<BlueprintCustomEvent, EBlueprint>)o;
             NodeBase nb = (NodeBase)this;
             if (nb != null)
             {
-                nb.unlocalTitle = target.addEventName;
-                nb.targetPage = target.page;
+                nb.unlocalTitle = target.Item1.eventName;
+                nb.targetEventOrVar = target.Item2 + "." + target.Item1;
             }
         }
 
@@ -339,7 +385,7 @@ namespace ETool
             if (nb != null)
             {
                 nb.unlocalTitle = target;
-                nb.targetPage = 0;
+                nb.targetEventOrVar = "";
             }   
         }
 
@@ -374,7 +420,7 @@ namespace ETool
         /// <param name="messageString"></param>
         protected void OnClickErrorMessage(object messageString)
         {
-            NodeBasedEditor.Instance.GreyBackgroundOkButton((string)messageString);
+            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton((string)messageString);
         }
 
         /// <summary>
@@ -382,7 +428,7 @@ namespace ETool
         /// </summary>
         protected void OnClickDescription()
         {
-            NodeBasedEditor.Instance.GreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
+            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
         }
     }
 }

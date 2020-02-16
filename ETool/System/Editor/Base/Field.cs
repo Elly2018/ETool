@@ -92,6 +92,9 @@ namespace ETool
         Ray = 69,
         Mesh = 70,
         Flare = 71,
+        Matrix4x4 = 72,
+        Plane = 73,
+        Bounds = 74,
 
         // Component
         // Range: 200 - 1999
@@ -107,6 +110,8 @@ namespace ETool
         NodeComponent = 209,
         Light = 210,
         AudioSource = 211,
+        Camera = 212,
+        Character = 213,
 
         // Useful enum type
         // Range: 2000 - NaN
@@ -123,6 +128,11 @@ namespace ETool
         AvatarIKGoal = 2010,
         LightType = 2011,
         ShadowType = 2012,
+        InstallMode = 2013,
+        Platform = 2014,
+        FullScreenMode = 2015,
+        ScreenOrientation = 2016,
+        CollisionFlag = 2017,
     }
 
     /// <summary>
@@ -626,6 +636,13 @@ namespace ETool
                         target.genericUnityType.target_Flare = ObjectField<Flare>(target.genericUnityType.target_Flare, Top, Bottom);
                         break;
                     }
+
+                case FieldType.Matrix4x4:
+                    {
+                        EditorGUI.LabelField(Top, GetTypePrefixTitle(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        EditorGUI.LabelField(Bottom, "...", StyleUtility.GetStyle(StyleType.GUI_Properties));
+                        break;
+                    }
                 #endregion
 
                 /* 200 - 1999 */
@@ -701,6 +718,11 @@ namespace ETool
                 case FieldType.AudioSource: // 211
                     {
                         target.target_Component.audioSource = ObjectField<AudioSource>(target.target_Component.audioSource, Top, Bottom);
+                        break;
+                    }
+                case FieldType.Camera: // 212
+                    {
+                        target.target_Component.camera = ObjectField<Camera>(target.target_Component.camera, Top, Bottom);
                         break;
                     }
                 #endregion
@@ -801,8 +823,8 @@ namespace ETool
             bool changed = EditorGUI.EndChangeCheck();
             if (changed)
             {
-                NodeBasedEditor.Instance.GetNodeByField(this).FieldUpdate();
-                EditorUtility.SetDirty(NodeBasedEditor.Instance.selectBlueprint);
+                NodeBasedEditor.Instance.Node_GetNodeByField(this).FieldUpdate();
+                EditorUtility.SetDirty(NodeBasedEditor.Instance);
             }
 
             /* Drawing connection point */
@@ -906,7 +928,7 @@ namespace ETool
         /// <returns></returns>
         private string[] GetVariableStringArray()
         {
-            List<BlueprintVariable> bv = NodeBasedEditor.Instance.GetAllCustomVariable();
+            List<BlueprintVariable> bv = NodeBasedEditor.Instance.blueprintVariables;
             string[] result = new string[bv.Count];
             for(int i = 0; i < bv.Count; i++)
             {
@@ -952,6 +974,33 @@ namespace ETool
                 case ConnectionType.EventBoth:
                     inPoint.Draw();
                     outPoint.Draw();
+                    break;
+            }
+        }
+
+        public void ProcessEvent(Event e)
+        {
+            switch (connectionType)
+            {
+                case ConnectionType.DataInput:
+                    inPoint.ProcessEvents(e);
+                    break;
+                case ConnectionType.DataOutput:
+                    outPoint.ProcessEvents(e);
+                    break;
+                case ConnectionType.DataBoth:
+                    inPoint.ProcessEvents(e);
+                    outPoint.ProcessEvents(e);
+                    break;
+                case ConnectionType.EventInput:
+                    inPoint.ProcessEvents(e);
+                    break;
+                case ConnectionType.EventOutput:
+                    outPoint.ProcessEvents(e);
+                    break;
+                case ConnectionType.EventBoth:
+                    inPoint.ProcessEvents(e);
+                    outPoint.ProcessEvents(e);
                     break;
             }
         }
@@ -1188,6 +1237,8 @@ namespace ETool
                     return typeof(Mesh); // 70
                 case FieldType.Flare:
                     return typeof(Flare); // 71
+                case FieldType.Matrix4x4:
+                    return typeof(Matrix4x4); // 72
                 #endregion
 
                 #region Component Type
@@ -1215,6 +1266,8 @@ namespace ETool
                     return typeof(Light); // 210
                 case FieldType.AudioSource:
                     return typeof(AudioSource); // 211
+                case FieldType.Camera:
+                    return typeof(Camera); // 212
                 #endregion
 
                 #region Enum type
@@ -1280,7 +1333,7 @@ namespace ETool
                 case FieldType.Number:
                     return go.genericBasicType.target_Int; // 16
                 case FieldType.Vector:
-                    break; // 17
+                    return go.genericBasicType.target_Int; // 17
                 case FieldType.Char:
                     return go.genericBasicType.target_Char; // 18
                 #endregion
@@ -1330,6 +1383,8 @@ namespace ETool
                     return go.genericUnityType.target_Mesh; // 72
                 case FieldType.Flare:
                     return go.genericUnityType.target_Flare; // 73
+                case FieldType.Matrix4x4:
+                    return go.genericUnityType.target_matrix4X4; // 74
                 #endregion
 
                 #region Component Type
@@ -1357,6 +1412,8 @@ namespace ETool
                     return go.target_Component.light; // 210
                 case FieldType.AudioSource:
                     return go.target_Component.audioSource; // 211
+                case FieldType.Camera:
+                    return go.target_Component.camera; // 212
                 #endregion
 
                 #region Enum Type

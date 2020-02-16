@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
+    [CanNotDelete]
     public class ACustomEvent : NodeBase
     {
         private object[] obj;
@@ -21,8 +22,10 @@ namespace ETool.ANode
         [NodePropertyGet2(1, 100)]
         public object OutputData(BlueprintInput data, int index)
         {
-            if (obj[index - 1] == null) return Field.GetObjectByFieldType(fields[index].fieldType, fields[index].target);
-            return obj[index - 1];
+            if (obj[index - 1] == null)
+                return GetFieldOrLastInputField(index, data);
+            else
+                return obj[index - 1];
         }
 
         public override void ProcessCalling(BlueprintInput data)
@@ -112,25 +115,25 @@ namespace ETool.ANode
         public static void AddVariableField(BlueprintVariable v, NodeBase nb, bool call)
         {
             if(call)
-                nb.fields.Add(new Field(v.type, v.label, ConnectionType.DataInput, true, nb, FieldContainer.Object));
+                nb.fields.Add(new Field(v.type, v.label, ConnectionType.DataInput, true, nb, v.fieldContainer));
             else
-                nb.fields.Add(new Field(v.type, v.label, ConnectionType.DataOutput, nb, FieldContainer.Object));
+                nb.fields.Add(new Field(v.type, v.label, ConnectionType.DataOutput, nb, v.fieldContainer));
         }
 
         public static void RemoveVariableField(NodeBase nb, bool call)
         {
-            NodeBasedEditor.Instance.RemoveRelateConnectionInField(nb.fields[nb.fields.Count - 1]);
+            NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(nb.fields[nb.fields.Count - 1]);
             nb.fields.RemoveAt(nb.fields.Count - 1);
         }
 
         public static void ChangeVariableField(BlueprintVariable v, NodeBase nb, int index, bool call)
         {
             if(v.type != nb.fields[index].fieldType)
-                NodeBasedEditor.Instance.RemoveRelateConnectionInField(nb.fields[index]);
+                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(nb.fields[index]);
             if (call)
-                nb.fields[index] = new Field(v.type, v.label, ConnectionType.DataInput, true, nb, FieldContainer.Object);
+                nb.fields[index] = new Field(v.type, v.label, ConnectionType.DataInput, true, nb, v.fieldContainer);
             else
-                nb.fields[index] = new Field(v.type, v.label, ConnectionType.DataOutput, nb, FieldContainer.Object);
+                nb.fields[index] = new Field(v.type, v.label, ConnectionType.DataOutput, nb, v.fieldContainer);
         }
     }
 }

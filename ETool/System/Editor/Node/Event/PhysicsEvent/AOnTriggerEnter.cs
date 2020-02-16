@@ -5,6 +5,7 @@ namespace ETool.ANode
     [NodePath("Add Node/Event/OnTriggerEnter")]
     [NodeHide]
     [CanNotCopy]
+    [CanNotDelete]
     public class AOnTriggerEnter : NodeBase
     {
         private Collider collision;

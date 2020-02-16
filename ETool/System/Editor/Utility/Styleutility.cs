@@ -47,64 +47,60 @@ namespace ETool
         {
             string themeColorString = string.Empty;
 
-            if (NodeBasedEditor.uITheme == GUITheme.Light)
-                themeColorString = "lightskin";
-            if (NodeBasedEditor.uITheme == GUITheme.Dark)
-                themeColorString = "darkskin";
 
             GUIStyle result = new GUIStyle();
             switch (select)
             {
                 #region Default
                 case StyleType.Default_Node: // 0
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node1@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
 
                     return result;
                 case StyleType.Event_Node: // 1
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node2@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node2@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Logic_Node: // 2
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node3@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node3@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Function_Node: // 3
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node4@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node4@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Error_Node: // 4
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node6@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node6@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
                 #endregion
 
                 #region Select
                 case StyleType.Select_Default_Node: // 30
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node1 on@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node1 on@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Select_Event_Node: // 31
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node2 on@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node2 on@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Select_Logic_Node: // 32
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node3 on@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node3 on@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Select_Function_Node: // 33
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node4 on@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node4 on@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
 
                 case StyleType.Select_Error_Node:
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/node6 on@2x.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/node6 on@2x.png") as Texture2D;
                     result.border = new RectOffset(12, 12, 12, 12);
                     return result;
                 #endregion
@@ -130,7 +126,7 @@ namespace ETool
                     return result;
 
                 case StyleType.Panel: // 90
-                    result.normal.background = EditorGUIUtility.Load("builtin skins/" + themeColorString + "/images/objectpickerbackground.png") as Texture2D;
+                    result.normal.background = EditorGUIUtility.Load("builtin skins/darkskin/images/objectpickerbackground.png") as Texture2D;
                     return result;
 
                 case StyleType.GUI_Title: // 120

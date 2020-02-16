@@ -7,6 +7,8 @@ namespace ETool.ANode
     [NodePath("Add Node/Variable/Set Variable")]
     public class SetVariable : NodeBase
     {
+        private List<Tuple<BlueprintVariable, EBlueprint>> MyTarget;
+
         public SetVariable(Vector2 position, float width, float height) : base(position, width, height)
         {
             unlocalTitle = "Set Variable";
@@ -33,79 +35,66 @@ namespace ETool.ANode
             ActiveNextEvent(0, data);
         }
 
-        public override void FieldInitialize()
+        public void SetOptions(List<Tuple<BlueprintVariable, EBlueprint>> options)
         {
-            fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventBoth, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.Variable, "Target", ConnectionType.None, this, FieldContainer.Object));
-        }
+            MyTarget = options;
 
-        public override void PostFieldInitialize()
-        {
+            fields[1].target_array = new GenericObject[options.Count];
+            for (int i = 0; i < options.Count; i++)
+            {
+                fields[1].target_array[i] = new GenericObject();
+                fields[1].target_array[i].genericBasicType.target_String = options[i].Item1.label;
+            }
+
+            if (fields[1].target.genericBasicType.target_Int < 0 || fields[1].target.genericBasicType.target_Int + 1 > options.Count)
+            {
+                fields[1].target.genericBasicType.target_Int = 0;
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[1]);
+            }
+
             GetFieldDone();
         }
 
-        public override void PostFieldInitialize(BlueprintInput data)
+        public void RenameContent(string oldName, string newName)
         {
-            GetFieldDone(data);
-        }
-
-        public override void DynamicFieldInitialize(BlueprintInput data)
-        {
-            GetFieldDone(data);
+            foreach(var i in fields[1].target_array)
+            {
+                if(i.genericBasicType.target_String == oldName)
+                {
+                    i.genericBasicType.target_String = newName;
+                }
+            }
         }
 
         public override void FieldUpdate()
         {
-            GetFieldDone();
+            EBlueprint e = EBlueprint.GetBlueprintByNode(this);
+
+            SetOptions(e.GetInheritVariable());
+        }
+
+        public override void FieldInitialize()
+        {
+            fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventBoth, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Dropdown, "Variable", ConnectionType.None, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Int, "Value", ConnectionType.DataBoth, true, this, FieldContainer.Object));
         }
 
         private void GetFieldDone()
         {
-            List<BlueprintVariable> bv = NodeBasedEditor.Instance.GetAllCustomVariable();
+            if (MyTarget.Count == 0) return;
+            int index = fields[1].target.genericBasicType.target_Int;
+            targetEventOrVar = MyTarget[index].Item2.name + "." + fields[1].target_array[index].genericBasicType.target_String;
 
-            if(fields.Count == 2)
+            BlueprintVariable target = MyTarget[index].Item1;
+
+            if (fields[2].fieldType != target.type || fields[2].fieldContainer != target.fieldContainer)
             {
-                fields.Add(new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type,
-                    "Result",
-                    ConnectionType.DataBoth,
-                    this, bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].fieldContainer));
-            }
-            else if(fields.Count == 3)
-            {
-                if (bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type != fields[2].fieldType)
-                {
-                    NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[2]);
-                    fields[2] = new Field(bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type,
-                        "Result",
-                        ConnectionType.DataBoth,
-                        this, bv[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].fieldContainer);
-                }
+                fields[2] = new Field(target.type, "Value", ConnectionType.DataBoth, true, this, target.fieldContainer);
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[1]);
             }
 
-        }
-
-        private void GetFieldDone(BlueprintInput data)
-        {
-            if (fields.Count == 2)
-            {
-                fields.Add(new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type,
-                    "Result",
-                    ConnectionType.DataBoth,
-                    this, data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].fieldContainer));
-            }
-            else if (fields.Count == 3)
-            {
-                if (data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].type != fields[2].fieldType)
-                {
-                    NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[2]);
-                    fields[2] = new Field(data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int,
-                        fields[1].target)].type,
-                        "Result",
-                        ConnectionType.DataBoth,
-                        this, data.blueprintVariables[(Int32)Field.GetObjectByFieldType(FieldType.Int, fields[1].target)].fieldContainer);
-                }
-            }
-
+            targetEventOrVar = MyTarget[index].Item2.name + "." + MyTarget[index].Item1.label;
         }
 
         [NodePropertyGet(typeof(object), 2)]

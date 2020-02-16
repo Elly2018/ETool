@@ -13,7 +13,63 @@ namespace ETool.ANode
 
         public AOutterEventCall(Vector2 position, float width, float height) : base(position, width, height)
         {
-            title = "External Event Call";
+            unlocalTitle = "External Event Call";
+        }
+
+        /// <summary>
+        /// Editor stage <br />
+        /// It will force modify this outter event call target
+        /// </summary>
+        /// <param name="targetBP"></param>
+        /// <param name="targetEvent"></param>
+        public void SetCustomEvent(EBlueprint targetBP, BlueprintCustomEvent targetEvent)
+        {
+            ETarget = targetBP;
+            MyTarget = targetEvent;
+            UpdateContent();
+        }
+
+
+        /// <summary>
+        /// Use the given reference and modify the fields
+        /// </summary>
+        private void UpdateContent()
+        {
+            fields[1].target.genericUnityType.blueprint = ETarget;
+
+            if(ETarget == null)
+            {
+                /* Set the target null */
+                Zero();
+                targetEventOrVar = ".";
+                return;
+                
+            }
+            else
+            {
+                /* The target is not null */
+
+                /* Get the custom event struct from target blueprint */
+                List<Tuple<BlueprintCustomEvent, EBlueprint>> buffer = ETarget.GetAllPublicEvent();
+
+                int index = (int)fields[3].GetValue(FieldType.Int);
+                if (index > -1 && index <= buffer.Count)
+                {
+                    MyTarget = buffer[index].Item1;
+                    UpdateField();
+                }
+                targetEventOrVar = ETarget.name + "." + buffer[index].Item1.eventName;
+            }
+        }
+
+        private void DropdownInitliaze(List<Tuple<BlueprintCustomEvent, EBlueprint>> buffer)
+        {
+            fields[3].target_array = new GenericObject[buffer.Count];
+            for (int i = 0; i < buffer.Count; i++)
+            {
+                fields[3].target_array[i] = new GenericObject();
+                fields[3].target_array[i].genericBasicType.target_String = buffer[i].Item1.eventName;
+            }
         }
 
         public override void ProcessCalling(BlueprintInput data)
@@ -27,9 +83,8 @@ namespace ETool.ANode
                     _arg.Add(null);
 
             }
-            Material c;
             EBlueprint target = (EBlueprint)GetFieldOrLastInputField(2, data);
-            target.CallCustomEvent(target, fields[3].target_array[fields[3].target.genericBasicType.target_Int].genericBasicType.target_String, _arg.ToArray());
+            target.Custom_CallCustomEvent(fields[3].target_array[fields[3].target.genericBasicType.target_Int].genericBasicType.target_String, _arg.ToArray());
             ActiveNextEvent(0, data);
         }
 
@@ -43,34 +98,36 @@ namespace ETool.ANode
 
         public override void FieldUpdate()
         {
-            UpdateContent();
+            FieldUpdateAndRunningTimeInitialize();
         }
 
         public override void FinalFieldInitialize(BlueprintInput data)
         {
-            UpdateContent();
+            FieldUpdateAndRunningTimeInitialize();
         }
 
-        private void UpdateContent()
+        private void FieldUpdateAndRunningTimeInitialize()
         {
-            ETarget = (EBlueprint)fields[1].GetValue(FieldType.Blueprint);
-            if (ETarget == null) { Zero(); return; } 
+            ETarget = fields[1].target.genericUnityType.blueprint;
 
-            List<BlueprintCustomEvent> buffer = ETarget.GetAllPublicEvent();
-            if (buffer.Count == 0) { Zero(); return; }
-
-            fields[3].target_array = new GenericObject[buffer.Count];
-            for (int i = 0; i < buffer.Count; i++)
+            if (ETarget != null)
             {
-                fields[3].target_array[i] = new GenericObject();
-                fields[3].target_array[i].genericBasicType.target_String = buffer[i].eventName;
+                List<Tuple<BlueprintCustomEvent, EBlueprint>> buffer = ETarget.GetAllPublicEvent();
+                DropdownInitliaze(buffer);
+            }
+            else
+            {
+                Zero();
+                return;
             }
 
-            int index = (int)fields[3].GetValue(FieldType.Int);
-            if(index > -1 && index <= buffer.Count)
+            foreach (var i in ETarget.blueprintEvent.customEvent)
             {
-                MyTarget = buffer[index];
-                UpdateField();
+                if (i.eventName == fields[3].target_array[fields[3].target.genericBasicType.target_Int].genericBasicType.target_String)
+                {
+                    MyTarget = i;
+                    UpdateContent();
+                }
             }
         }
 

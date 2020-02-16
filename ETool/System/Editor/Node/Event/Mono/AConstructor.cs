@@ -5,6 +5,7 @@ namespace ETool.ANode
     [NodePath("Add Node/Event/Constructor")]
     [NodeHide]
     [CanNotCopy]
+    [CanNotDelete]
     public class AConstructor : NodeBase
     {
         public AConstructor(Vector2 position, float width, float height) : base(position, width, height)

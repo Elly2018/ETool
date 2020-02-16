@@ -52,14 +52,14 @@ namespace ETool.ANode
             {
                 if (fields[i].fieldType != ft)
                 {
-                    NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[i]);
+                    NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[i]);
                     fields[i] = new Field(ft, "Number " + (i - 3).ToString(), ConnectionType.DataInput, this, FieldContainer.Object);
                 }
             }
 
             if (fields[1].fieldType != ft)
             {
-                NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[1]);
+                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[1]);
                 fields[1] = new Field(ft, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
             }
         }

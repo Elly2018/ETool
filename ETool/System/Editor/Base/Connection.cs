@@ -76,13 +76,13 @@ namespace ETool
         public void Draw()
         {
             /* Get connection point output */
-            ConnectionPoint outPoint = NodeBasedEditor.Instance.GetConnectionPoint(outPointMark, false);
+            ConnectionPoint outPoint = NodeBasedEditor.Instance.Connection_GetConnectionPoint(outPointMark, false);
 
             /* If it's node to node connection */
             if (!onConnectType)
             {
                 /* Get connection point input */
-                ConnectionPoint inPoint = NodeBasedEditor.Instance.GetConnectionPoint(inPointMark, true);
+                ConnectionPoint inPoint = NodeBasedEditor.Instance.Connection_GetConnectionPoint(inPointMark, true);
 
                 /* Debug, if any of mark is null, tell the developer */
                 /* Usually it should not be null */
@@ -130,7 +130,7 @@ namespace ETool
             {
                 case EventType.MouseDown:
                     {
-                        if (!e.shift && !NodeBasedEditor.Instance.IfAnyOtherNodeAreSelected(null) && e.button == 0)
+                        if (!e.shift && !NodeBasedEditor.Instance.Check_AnyOtherNodeAreSelected(null) && e.button == 0)
                         {
                             isSelected = false;
                         }

@@ -114,6 +114,7 @@ namespace ETool
         public Ray target_Ray; // 69
         public Mesh target_Mesh = null; // 70
         public Flare target_Flare = null; // 71
+        public Matrix4x4 target_matrix4X4; // 72
 
         public GenericUnityType()
         {
@@ -155,6 +156,7 @@ namespace ETool
             target_Texture3D = reference.target_Texture3D;
             target_Material = reference.target_Material;
             target_Quaternion = reference.target_Quaternion;
+            target_matrix4X4 = reference.target_matrix4X4;
         }
     }
 
@@ -176,6 +178,7 @@ namespace ETool
         public NodeComponent nodeComponent; // 209
         public Light light; // 210
         public AudioSource audioSource; // 211
+        public Camera camera; // 212
 
         public GenericComponent()
         {
@@ -193,6 +196,7 @@ namespace ETool
             meshRenderer = reference.meshRenderer; // 207
             animator = reference.animator; // 208
             audioSource = reference.audioSource; // 211
+            camera = reference.camera; // 211
         }
     }
 

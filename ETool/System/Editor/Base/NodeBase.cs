@@ -15,8 +15,6 @@ namespace ETool
         public int in_point;
         public int out_point;
 
-        public int targetPage;
-
         public NodeBase(Vector2 position, float width, float height) : base(position, width, height) 
         {
             StyleInitialize();
@@ -53,7 +51,7 @@ namespace ETool
 
         private Rect GetBoxRect()
         {
-            ZoomData zoomLevel = NodeBasedEditor.Instance.GetZoomLevel();
+            ZoomData zoomLevel = NodeBasedEditor.Editor_Instance.GetZoomLevel();
             float height = rect.height + ((fields.Count + 1) * PropertiesHeight);
             float padding = 7;
             return new Rect(
@@ -159,7 +157,7 @@ namespace ETool
         /// </summary>
         /// <param name="fieldIndex">Field index</param>
         /// <param name="data">BP input data</param>
-        protected void ActiveNextEvent(int fieldIndex, BlueprintInput data)
+        public void ActiveNextEvent(int fieldIndex, BlueprintInput data)
         {
             try
             {
@@ -168,7 +166,7 @@ namespace ETool
             catch { }
         }
 
-        protected void ActiveCustomEvent(BlueprintInput data, int page, object[] obj)
+        protected void ActiveCustomEvent(BlueprintInput data, string eventName, object[] obj)
         {
             foreach(var i in data.allNode)
             {
@@ -181,10 +179,28 @@ namespace ETool
             }
         }
 
-        protected void ActiveInheritCustomEvent(BlueprintInput data, object[] obj)
+        protected void ActiveInheritCustomEvent(BlueprintInput data, object[] obj, string blueprintName)
         {
-            bool eventExist = data.inherit.CallCustomEvent(data.inherit, title, obj);
+            BlueprintInput refer = FindBlueprintInher(data, blueprintName);
+            if (refer == null) Debug.LogWarning("Cannot find event for calling method");
+            bool eventExist = refer.self.Custom_CallCustomEvent(targetEventOrVar.Split('.')[1], obj);
             if (!eventExist) Debug.LogWarning("Cannot find event for calling method");
+        }
+
+        private BlueprintInput FindBlueprintInher(BlueprintInput data, string Targetname)
+        {
+            if (data == null) return null;
+
+            if (data.self.name == Targetname) return data;
+
+            if (data.inherit != null)
+            {
+                return FindBlueprintInher(data.inherit._InputInstance, Targetname);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         protected bool CheckIfConnectionExist(int fieldIndex, BlueprintInput data, bool input)
@@ -265,6 +281,18 @@ namespace ETool
             return null;
         }
 
+        protected object GetVarialbe(BlueprintInput data, FieldType ft)
+        {
+            BlueprintInput refer = FindBlueprintInher(data, targetEventOrVar.Split('.')[0]);
+            return refer.self.Custom_CallGetVariable(targetEventOrVar.Split('.')[1], ft);
+        }
+
+        protected object GetVarialbeArray(BlueprintInput data, FieldType ft)
+        {
+            BlueprintInput refer = FindBlueprintInher(data, targetEventOrVar.Split('.')[0]);
+            return refer.self.Custom_CallGetVariableArray(targetEventOrVar.Split('.')[1], ft);
+        }
+
         #region Field modify
 
         protected bool CheckFieldType(int index, FieldType ft)
@@ -296,7 +324,7 @@ namespace ETool
                 {
                     if (fields[i].fieldType != fields[i + 1].fieldType)
                     {
-                        NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[i]);
+                        NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[i]);
                     }
                 }
             }
@@ -304,7 +332,7 @@ namespace ETool
 
         protected void DeleteLastField()
         {
-            NodeBasedEditor.Instance.RemoveRelateConnectionInField(fields[fields.Count - 1]);
+            NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
             fields.RemoveAt(fields.Count - 1);
         }
 

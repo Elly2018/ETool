@@ -5,6 +5,7 @@ namespace ETool.ANode
     [NodePath("Add Node/Event/FixedUpdate")]
     [NodeHide]
     [CanNotCopy]
+    [CanNotDelete]
     public class AFixedUpdate : NodeBase
     {
         public AFixedUpdate(Vector2 position, float width, float height) : base(position, width, height)

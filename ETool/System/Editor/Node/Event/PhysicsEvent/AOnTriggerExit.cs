@@ -5,6 +5,7 @@ namespace ETool.ANode
     [NodePath("Add Node/Event/OnTriggerExit")]
     [NodeHide]
     [CanNotCopy]
+    [CanNotDelete]
     public class AOnTriggerExit : NodeBase
     {
         private Collider collision;

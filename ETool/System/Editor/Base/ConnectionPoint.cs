@@ -103,11 +103,22 @@ namespace ETool
             if (GUI.Button(rect, "", useStyle))
             {
                 if (type == ConnectionPointType.In)
-                    NodeBasedEditor.Instance.OnClickInPoint(this);
+                    NodeBasedEditor.Editor_Instance.OnClickInPoint(this);
                 else
-                    NodeBasedEditor.Instance.OnClickOutPoint(this);
+                    NodeBasedEditor.Editor_Instance.OnClickOutPoint(this);
             }
             GUI.color = Color.white;
+        }
+
+        public void ProcessEvents(Event e)
+        {
+            if (rect.Contains(e.mousePosition) && e.button == 0 && e.isMouse)
+            {
+                if (type == ConnectionPointType.Out)
+                    NodeBasedEditor.Editor_Instance.OnClickOutPoint(this);
+                if (type == ConnectionPointType.In)
+                    NodeBasedEditor.Editor_Instance.OnClickInPoint(this);
+            }
         }
     }
 }
