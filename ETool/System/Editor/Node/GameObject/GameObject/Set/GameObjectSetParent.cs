@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Set/SetParent")]
+    [Transform_Menu("GameObjectChild")]
     public class SetParent : NodeBase
     {
         public SetParent(Vector2 position, float width, float height) : base(position, width, height)

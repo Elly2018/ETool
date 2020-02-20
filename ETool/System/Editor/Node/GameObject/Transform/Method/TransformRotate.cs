@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Method/Rotate")]
+    [Transform_Menu("TransformMethod")]
     public class TransformRotate : NodeBase
     {
         public TransformRotate(Vector2 position, float width, float height) : base(position, width, height)

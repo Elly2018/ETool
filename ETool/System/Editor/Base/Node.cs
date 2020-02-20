@@ -1,8 +1,11 @@
-﻿using UnityEngine;
-using UnityEditor;
+﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using ETool.ANode;
-using System;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ETool
 {
@@ -175,6 +178,7 @@ namespace ETool
         public virtual void DragChanged(bool change) { }
         #endregion
 
+#if UNITY_EDITOR
         /// <summary>
         /// Drag node method
         /// </summary>
@@ -389,11 +393,29 @@ namespace ETool
             }   
         }
 
+        /// <summary>
+        /// User want to check error message
+        /// </summary>
+        /// <param name="messageString"></param>
+        protected void OnClickErrorMessage(object messageString)
+        {
+            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton((string)messageString);
+        }
+
+        /// <summary>
+        /// User want to check node description
+        /// </summary>
+        protected void OnClickDescription()
+        {
+            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
+        }
+#endif
+
         public void AddNodeError(NodeError ne)
         {
-            foreach(var i in nodeErrors)
+            foreach (var i in nodeErrors)
             {
-                if(i == ne)
+                if (i == ne)
                 {
                     return;
                 }
@@ -412,23 +434,6 @@ namespace ETool
                     return;
                 }
             }
-        }
-
-        /// <summary>
-        /// User want to check error message
-        /// </summary>
-        /// <param name="messageString"></param>
-        protected void OnClickErrorMessage(object messageString)
-        {
-            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton((string)messageString);
-        }
-
-        /// <summary>
-        /// User want to check node description
-        /// </summary>
-        protected void OnClickDescription()
-        {
-            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
         }
     }
 }

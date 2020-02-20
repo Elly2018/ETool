@@ -3,17 +3,18 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Math/Vector/CrossVector3")]
-    public class CrossVector3 : NodeBase
+    [NodePath("Add Node/Math/Vector/Vector3Cross")]
+    [Math_Menu("Vector3")]
+    public class Vector3Cross : NodeBase
     {
-        public CrossVector3(Vector2 position, float width, float height) : base(position, width, height)
+        public Vector3Cross(Vector2 position, float width, float height) : base(position, width, height)
         {
             unlocalTitle = "Cross";
         }
 
         public override void FieldInitialize()
         {
-            fields.Add(new Field(FieldType.Vector3, "Result", ConnectionType.DataOutput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Vector3, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "First", ConnectionType.DataInput, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "Second", ConnectionType.DataInput, this, FieldContainer.Object));
         }

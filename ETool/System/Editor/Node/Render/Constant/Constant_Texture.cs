@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Render/Constant/Texture")]
+    [Constant_Menu]
     public class Constant_Texture : NodeBase
     {
         public Constant_Texture(Vector2 position, float width, float height) : base(position, width, height)

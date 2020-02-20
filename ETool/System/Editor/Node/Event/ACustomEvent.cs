@@ -31,6 +31,7 @@ namespace ETool.ANode
         public override void ProcessCalling(BlueprintInput data)
         {
             ActiveNextEvent(0, data);
+            data.eventManager.StartReturn(data); // return null
         }
 
         public override void DynamicFieldInitialize(BlueprintInput data)
@@ -122,14 +123,14 @@ namespace ETool.ANode
 
         public static void RemoveVariableField(NodeBase nb, bool call)
         {
-            NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(nb.fields[nb.fields.Count - 1]);
+            EBlueprint.GetBlueprintByNode(nb).Connection_RemoveRelateConnectionInField(nb.fields[nb.fields.Count - 1]);
             nb.fields.RemoveAt(nb.fields.Count - 1);
         }
 
         public static void ChangeVariableField(BlueprintVariable v, NodeBase nb, int index, bool call)
         {
             if(v.type != nb.fields[index].fieldType)
-                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(nb.fields[index]);
+                EBlueprint.GetBlueprintByNode(nb).Connection_RemoveRelateConnectionInField(nb.fields[index]);
             if (call)
                 nb.fields[index] = new Field(v.type, v.label, ConnectionType.DataInput, true, nb, v.fieldContainer);
             else

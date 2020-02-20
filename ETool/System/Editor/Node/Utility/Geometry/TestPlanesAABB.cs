@@ -21,8 +21,8 @@ namespace ETool.ANode
         {
             NodeError nodeError1 = new NodeError() { errorString = "This node need a target Plane Array input", errorType = NodeErrorType.ConnectionError, code = 1 };
             NodeError nodeError2 = new NodeError() { errorString = "This node need a target Bounds input", errorType = NodeErrorType.ConnectionError, code = 2 };
-            bool exist1 = NodeBasedEditor.Instance.Check_ConnectionExist(this, 1, true);
-            bool exist2 = NodeBasedEditor.Instance.Check_ConnectionExist(this, 2, true);
+            bool exist1 = EBlueprint.GetBlueprintByNode(this).Check_ConnectionExist(this, 1, true);
+            bool exist2 = EBlueprint.GetBlueprintByNode(this).Check_ConnectionExist(this, 2, true);
 
             if (!exist1)
             {

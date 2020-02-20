@@ -20,6 +20,7 @@ namespace ETool
             StyleInitialize();
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Draw on graph method
         /// </summary>
@@ -60,6 +61,7 @@ namespace ETool
                 (rect.width + padding * 2) * zoomLevel.ratio,
                 (height) * zoomLevel.ratio);
         }
+#endif
 
         /// <summary>
         /// This will initialize style <br />
@@ -170,13 +172,21 @@ namespace ETool
         {
             foreach(var i in data.allNode)
             {
-                if(i.page == page && i.GetType() == typeof(ACustomEvent))
+                if(i.targetEventOrVar.Split('.').Length > 1)
                 {
-                    ACustomEvent target = (ACustomEvent)i;
-                    target.ReceivedObject(obj);
-                    target.ProcessCalling(data);
+                    if (i.targetEventOrVar.Split('.')[1] == eventName && i.NodeType == typeof(ACustomEvent).FullName)
+                    {
+                        ACustomEvent target = (ACustomEvent)i;
+                        data.eventManager.AddEvent(this as ACustomEventCall);
+                        target.ReceivedObject(obj);
+                        target.ProcessCalling(data);
+                    }
                 }
             }
+
+            DebugHelper.Log("Cannot find custom event node\n" +
+                "eventName: " + eventName,
+                this);
         }
 
         protected void ActiveInheritCustomEvent(BlueprintInput data, object[] obj, string blueprintName)
@@ -189,6 +199,7 @@ namespace ETool
 
         private BlueprintInput FindBlueprintInher(BlueprintInput data, string Targetname)
         {
+
             if (data == null) return null;
 
             if (data.self.name == Targetname) return data;
@@ -281,13 +292,25 @@ namespace ETool
             return null;
         }
 
+        protected void SetVariable(BlueprintInput data, FieldType ft, object target)
+        {
+            BlueprintInput refer = FindBlueprintInher(data, targetEventOrVar.Split('.')[0]);
+            refer.self.Custom_CallSetVariable(targetEventOrVar.Split('.')[1], ft, target);
+        }
+
+        protected void SetVariableArray(BlueprintInput data, FieldType ft, object[] target)
+        {
+            BlueprintInput refer = FindBlueprintInher(data, targetEventOrVar.Split('.')[0]);
+            refer.self.Custom_CallSetVariable_Array(targetEventOrVar.Split('.')[1], ft, target);
+        }
+
         protected object GetVarialbe(BlueprintInput data, FieldType ft)
         {
             BlueprintInput refer = FindBlueprintInher(data, targetEventOrVar.Split('.')[0]);
             return refer.self.Custom_CallGetVariable(targetEventOrVar.Split('.')[1], ft);
         }
 
-        protected object GetVarialbeArray(BlueprintInput data, FieldType ft)
+        protected object[] GetVarialbeArray(BlueprintInput data, FieldType ft)
         {
             BlueprintInput refer = FindBlueprintInher(data, targetEventOrVar.Split('.')[0]);
             return refer.self.Custom_CallGetVariableArray(targetEventOrVar.Split('.')[1], ft);
@@ -324,7 +347,7 @@ namespace ETool
                 {
                     if (fields[i].fieldType != fields[i + 1].fieldType)
                     {
-                        NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[i]);
+                        EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[i]);
                     }
                 }
             }
@@ -332,7 +355,7 @@ namespace ETool
 
         protected void DeleteLastField()
         {
-            NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
+            EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
             fields.RemoveAt(fields.Count - 1);
         }
 

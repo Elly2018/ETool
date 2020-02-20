@@ -1,4 +1,5 @@
-﻿using ETool.ANode;
+﻿#if UNITY_EDITOR
+using ETool.ANode;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -27,7 +28,9 @@ namespace ETool
             {
                 string Oldname = Path.GetFileName(sourcePath).Replace(".asset", "");
                 string Newname = Path.GetFileName(destinationPath).Replace(".asset", "");
-                BlueprintChangeName(Oldname, Newname);
+
+                if(Oldname != Newname)
+                    BlueprintChangeName(Oldname, Newname);
             }
 
             return AssetMoveResult.DidNotMove;
@@ -90,3 +93,4 @@ namespace ETool
         }
     }
 }
+#endif

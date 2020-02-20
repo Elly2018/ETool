@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Quaternion/FromEular")]
+    [Math_Menu("Quaternion")]
     public class QuaternionFromEular : NodeBase
     {
         public QuaternionFromEular(Vector2 position, float width, float height) : base(position, width, height)

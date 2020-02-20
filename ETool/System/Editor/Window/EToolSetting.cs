@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace ETool
 {
+#if UNITY_EDITOR
     public class EToolSetting : EditorWindow
     {
         private static EToolSetting NBE;
@@ -35,4 +36,5 @@ namespace ETool
             
         }
     }
+#endif
 }

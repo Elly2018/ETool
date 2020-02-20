@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Get/GetAllChild")]
+    [Transform_Menu("GameObjectChild")]
     public class GameObjectGetAllChild : NodeBase
     {
         public GameObjectGetAllChild(Vector2 position, float width, float height) : base(position, width, height)

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Get/SelfGameObject")]
+    [Self_Menu]
     public class GameObjectSelfGameObject : NodeBase
     {
         public GameObjectSelfGameObject(Vector2 position, float width, float height) : base(position, width, height)

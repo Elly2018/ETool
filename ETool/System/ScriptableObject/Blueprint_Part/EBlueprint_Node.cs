@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ETool
 {
@@ -27,7 +30,10 @@ namespace ETool
             n.Initialize();
             n.PostFieldInitialize();
             n.page = selectPage;
+
+#if UNITY_EDITOR
             AssetDatabase.SaveAssets();
+#endif
             return n;
         }
 
@@ -58,7 +64,10 @@ namespace ETool
         public void Node_RemoveNodes(NodeBase[] _nodes)
         {
             foreach (var i in _nodes) Node_RemoveNode(i);
+
+#if UNITY_EDITOR
             AssetDatabase.SaveAssets();
+#endif
         }
 
         /// <summary>
@@ -94,7 +103,9 @@ namespace ETool
             }
 
             nodes.Remove(n_nodesodes);
+#if UNITY_EDITOR
             AssetDatabase.SaveAssets();
+#endif
         }
 
         /// <summary>
@@ -145,6 +156,24 @@ namespace ETool
             }
             allTypes = sorted.ToArray();
             return allTypes;
+        }
+
+        public FieldType Node_GetReturnTypeByCustomEvent(string eventname)
+        {
+            foreach(var i in blueprintEvent.customEvent)
+            {
+                if (i.eventName == eventname) return i.returnType;
+            }
+            return FieldType.Event;
+        }
+
+        public FieldContainer Node_GetReturnContainerByCustomEvent(string eventname)
+        {
+            foreach (var i in blueprintEvent.customEvent)
+            {
+                if (i.eventName == eventname) return i.returnContainer;
+            }
+            return FieldContainer.Object;
         }
     }
 }

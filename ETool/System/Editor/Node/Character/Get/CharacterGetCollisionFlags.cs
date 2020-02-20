@@ -19,7 +19,7 @@ namespace ETool.ANode
         public override void ConnectionUpdate()
         {
             NodeError nodeError = new NodeError() { errorType = NodeErrorType.ConnectionError, errorString = "The Target field must link a character controller" };
-            bool gameObjectConnection = NodeBasedEditor.Instance.Check_ConnectionExist(this, 1, true);
+            bool gameObjectConnection = EBlueprint.GetBlueprintByNode(this).Check_ConnectionExist(this, 1, true);
 
             if (!gameObjectConnection)
             {

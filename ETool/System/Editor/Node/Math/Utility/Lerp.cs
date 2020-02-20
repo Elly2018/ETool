@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Lerp")]
+    [Math_Menu("Utility")]
     public class Lerp : NodeBase
     {
         public Lerp(Vector2 position, float width, float height) : base(position, width, height)

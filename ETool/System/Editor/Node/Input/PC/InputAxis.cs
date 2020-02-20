@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Input/PC/GetAxis")]
+    [Input_Menu("Axis")]
     public class InputAxis : NodeBase
     {
         public InputAxis(Vector2 position, float width, float height) : base(position, width, height)

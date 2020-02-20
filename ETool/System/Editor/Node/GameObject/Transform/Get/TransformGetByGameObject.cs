@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetTransformByGameObject")]
+    [Transform_Menu("TransformFind")]
     public class TransformGetByGameObject : NodeBase
     {
         public TransformGetByGameObject(Vector2 position, float width, float height) : base(position, width, height)

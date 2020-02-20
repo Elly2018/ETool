@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Logic/Condition/IfElse")]
+    [Logic_Menu("Condition")]
     public class ConditionIfElse : NodeBase
     {
         public ConditionIfElse(Vector2 position, float width, float height) : base(position, width, height)

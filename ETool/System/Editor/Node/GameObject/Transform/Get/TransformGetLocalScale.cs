@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetLocalScale")]
+    [Transform_Menu("TransformLocal")]
     public class TransformGetLocalScale : NodeBase
     {
         public TransformGetLocalScale(Vector2 position, float width, float height) : base(position, width, height)

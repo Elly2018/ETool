@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Input/PC/GetMouseButtonDown")]
+    [Input_Menu("Mouse")]
     public class InputMouseButtonDown : NodeBase
     {
         public InputMouseButtonDown(Vector2 position, float width, float height) : base(position, width, height)

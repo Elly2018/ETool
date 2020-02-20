@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetInverseTransformDirection")]
+    [Transform_Menu("TransformSpace")]
     public class TransformGetInverseTransformDirection : NodeBase
     {
         public TransformGetInverseTransformDirection(Vector2 position, float width, float height) : base(position, width, height)

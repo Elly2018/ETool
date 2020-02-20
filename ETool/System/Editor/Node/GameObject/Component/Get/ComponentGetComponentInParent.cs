@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Component/Get/GetComponentInParent")]
+    [Component_Menu]
     public class ComponentGetComponentInParent : NodeBase
     {
         public ComponentGetComponentInParent(Vector2 position, float width, float height) : base(position, width, height)

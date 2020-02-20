@@ -12,10 +12,8 @@ namespace ETool
 
         public void EStart(GameObject g, BlueprintGameobjectRegister[] b)
         {
-            //InitializeProperties(g, b);
-
-            Node c = GetNode(typeof(AConstructor), nodes_instance);
-            Node a = GetNode(typeof(AStart), nodes_instance);
+            Node c = GetNode(typeof(AConstructor), _InputInstance);
+            Node a = GetNode(typeof(AStart), _InputInstance);
 
             if (c != null)
                 c.ProcessCalling(_InputInstance);
@@ -29,7 +27,7 @@ namespace ETool
 
         public void EUpdate(GameObject g, BlueprintGameobjectRegister[] b)
         {
-            Node a = GetNode(typeof(AUpdate), nodes_instance);
+            Node a = GetNode(typeof(AUpdate), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -38,7 +36,7 @@ namespace ETool
 
         public void EFixedUpdate(GameObject g, BlueprintGameobjectRegister[] b)
         {
-            Node a = GetNode(typeof(AFixedUpdate), nodes_instance);
+            Node a = GetNode(typeof(AFixedUpdate), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -47,7 +45,7 @@ namespace ETool
 
         public void ELateUpdate(GameObject g, BlueprintGameobjectRegister[] b)
         {
-            Node a = GetNode(typeof(ALateUpdate), nodes_instance);
+            Node a = GetNode(typeof(ALateUpdate), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -56,7 +54,7 @@ namespace ETool
 
         public void EOnDestroy(GameObject g, BlueprintGameobjectRegister[] b)
         {
-            Node a = GetNode(typeof(AOnDestory), nodes_instance);
+            Node a = GetNode(typeof(AOnDestory), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -66,7 +64,7 @@ namespace ETool
         public void EOnCollisionEnter(Collision collision)
         {
             _InputInstance.m_Collision = collision;
-            Node a = GetNode(typeof(AOnCollisionEnter), nodes_instance);
+            Node a = GetNode(typeof(AOnCollisionEnter), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -76,7 +74,7 @@ namespace ETool
         public void EOnCollisionExit(Collision collision)
         {
             _InputInstance.m_Collision = collision;
-            Node a = GetNode(typeof(AOnCollisionExit), nodes_instance);
+            Node a = GetNode(typeof(AOnCollisionExit), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -86,7 +84,7 @@ namespace ETool
         public void EOnCollisionStay(Collision collision)
         {
             _InputInstance.m_Collision = collision;
-            Node a = GetNode(typeof(AOnCollisionStay), nodes_instance);
+            Node a = GetNode(typeof(AOnCollisionStay), _InputInstance);
             if (a != null)
             {
                 a.ProcessCalling(_InputInstance);
@@ -136,6 +134,20 @@ namespace ETool
         public void EOnTriggerStay2D(Collider2D collision)
         {
             _InputInstance.m_Collider2D = collision;
+        }
+
+        private void OnEnable()
+        {
+            bool exist = false;
+            foreach(var i in nodes)
+            {
+                if (i.NodeType == typeof(AConstructor).FullName) exist = true;
+            }
+
+            if (!exist)
+            {
+                Node_AddNode(Vector2.zero, 1, typeof(AConstructor));
+            }
         }
     }
 }

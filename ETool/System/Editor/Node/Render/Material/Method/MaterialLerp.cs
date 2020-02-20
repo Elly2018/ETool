@@ -27,7 +27,9 @@ namespace ETool.ANode
             float fac = GetFieldOrLastInputField<float>(4, data);
 
             if (mat1 != null && mat2 != null && mat != null)
+            {
                 mat.Lerp(mat1, mat2, fac);
+            }
 
             ActiveNextEvent(0, data);
         }

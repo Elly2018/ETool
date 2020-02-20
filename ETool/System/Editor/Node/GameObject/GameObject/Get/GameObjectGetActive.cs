@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Get/GetActive")]
+    [Transform_Menu("GameObject")]
     public class GameObjectGetActive : NodeBase
     {
         public GameObjectGetActive(Vector2 position, float width, float height) : base(position, width, height)

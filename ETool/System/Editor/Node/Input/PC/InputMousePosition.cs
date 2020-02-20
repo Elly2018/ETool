@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Input/PC/GetMousePosition")]
+    [Input_Menu("Mouse")]
     public class InputMousePosition : NodeBase
     {
         public InputMousePosition(Vector2 position, float width, float height) : base(position, width, height)

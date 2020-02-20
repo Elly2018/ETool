@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Method/WorldToLocalMatrix")]
+    [Transform_Menu("TransformMatrix")]
     public class TransformWorldToLocalMatrix : NodeBase
     {
         public TransformWorldToLocalMatrix(Vector2 position, float width, float height) : base(position, width, height)

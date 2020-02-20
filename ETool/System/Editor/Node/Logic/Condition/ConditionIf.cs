@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Logic/Condition/If")]
+    [Logic_Menu("Condition")]
     public class ConditionIf : NodeBase
     {
         public ConditionIf(Vector2 position, float width, float height) : base(position, width, height)
@@ -13,7 +14,7 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            if((bool)GetFieldOrLastInputField(1, data))
+            if ((bool)GetFieldOrLastInputField(1, data))
             {
                 ActiveNextEvent(0, data);
             }

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetLocalRotation")]
+    [Transform_Menu("TransformLocal")]
     public class TransformGetLocalRotation : NodeBase
     {
         public TransformGetLocalRotation(Vector2 position, float width, float height) : base(position, width, height)

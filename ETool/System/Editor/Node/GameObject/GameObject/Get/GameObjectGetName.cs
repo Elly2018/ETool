@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Get/GetName")]
+    [Transform_Menu("GameObject")]
     public class GameObjectGetName : NodeBase
     {
         public GameObjectGetName(Vector2 position, float width, float height) : base(position, width, height)

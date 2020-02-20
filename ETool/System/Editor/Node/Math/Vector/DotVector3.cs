@@ -3,17 +3,18 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/Math/Vector/DotVector3")]
-    public class DotVector3 : NodeBase
+    [NodePath("Add Node/Math/Vector/Vector3Dot")]
+    [Math_Menu("Vector3")]
+    public class Vector3Dot : NodeBase
     {
-        public DotVector3(Vector2 position, float width, float height) : base(position, width, height)
+        public Vector3Dot(Vector2 position, float width, float height) : base(position, width, height)
         {
             unlocalTitle = "Dot";
         }
 
         public override void FieldInitialize()
         {
-            fields.Add(new Field(FieldType.Float, "Result", ConnectionType.DataOutput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Float, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "First", ConnectionType.DataInput, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "Second", ConnectionType.DataInput, this, FieldContainer.Object));
         }

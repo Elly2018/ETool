@@ -2,6 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Video;
 
 namespace ETool
 {
@@ -33,20 +34,6 @@ namespace ETool
             genericBasicType = new GenericBasicType(reference.genericBasicType);
             genericUnityType = new GenericUnityType(reference.genericUnityType);
             target_Component = new GenericComponent(reference.target_Component);
-        }
-
-        public T GetUnityComponent<T>() where T : UnityEngine.Object
-        {
-            FieldInfo[] memberInfos = target_Component.GetType().GetFields();
-            int memberIndexMatch = -1;
-            for(int i = 0; i < memberInfos.Length; i++)
-            {
-                if(memberInfos[i].GetType() == typeof(T))
-                {
-                    memberIndexMatch = i;
-                }
-            }
-            return target_Component.GetType().GetFields()[memberIndexMatch].GetValue(target_Component) as T;
         }
     }
 
@@ -107,39 +94,26 @@ namespace ETool
         public AudioClip target_AudioClip = null; // 62
         public AnimatorStateInfo target_AnimatorStateInfo; // 63
         public AnimatorClipInfo target_AnimatorClipInfo; // 64
-        public EBlueprint blueprint = null; // 65
-        public EGameData gameData = null; // 66
+        public EBlueprint target_Blueprint = null; // 65
+        public EGameData target_GameData = null; // 66
         public AudioMixer target_AudioMixer = null; // 67
         public Touch target_Touch; // 68
         public Ray target_Ray; // 69
         public Mesh target_Mesh = null; // 70
         public Flare target_Flare = null; // 71
-        public Matrix4x4 target_matrix4X4; // 72
+        public Matrix4x4 target_Matrix4X4; // 72
+        public Plane target_Plane; // 73
+        public Bounds target_Bounts; // 74
+        public VideoClip target_VideoClip; // 75
+        public Renderer target_Renderer; // 76
+        public RenderTexture target_RenderTexture; // 77
+        public Collision target_Collision; // 78
+        public Collision2D target_Collision2D; // 79
+        public Cubemap target_Cubemap; // 80
 
         public GenericUnityType()
         {
-            target_GameObject = null;
-            target_Transform = null;
-            target_Vector2 = Vector2.zero;
-            target_Vector3 = Vector3.zero;
-            target_Vector4 = Vector4.zero;
-            target_Rect = Rect.zero;
-            target_Color = Color.white;
-            target_Texture = null;
-            target_Texture2D = null;
-            target_Texture3D = null;
-            target_Material = null;
-            target_Quaternion = Quaternion.identity;
-            target_AudioClip = null;
-            target_AnimatorStateInfo = new AnimatorStateInfo();
-            target_AnimatorClipInfo = new AnimatorClipInfo();
-            blueprint = null;
-            gameData = null;
-            target_AudioMixer = null;
-            target_Touch = new Touch();
-            target_Ray = new Ray();
-            target_Mesh = null;
-            target_Flare = null;
+
         }
 
         public GenericUnityType(GenericUnityType reference)
@@ -156,7 +130,22 @@ namespace ETool
             target_Texture3D = reference.target_Texture3D;
             target_Material = reference.target_Material;
             target_Quaternion = reference.target_Quaternion;
-            target_matrix4X4 = reference.target_matrix4X4;
+            target_AudioClip = reference.target_AudioClip;
+            target_AnimatorStateInfo = reference.target_AnimatorStateInfo;
+            target_AnimatorClipInfo = reference.target_AnimatorClipInfo;
+            target_Blueprint = reference.target_Blueprint;
+            target_GameData = reference.target_GameData;
+            target_AudioMixer = reference.target_AudioMixer;
+            target_Touch = reference.target_Touch;
+            target_Ray = reference.target_Ray;
+            target_Mesh = reference.target_Mesh;
+            target_Flare = reference.target_Flare;
+            target_Matrix4X4 = reference.target_Matrix4X4;
+            target_VideoClip = reference.target_VideoClip;
+            target_Renderer = reference.target_Renderer;
+            target_Collision = reference.target_Collision;
+            target_Collision2D = reference.target_Collision2D;
+            target_Cubemap = reference.target_Cubemap;
         }
     }
 
@@ -168,17 +157,17 @@ namespace ETool
     {
         public Rigidbody rigidbody; // 200
         public Rigidbody2D rigidbody2D; // 201
-        public Collision collision; // 202
-        public Collision2D collision2D; // 203
+        public Light light; // 202
+        public Camera camera; // 203
         public Collider collider; // 204
         public Collider2D collider2D; // 205
         public MeshFilter meshFilter; // 206
         public MeshRenderer meshRenderer; // 207
         public Animator animator; // 208
-        public NodeComponent nodeComponent; // 209
-        public Light light; // 210
-        public AudioSource audioSource; // 211
-        public Camera camera; // 212
+        public ENodeComponent nodeComponent; // 209
+        public AudioSource audioSource; // 210
+        public CharacterController characterController; // 211
+        public VideoPlayer videoPlayer; // 212
 
         public GenericComponent()
         {
@@ -188,15 +177,16 @@ namespace ETool
         {
             rigidbody = reference.rigidbody; // 200
             rigidbody2D = reference.rigidbody2D; // 201
-            collision = reference.collision; // 202
-            collision2D = reference.collision2D; // 203
+            light = reference.light; // 202
+            camera = reference.camera; // 203
             collider = reference.collider; // 204
             collider2D = reference.collider2D; // 205
             meshFilter = reference.meshFilter; // 206
             meshRenderer = reference.meshRenderer; // 207
             animator = reference.animator; // 208
-            audioSource = reference.audioSource; // 211
-            camera = reference.camera; // 211
+            audioSource = reference.audioSource; // 209
+            characterController = reference.characterController; // 211
+            videoPlayer = reference.videoPlayer; // 212
         }
     }
 

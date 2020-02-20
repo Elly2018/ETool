@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetGlobalEularAngle")]
+    [Transform_Menu("TransformGlobal")]
     public class TransformGetGlobalEularAngle : NodeBase
     {
         public TransformGetGlobalEularAngle(Vector2 position, float width, float height) : base(position, width, height)

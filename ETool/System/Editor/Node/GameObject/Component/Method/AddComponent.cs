@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Component/Method/AddComponent")]
+    [Component_Menu]
     public class AddComponent : NodeBase
     {
         public AddComponent(Vector2 position, float width, float height) : base(position, width, height)

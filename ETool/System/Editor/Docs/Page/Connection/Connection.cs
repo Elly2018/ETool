@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿#if UNITY_EDITOR
 namespace ETool.Docs
 {
     [DocsPath("Home/Connection")]
@@ -21,3 +20,4 @@ namespace ETool.Docs
         }
     }
 }
+#endif

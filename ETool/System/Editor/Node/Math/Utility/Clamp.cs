@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Clamp")]
+    [Math_Menu("Utility")]
     public class Clamp : NodeBase
     {
         public Clamp(Vector2 position, float width, float height) : base(position, width, height)

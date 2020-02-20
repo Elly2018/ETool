@@ -1,4 +1,5 @@
-﻿namespace ETool.Docs
+﻿#if UNITY_EDITOR
+namespace ETool.Docs
 {
     [DocsPath("Home/Node/Array")]
     public class Node_Array : DocsBase
@@ -9,3 +10,4 @@
         }
     }
 }
+#endif

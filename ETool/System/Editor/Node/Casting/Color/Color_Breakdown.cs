@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Casting/Color/Breakdown")]
+    [Casting_Menu("Color")]
     public class Color_Breakdown : NodeBase
     {
         public Color_Breakdown(Vector2 position, float width, float height) : base(position, width, height)

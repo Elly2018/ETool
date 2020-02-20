@@ -13,17 +13,51 @@ namespace ETool.ANode
 
         public override void FieldInitialize()
         {
-            fields.Add(new Field(FieldType.String, "First String", ConnectionType.DataInput, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.String, "Second String", ConnectionType.DataInput, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.String, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Int, "String Count", ConnectionType.None, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.String, "String 0", ConnectionType.DataInput, this, FieldContainer.Object));
         }
 
-        [NodePropertyGet(typeof(String), 2)]
-        public string GetString(BlueprintInput data)
+        public override void DynamicFieldInitialize(BlueprintInput data)
         {
-            string s0 = (string)GetFieldOrLastInputField(0, data);
-            string s1 = (string)GetFieldOrLastInputField(1, data);
-            return s0 + s1;
+            Update();
+        }
+
+        public override void FieldUpdate()
+        {
+            Update();
+        }
+
+        private void Update()
+        {
+            bool change = true;
+            while (change)
+            {
+                change = false;
+                if (fields.Count - 3 > (int)fields[1].GetValue(FieldType.Int))
+                {
+                    change = true;
+                    DeleteLastField();
+                }
+                if (fields.Count - 3 < (int)fields[1].GetValue(FieldType.Int))
+                {
+                    change = true;
+                    fields.Add(new Field(FieldType.String, "String " + (fields.Count - 2).ToString(), ConnectionType.DataInput, this, FieldContainer.Object));
+                }
+            }
+        }
+
+        [NodePropertyGet(typeof(object), 0)]
+        public object GetAnswer(BlueprintInput data)
+        {
+            string answer = (string)GetFieldOrLastInputField(2, data);
+            for (int i = 3; i < fields.Count; i++)
+            {
+                answer += (string)GetFieldOrLastInputField(i, data);
+            }
+            return answer;
         }
     }
 }
+
+

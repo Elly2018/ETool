@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Casting/Color/ColorToString")]
+    [Casting_Menu("Color")]
     public class ColorToString : NodeBase
     {
         public ColorToString(Vector2 position, float width, float height) : base(position, width, height)

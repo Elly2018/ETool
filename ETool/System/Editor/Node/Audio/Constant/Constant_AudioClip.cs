@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Audio/Constant/AudioClip")]
+    [Constant_Menu]
     public class Constant_AudioClip : NodeBase
     {
         public Constant_AudioClip(Vector2 position, float width, float height) : base(position, width, height)

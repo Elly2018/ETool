@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Logic/Loop/While")]
+    [Logic_Menu("Loop")]
     public class LoopWhileLoop : NodeBase
     {
         public LoopWhileLoop(Vector2 position, float width, float height) : base(position, width, height)

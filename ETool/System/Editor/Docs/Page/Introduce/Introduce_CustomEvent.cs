@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 
 namespace ETool.Docs
 {
@@ -66,3 +67,4 @@ namespace ETool.Docs
         }
     }
 }
+#endif

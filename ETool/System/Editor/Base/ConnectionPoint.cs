@@ -55,6 +55,7 @@ namespace ETool
             rect = new Rect(0, 0, 20f, 20f);
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Drawing method
         /// </summary>
@@ -120,5 +121,6 @@ namespace ETool
                     NodeBasedEditor.Editor_Instance.OnClickInPoint(this);
             }
         }
+#endif
     }
 }

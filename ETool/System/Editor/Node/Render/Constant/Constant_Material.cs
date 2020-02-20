@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Render/Constant/Material")]
+    [Constant_Menu]
     public class Constant_Material : NodeBase
     {
         public Constant_Material(Vector2 position, float width, float height) : base(position, width, height)

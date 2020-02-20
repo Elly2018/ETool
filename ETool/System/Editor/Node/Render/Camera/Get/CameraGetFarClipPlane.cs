@@ -1,12 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using UnityEngine;
 
-namespace Assets.ETool.System.Editor.Node.Render.Camera.Get
+namespace ETool.ANode
 {
-    class CameraGetFarClipPlane
+    [NodePath("Add Node/Render/Camera/Get/GetFarClipPlane")]
+    public class CameraGetFarClipPlane : NodeBase
     {
+        public CameraGetFarClipPlane(Vector2 position, float width, float height) : base(position, width, height)
+        {
+            unlocalTitle = "Get Camera Far Clip Plane";
+        }
+
+        public override void FieldInitialize()
+        {
+            fields.Add(new Field(FieldType.Float, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Camera, "Target", ConnectionType.DataInput, this, FieldContainer.Object));
+        }
+
+        public override void ConnectionUpdate()
+        {
+            NodeError nodeError = new NodeError() { errorType = NodeErrorType.ConnectionError, errorString = "The Target field must link a camera" };
+            bool gameObjectConnection = EBlueprint.GetBlueprintByNode(this).Check_ConnectionExist(this, 1, true);
+
+            if (!gameObjectConnection)
+            {
+                AddNodeError(nodeError);
+            }
+            else
+            {
+                DeleteNodeError(nodeError);
+            }
+        }
+
+        [NodePropertyGet(typeof(float), 0)]
+        public float GetID(BlueprintInput data)
+        {
+            return GetFieldOrLastInputField<Camera>(1, data).farClipPlane;
+        }
     }
 }

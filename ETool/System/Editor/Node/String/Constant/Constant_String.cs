@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/String/Constant/String")]
+    [Constant_Menu]
     public class Constant_String : NodeBase
     {
         public Constant_String(Vector2 position, float width, float height) : base(position, width, height)

@@ -1,7 +1,9 @@
 ﻿using System;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ETool
 {
@@ -32,6 +34,7 @@ namespace ETool
     /* Define how sisters getting draw hehe */
     public class StyleUtility
     {
+#if UNITY_EDITOR
         private static GUIStyle[] m_GUIStyle = new GUIStyle[0];
 
         public static void Initialize()
@@ -152,10 +155,12 @@ namespace ETool
             t.Apply();
             return t;
         }
+#endif
 
         public static GUIStyle GetStyle(StyleType select)
         {
-            if(m_GUIStyle.Length == 0 || m_GUIStyle == null)
+#if UNITY_EDITOR
+            if (m_GUIStyle.Length == 0 || m_GUIStyle == null)
             {
                 Initialize();
             }
@@ -164,6 +169,9 @@ namespace ETool
                 m_GUIStyle[(int)select] = CreateStyle(select);
             }
             return m_GUIStyle[(int)select];
+#else
+            return new GUIStyle();
+#endif
         }
 
     }

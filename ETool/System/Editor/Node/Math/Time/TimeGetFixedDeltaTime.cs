@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Time/Fixed Delta Time")]
+    [Math_Menu("Time")]
     public class TimeGetFixedDeltaTime : NodeBase
     {
         public TimeGetFixedDeltaTime(Vector2 position, float width, float height) : base(position, width, height)

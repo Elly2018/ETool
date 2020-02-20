@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Casting/Color/Merge")]
+    [Casting_Menu("Color")]
     public class Color_Merge : NodeBase
     {
         public Color_Merge(Vector2 position, float width, float height) : base(position, width, height)

@@ -8,6 +8,7 @@ namespace ETool
     {
         public static string GetString_Node(string tag, string defaultString)
         {
+#if UNITY_EDITOR
             if (ToolLanguageEditor.languageManager.node_LanguageStructs.Count == 0) return defaultString;
             ELanguageStruct es = ToolLanguageEditor.languageManager.node_LanguageStructs[ToolLanguageEditor.languageManager.node_Index];
 
@@ -28,10 +29,15 @@ namespace ETool
                 }
             }
             return defaultString;
+#else
+            return "";
+#endif
+
         }
 
         public static string GetString_Field(string tag, string defaultString)
         {
+#if UNITY_EDITOR
             if (ToolLanguageEditor.languageManager.field_LanguageStructs.Count == 0) return defaultString;
             ELanguageStruct es = ToolLanguageEditor.languageManager.field_LanguageStructs[ToolLanguageEditor.languageManager.field_Index];
 
@@ -52,10 +58,14 @@ namespace ETool
                 }
             }
             return defaultString;
+#else
+            return "";
+#endif
         }
 
         public static string GetString_Custom(string tag, string defaultString)
         {
+#if UNITY_EDITOR
             if (ToolLanguageEditor.languageManager.custom_LanguageStructs.Count == 0) return defaultString;
             ELanguageStruct es = ToolLanguageEditor.languageManager.custom_LanguageStructs[ToolLanguageEditor.languageManager.custom_Index];
 
@@ -76,6 +86,9 @@ namespace ETool
                 }
             }
             return defaultString;
+#else
+            return "";
+#endif
         }
 
         public static string GetNodeTitle(Type t)

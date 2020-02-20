@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/InverseLerp")]
+    [Math_Menu("Utility")]
     public class InverseLerp : NodeBase
     {
         public InverseLerp(Vector2 position, float width, float height) : base(position, width, height)

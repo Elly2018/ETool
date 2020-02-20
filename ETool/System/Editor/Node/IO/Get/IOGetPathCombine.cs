@@ -50,7 +50,7 @@ namespace ETool.ANode
 
         private void SubField()
         {
-            NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
+            EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
             fields.RemoveAt(fields.Count - 1);
         }
 

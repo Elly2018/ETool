@@ -1,8 +1,10 @@
-﻿using System.Reflection;
+﻿#if UNITY_EDITOR
+using System.Reflection;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Linq;
 
 /// <summary>
 /// The base of node editor window
@@ -292,17 +294,24 @@ namespace ETool
             {
                 string message =
                     "Hotkey Map: \n\n" +
+                    "S \t\t Self Menu\n" +
+                    "C \t\t Constant Menu\n" +
+                    "V \t\t Casting Menu\n\n" +
+
                     "Shift + C \t\t Center Page\n" +
                     "F \t\t Center Selected Nodes\n" +
                     "Ctrl + C \t\t Copy Selection \n" +
                     "Ctrl + V \t\t Paste Clipboard \n" +
-                    "Delete \t\t Delete Selection \n" + 
+                    "Delete \t\t Delete Selection \n\n" + 
+
                     "[ \t\t Zoom Out \n" +
                     "] \t\t Zoom In \n" +
                     "A \t\t Select All \n" +
                     "B \t\t Box Selection \n";
                 GreyBackground = new NodeEditorMessagePopup() { Okbutton = true, Message = message };
             }
+
+            GUI.Box(RectGetMenuCenterRect(500), selectBlueprint.name);
         }
 
         /// <summary>
@@ -314,6 +323,11 @@ namespace ETool
         private Rect GetMenuButtonRect(int index, float left, Vector2 size)
         {
             return new Rect(left + (size.x * (index - 1)) + 3 * index, 3, size.x, size.y);
+        }
+
+        private Rect RectGetMenuCenterRect(float width)
+        {
+            return new Rect((position.width - width) / 2, 3, width, 20);
         }
 
         /// <summary>
@@ -607,13 +621,13 @@ namespace ETool
             }
             if (targetN != null)
             {
-                if (selectBlueprint == null || targetN.GetComponent<NodeComponent>() != null)
+                if (selectBlueprint == null || targetN.GetComponent<ENodeComponent>() != null)
                 {
-                    if (targetN.GetComponent<NodeComponent>().ABlueprint != null)
+                    if (targetN.GetComponent<ENodeComponent>().ABlueprint != null)
                     {
-                        if (targetN.GetComponent<NodeComponent>().ABlueprint != selectBlueprint)
+                        if (targetN.GetComponent<ENodeComponent>().ABlueprint != selectBlueprint)
                         {
-                            selectBlueprint = targetN.GetComponent<NodeComponent>().ABlueprint;
+                            selectBlueprint = targetN.GetComponent<ENodeComponent>().ABlueprint;
                             InitalizeContent();
                             GUI.changed = true;
                         }
@@ -641,6 +655,34 @@ namespace ETool
                 }
             }
 
+            if (e.keyCode == KeyCode.T && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextTransformMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.E && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextComponentMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.W && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextEToolMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.I && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextInputMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.M && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextMathMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.L && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextLogicMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.C && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextConstantMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.V && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextCastingMenu(e.mousePosition);
+
+            if (e.keyCode == KeyCode.S && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                ProcessContextSelfMenu(e.mousePosition);
+
+
             if (e.keyCode == KeyCode.Escape)
                 Instance.Connection_CleanConnectionPointSelection();
 
@@ -662,7 +704,7 @@ namespace ETool
                 GUI.changed = true;
             }
                 
-            if (e.keyCode == KeyCode.Delete && e.type == EventType.KeyDown)
+            if ((e.keyCode == KeyCode.Delete || e.keyCode == KeyCode.X) && e.type == EventType.KeyDown)
             {
                 DeleteSelection();
                 GUI.changed = true;
@@ -759,7 +801,6 @@ namespace ETool
         private void ProcessContextMenu(Vector2 mousePosition)
         {
             GenericMenu genericMenu = new GenericMenu();
-
             /* Adding content into menu */
             {
                 for (int i = 0; i < allTypes.Length; i++)
@@ -850,6 +891,345 @@ namespace ETool
             genericMenu.ShowAsContext();
         }
 
+        private void ProcessContextConstantMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            List<Tuple<int, List<Type>>> BufferNodes = new List<Tuple<int, List<Type>>>();
+
+            /* Get list of type */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        Constant_Menu constant_Menu = allTypes[i].GetCustomAttribute<Constant_Menu>();
+                        if (nodePath != null && constant_Menu != null)
+                        {
+                            bool exist = false;
+                            int index = 0;
+                            foreach(var j in BufferNodes)
+                            {
+                                if (j.Item1 == constant_Menu.priority)
+                                {
+                                    exist = true;
+                                    index = BufferNodes.IndexOf(j);
+                                    break;
+                                }
+                            }
+
+                            if (exist)
+                            {
+                                BufferNodes[index].Item2.Add(allTypes[i]);
+                            }
+                            else
+                            {
+                                BufferNodes.Add(new Tuple<int, List<Type>>(constant_Menu.priority, new List<Type>()));
+                            }
+                            //addNode = allTypes[i];
+                        }
+                    }
+                }
+            }
+
+            /* Sort every list */
+            {
+                foreach (var i in BufferNodes)
+                {
+                    var q = from e in i.Item2 orderby e.GetCustomAttribute<NodePath>().Path.Split('/')[e.GetCustomAttribute<NodePath>().Path.Split('/').Length - 1] select e;
+                    List<Type> buffer = new List<Type>();
+                    foreach (var j in q)
+                    {
+                        buffer.Add(j);
+                    }
+                    i.Item2.Clear();
+                    i.Item2.AddRange(buffer);
+                }
+            }
+
+            /* Adding to context menu */
+            {
+                var q2 = from e in BufferNodes orderby e.Item1 select e;
+                foreach (var i in q2)
+                {
+                    foreach (var j in i.Item2)
+                    {
+                        NodePath nodePath = j.GetCustomAttribute<NodePath>();
+                        genericMenu.AddItem(new GUIContent(nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1]), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, j, selectionPage));
+                    }
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextSelfMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            /* Adding content into menu */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        if (nodePath != null && allTypes[i].GetCustomAttribute<Self_Menu>() != null)
+                        {
+                            addNode = allTypes[i];
+                            genericMenu.AddItem(new GUIContent(nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1]), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, allTypes[i], selectionPage));
+                        }
+                    }
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextComponentMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            /* Adding content into menu */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        if (nodePath != null && allTypes[i].GetCustomAttribute<Component_Menu>() != null)
+                        {
+                            addNode = allTypes[i];
+                            genericMenu.AddItem(new GUIContent(nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1]), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, allTypes[i], selectionPage));
+                        }
+                    }
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextCastingMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            /* Adding content into menu */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        Casting_Menu casting_Menu = allTypes[i].GetCustomAttribute<Casting_Menu>();
+                        if (nodePath != null && casting_Menu != null)
+                        {
+                            addNode = allTypes[i];
+                            genericMenu.AddItem(new GUIContent(casting_Menu.source + "/" + nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1]), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, allTypes[i], selectionPage));
+                        }
+                    }
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextMathMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            List<Tuple<string, Type>> allMathNodeType = new List<Tuple<string, Type>>();
+
+            /* Getting all the math relate type */
+            {
+                for(int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        Math_Menu math_Menu = allTypes[i].GetCustomAttribute<Math_Menu>();
+
+                        if(nodePath != null && math_Menu != null)
+                        {
+                            allMathNodeType.Add(new Tuple<string, Type>(math_Menu.source + "/" + nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1], allTypes[i]));
+                        }
+                    }
+                }
+            }
+
+            /* Adding to menu */
+            {
+                var q = from e in allMathNodeType orderby e.Item1 select e;
+                foreach(var i in q)
+                {
+                    genericMenu.AddItem(new GUIContent(i.Item1), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, i.Item2, selectionPage));
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextInputMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            List<Tuple<string, Type>> allMathNodeType = new List<Tuple<string, Type>>();
+
+            /* Getting all the math relate type */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        Input_Menu math_Menu = allTypes[i].GetCustomAttribute<Input_Menu>();
+
+                        if (nodePath != null && math_Menu != null)
+                        {
+                            allMathNodeType.Add(new Tuple<string, Type>(math_Menu.source + "/" + nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1], allTypes[i]));
+                        }
+                    }
+                }
+            }
+
+            /* Adding to menu */
+            {
+                var q = from e in allMathNodeType orderby e.Item1 select e;
+                foreach (var i in q)
+                {
+                    genericMenu.AddItem(new GUIContent(i.Item1), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, i.Item2, selectionPage));
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextEToolMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            List<Tuple<string, Type>> allMathNodeType = new List<Tuple<string, Type>>();
+
+            /* Getting all the math relate type */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        ETool_Menu math_Menu = allTypes[i].GetCustomAttribute<ETool_Menu>();
+
+                        if (nodePath != null && math_Menu != null)
+                        {
+                            allMathNodeType.Add(new Tuple<string, Type>(math_Menu.source + "/" + nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1], allTypes[i]));
+                        }
+                    }
+                }
+            }
+
+            /* Adding to menu */
+            {
+                var q = from e in allMathNodeType orderby e.Item1 select e;
+                foreach (var i in q)
+                {
+                    genericMenu.AddItem(new GUIContent(i.Item1), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, i.Item2, selectionPage));
+                }
+            }
+
+            /* Adding custom event into menu */
+            {
+                foreach (var i in selectBlueprint.GetPublicEvent())
+                {
+                    genericMenu.AddItem(new GUIContent("Custom Event/Self/" + i.Item2.name + "." + i.Item1.eventName),
+                        false, Instance.GUI_OnClickAddCustomEvent, new AddCustomEvent(mousePosition, i.Item2, i.Item1, selectionPage, false));
+                }
+            }
+
+            /* Adding inherit custom event into menu */
+            {
+                if (selectBlueprint.Inherit != null)
+                {
+                    foreach (var i in selectBlueprint.GetInheritEvent())
+                    {
+                        genericMenu.AddItem(new GUIContent("Custom Event/Inherit/" + i.Item2.name + "." + i.Item1.eventName),
+                            false, Instance.GUI_OnClickAddCustomEvent, new AddCustomEvent(mousePosition, i.Item2, i.Item1, selectionPage, true));
+                    }
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextLogicMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            List<Tuple<string, Type>> allMathNodeType = new List<Tuple<string, Type>>();
+
+            /* Getting all the math relate type */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        Logic_Menu math_Menu = allTypes[i].GetCustomAttribute<Logic_Menu>();
+
+                        if (nodePath != null && math_Menu != null)
+                        {
+                            allMathNodeType.Add(new Tuple<string, Type>(math_Menu.source + "/" + nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1], allTypes[i]));
+                        }
+                    }
+                }
+            }
+
+            /* Adding to menu */
+            {
+                var q = from e in allMathNodeType orderby e.Item1 select e;
+                foreach (var i in q)
+                {
+                    genericMenu.AddItem(new GUIContent(i.Item1), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, i.Item2, selectionPage));
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
+        private void ProcessContextTransformMenu(Vector2 mousePosition)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            List<Tuple<string, Type>> allMathNodeType = new List<Tuple<string, Type>>();
+
+            /* Getting all the math relate type */
+            {
+                for (int i = 0; i < allTypes.Length; i++)
+                {
+                    if (allTypes[i].IsSubclassOf(typeof(Node)))
+                    {
+                        NodePath nodePath = allTypes[i].GetCustomAttribute<NodePath>();
+                        Transform_Menu math_Menu = allTypes[i].GetCustomAttribute<Transform_Menu>();
+
+                        if (nodePath != null && math_Menu != null)
+                        {
+                            allMathNodeType.Add(new Tuple<string, Type>(math_Menu.source + "/" + nodePath.Path.Split('/')[nodePath.Path.Split('/').Length - 1], allTypes[i]));
+                        }
+                    }
+                }
+            }
+
+            /* Adding to menu */
+            {
+                var q = from e in allMathNodeType orderby e.Item1 select e;
+                foreach (var i in q)
+                {
+                    genericMenu.AddItem(new GUIContent(i.Item1), false, Instance.GUI_OnClickAddNode, new AddClickEvent(mousePosition, i.Item2, selectionPage));
+                }
+            }
+
+            genericMenu.ShowAsContext();
+        }
+
         /// <summary>
         /// Put the editor position offset back to zero
         /// </summary>
@@ -897,9 +1277,10 @@ namespace ETool
             OnDrag(new Vector2(position.width / 2, position.height / 2));
             offset = Vector2.zero;
         }
-        
+
         #endregion
 
+        #region Utility
         private void OnDrag(Vector2 delta)
         {
             drag = delta;
@@ -1017,8 +1398,11 @@ namespace ETool
                 bufferc.fieldType = clipBorad.connections[i].fieldType;
                 bufferc.page = selectionPage;
                 bufferc.isSelected = true;
-            }
 
+                /* Update field state */
+                buffer[clipBorad.connections[i].inPointMark.x].fields[clipBorad.connections[i].inPointMark.y].onConnection = true;
+                buffer[clipBorad.connections[i].outPointMark.x].fields[clipBorad.connections[i].outPointMark.y].onConnection = true;
+            }
         }
 
         public void DeleteSelection()
@@ -1056,7 +1440,7 @@ namespace ETool
             GUI.changed = true;
             Repaint();
         }
-
+        #endregion
         #endregion
 
 
@@ -1156,3 +1540,4 @@ namespace ETool
         #endregion
     }
 }
+#endif

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Time/Realtime Since Startup")]
+    [Math_Menu("Time")]
     public class TimeGetRealtimeSinceStartup : NodeBase
     {
         public TimeGetRealtimeSinceStartup(Vector2 position, float width, float height) : base(position, width, height)

@@ -36,7 +36,7 @@ namespace ETool.ANode
             else
             {
                 /* This is private event */
-                ActiveCustomEvent(data, targetEventOrVar, _arg.ToArray());
+                ActiveCustomEvent(data, targetEventOrVar.Split('.')[1], _arg.ToArray());
             }
         }
 

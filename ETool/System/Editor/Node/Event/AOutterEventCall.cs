@@ -35,7 +35,7 @@ namespace ETool.ANode
         /// </summary>
         private void UpdateContent()
         {
-            fields[1].target.genericUnityType.blueprint = ETarget;
+            fields[1].target.genericUnityType.target_Blueprint = ETarget;
 
             if(ETarget == null)
             {
@@ -108,7 +108,7 @@ namespace ETool.ANode
 
         private void FieldUpdateAndRunningTimeInitialize()
         {
-            ETarget = fields[1].target.genericUnityType.blueprint;
+            ETarget = fields[1].target.genericUnityType.target_Blueprint;
 
             if (ETarget != null)
             {

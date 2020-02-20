@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Trigonometry/Asin")]
+    [Math_Menu("Trigonometry")]
     public class Asin : NodeBase
     {
         public Asin(Vector2 position, float width, float height) : base(position, width, height)

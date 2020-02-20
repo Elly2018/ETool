@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Component/Method/CheckComponentInParentExist")]
+    [Component_Menu]
     public class ComponentCheckComponentInParentExist : NodeBase
     {
         public ComponentCheckComponentInParentExist(Vector2 position, float width, float height) : base(position, width, height)

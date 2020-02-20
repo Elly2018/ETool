@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Sign")]
+    [Math_Menu("Utility")]
     public class Sign : NodeBase
     {
         public Sign(Vector2 position, float width, float height) : base(position, width, height)

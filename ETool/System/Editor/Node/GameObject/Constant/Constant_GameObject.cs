@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Constant/GameObject")]
+    [Constant_Menu]
     public class Constant_GameObject : NodeBase
     {
         public Constant_GameObject(Vector2 position, float width, float height) : base(position, width, height)

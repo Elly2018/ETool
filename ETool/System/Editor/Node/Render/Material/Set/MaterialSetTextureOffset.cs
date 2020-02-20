@@ -63,7 +63,7 @@ namespace ETool.ANode
             {
                 if (fields[3].fieldType != FieldType.Int)
                 {
-                    NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[3]);
+                    EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[3]);
                     fields[3] = new Field(FieldType.Int, "ID", ConnectionType.DataInput, this, FieldContainer.Object);
                 }
             }
@@ -71,7 +71,7 @@ namespace ETool.ANode
             {
                 if (fields[3].fieldType != FieldType.String)
                 {
-                    NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[3]);
+                    EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[3]);
                     fields[3] = new Field(FieldType.String, "Name", ConnectionType.DataInput, this, FieldContainer.Object);
                 }
             }

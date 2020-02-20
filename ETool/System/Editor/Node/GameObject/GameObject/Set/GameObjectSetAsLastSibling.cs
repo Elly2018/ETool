@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Set/SetAsLastSibling")]
+    [Transform_Menu("GameObjectChild")]
     public class GameObjectSetAsLastSibling : NodeBase
     {
         public GameObjectSetAsLastSibling(Vector2 position, float width, float height) : base(position, width, height)

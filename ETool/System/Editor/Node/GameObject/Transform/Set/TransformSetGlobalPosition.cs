@@ -3,17 +3,18 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/GameObject/Transform/Set/SetLocalPosition")]
+    [NodePath("Add Node/GameObject/Transform/Set/SetGlobalPosition")]
+    [Transform_Menu("TransformGlobal")]
     public class TransformSetGlobalPosition : NodeBase
     {
         public TransformSetGlobalPosition(Vector2 position, float width, float height) : base(position, width, height)
         {
-            unlocalTitle = "Set Local Position";
+            unlocalTitle = "Set Global Position";
         }
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            ((Transform)GetFieldOrLastInputField(1, data)).localPosition = (Vector3)GetFieldOrLastInputField(2, data);
+            ((Transform)GetFieldOrLastInputField(1, data)).position = (Vector3)GetFieldOrLastInputField(2, data);
             ActiveNextEvent(0, data);
         }
 

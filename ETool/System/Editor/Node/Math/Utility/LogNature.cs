@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/LogNature")]
+    [Math_Menu("Utility")]
     public class LogNature : NodeBase
     {
         public LogNature(Vector2 position, float width, float height) : base(position, width, height)

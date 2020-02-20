@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Logic/Compare/Smaller")]
+    [Logic_Menu("Compare")]
     public class CompareSmaller : NodeBase
     {
         public CompareSmaller(Vector2 position, float width, float height) : base(position, width, height)
@@ -14,8 +15,8 @@ namespace ETool.ANode
         public override void FieldInitialize()
         {
             fields.Add(new Field(FieldType.Number, "Type", ConnectionType.None, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.Float, "Number A", ConnectionType.DataInput, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.Float, "Number B", ConnectionType.DataInput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Int, "Number A", ConnectionType.DataInput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Int, "Number B", ConnectionType.DataInput, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Boolean, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
         }
 
@@ -26,13 +27,13 @@ namespace ETool.ANode
             switch (ft)
             {
                 case FieldType.Int:
-                    return (int)GetFieldOrLastInputField(0, data) < (int)GetFieldOrLastInputField(1, data);
+                    return (int)GetFieldOrLastInputField(1, data) < (int)GetFieldOrLastInputField(2, data);
                 case FieldType.Long:
-                    return (long)GetFieldOrLastInputField(0, data) < (long)GetFieldOrLastInputField(1, data);
+                    return (long)GetFieldOrLastInputField(1, data) < (long)GetFieldOrLastInputField(2, data);
                 case FieldType.Float:
-                    return (float)GetFieldOrLastInputField(0, data) < (float)GetFieldOrLastInputField(1, data);
+                    return (float)GetFieldOrLastInputField(1, data) < (float)GetFieldOrLastInputField(2, data);
                 case FieldType.Double:
-                    return (double)GetFieldOrLastInputField(0, data) < (double)GetFieldOrLastInputField(1, data);
+                    return (double)GetFieldOrLastInputField(1, data) < (double)GetFieldOrLastInputField(2, data);
             }
             return (int)GetFieldOrLastInputField(0, data) < (int)GetFieldOrLastInputField(1, data);
         }
@@ -53,10 +54,16 @@ namespace ETool.ANode
             if (fields[1].fieldType != ft)
             {
                 fields[1] = new Field(ft, "Number A", ConnectionType.DataInput, this, FieldContainer.Object);
+
+                EBlueprint e = EBlueprint.GetBlueprintByNode(this);
+                e.Connection_RemoveRelateConnectionInField(fields[1]);
             }
             if (fields[2].fieldType != ft)
             {
                 fields[2] = new Field(ft, "Number B", ConnectionType.DataInput, this, FieldContainer.Object);
+
+                EBlueprint e = EBlueprint.GetBlueprintByNode(this);
+                e.Connection_RemoveRelateConnectionInField(fields[2]);
             }
         }
     }

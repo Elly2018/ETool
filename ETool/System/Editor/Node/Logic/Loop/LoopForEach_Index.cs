@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Logic/Loop/ForEachIndex")]
+    [Logic_Menu("Loop")]
     public class LoopForEach_Index : NodeBase
     {
         private int index;

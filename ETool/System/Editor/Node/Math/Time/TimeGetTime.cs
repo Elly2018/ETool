@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Time/Time")]
+    [Math_Menu("Time")]
     public class TimeGetTime : NodeBase
     {
         public TimeGetTime(Vector2 position, float width, float height) : base(position, width, height)

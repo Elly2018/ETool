@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Matrix/CreateMatrix")]
+    [Math_Menu("Matrix")]
     public class CreateMatrix : NodeBase
     {
         public CreateMatrix(Vector2 position, float width, float height) : base(position, width, height)

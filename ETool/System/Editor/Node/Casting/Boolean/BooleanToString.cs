@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Casting/Boolean/BooleanToString")]
+    [Casting_Menu("Boolean")]
     public class BooleanToString : NodeBase
     {
         public BooleanToString(Vector2 position, float width, float height) : base(position, width, height)

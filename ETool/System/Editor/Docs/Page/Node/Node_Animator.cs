@@ -1,4 +1,5 @@
-﻿namespace ETool.Docs
+﻿#if UNITY_EDITOR
+namespace ETool.Docs
 {
     [DocsPath("Home/Node/Animator")]
     public class Node_Animator : DocsBase
@@ -9,3 +10,4 @@
         }
     }
 }
+#endif

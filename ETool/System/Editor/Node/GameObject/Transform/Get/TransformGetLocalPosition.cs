@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetLocalPosition")]
+    [Transform_Menu("TransformLocal")]
     public class TransformGetLocalPosition : NodeBase
     {
         public TransformGetLocalPosition(Vector2 position, float width, float height) : base(position, width, height)

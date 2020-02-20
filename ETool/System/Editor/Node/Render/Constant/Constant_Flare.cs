@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Render/Constant/Flare")]
+    [Constant_Menu]
     public class Constant_Flare : NodeBase
     {
         public Constant_Flare(Vector2 position, float width, float height) : base(position, width, height)

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Repeat")]
+    [Math_Menu("Utility")]
     public class Repeat : NodeBase
     {
         public Repeat(Vector2 position, float width, float height) : base(position, width, height)

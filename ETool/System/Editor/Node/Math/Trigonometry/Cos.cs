@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Trigonometry/Cos")]
+    [Math_Menu("Trigonometry")]
     public class Cos : NodeBase
     {
         public Cos(Vector2 position, float width, float height) : base(position, width, height)

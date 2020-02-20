@@ -18,6 +18,11 @@ namespace ETool
             return null;
         }
 
+        public static int GetBlueprintNodeIndexByNode(Node node)
+        {
+            return GetBlueprintByNode(node).nodes.IndexOf(node as NodeBase);
+        }
+
         /// <summary>
         /// Check if any other node are selected <br />
         /// This is use for multiple node drag

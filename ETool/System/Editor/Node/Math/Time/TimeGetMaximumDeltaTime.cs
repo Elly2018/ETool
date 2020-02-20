@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Time/Maximum Delta Time")]
+    [Math_Menu("Time")]
     public class TimeGetMaximumDeltaTime : NodeBase
     {
         public TimeGetMaximumDeltaTime(Vector2 position, float width, float height) : base(position, width, height)

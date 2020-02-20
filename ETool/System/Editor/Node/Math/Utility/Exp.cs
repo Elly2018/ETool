@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Exp")]
+    [Math_Menu("Utility")]
     public class Exp : NodeBase
     {
         public Exp(Vector2 position, float width, float height) : base(position, width, height)

@@ -19,7 +19,7 @@ namespace ETool.ANode
         public override void ConnectionUpdate()
         {
             NodeError nodeError = new NodeError() { errorString = "This node need a target camera input", errorType = NodeErrorType.ConnectionError };
-            bool exist = NodeBasedEditor.Instance.Check_ConnectionExist(this, 1, true);
+            bool exist = EBlueprint.GetBlueprintByNode(this).Check_ConnectionExist(this, 1, true);
             if (!exist)
             {
                 AddNodeError(nodeError);

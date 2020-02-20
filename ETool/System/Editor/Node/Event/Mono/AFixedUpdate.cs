@@ -13,6 +13,11 @@ namespace ETool.ANode
             unlocalTitle = "Fixed Update";
         }
 
+        public override void ProcessCalling(BlueprintInput data)
+        {
+            ActiveNextEvent(0, data);
+        }
+
         public override void FieldInitialize()
         {
             fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventOutput, this, FieldContainer.Object));

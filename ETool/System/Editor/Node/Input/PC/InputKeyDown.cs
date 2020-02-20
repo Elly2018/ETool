@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Input/PC/GetKeyDown")]
+    [Input_Menu("Keyborad")]
     public class InputKeyDown : NodeBase
     {
         public InputKeyDown(Vector2 position, float width, float height) : base(position, width, height)

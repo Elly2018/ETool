@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Time/Unscaled Delta Time")]
+    [Math_Menu("Time")]
     public class TimeGetUnscaledDeltaTime : NodeBase
     {
         public TimeGetUnscaledDeltaTime(Vector2 position, float width, float height) : base(position, width, height)

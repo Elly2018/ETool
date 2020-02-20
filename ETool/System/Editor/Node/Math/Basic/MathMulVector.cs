@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Basic/MultiplyVector")]
+    [Math_Menu("Basic Vector")]
     public class MathMulVector : NodeBase
     {
         public MathMulVector(Vector2 position, float width, float height) : base(position, width, height)
@@ -52,19 +53,19 @@ namespace ETool.ANode
             {
                 if (fields[i].fieldType != ft)
                 {
-                    NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[i]);
+                    EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[i]);
                     fields[i] = new Field(ft, "Vector " + (i - 3).ToString(), ConnectionType.DataInput, this, FieldContainer.Object);
                 }
             }
 
             if (fields[1].fieldType != ft)
             {
-                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[1]);
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[1]);
                 fields[1] = new Field(ft, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object);
             }
         }
 
-        [NodePropertyGet(typeof(object), 0)]
+        [NodePropertyGet(typeof(object), 1)]
         public object GetAnswer(BlueprintInput data)
         {
             FieldType ft = (FieldType)(int)fields[0].GetValue(FieldType.Number);
@@ -73,29 +74,29 @@ namespace ETool.ANode
             {
                 case FieldType.Vector2:
                     {
-                        Vector2 answer = (Vector2)GetFieldOrLastInputField(2, data);
-                        for (int i = 0; i < fields.Count - 3; i++)
+                        Vector2 answer = (Vector2)GetFieldOrLastInputField(3, data);
+                        for (int i = 4; i < fields.Count; i++)
                         {
-                            answer *= (Vector2)GetFieldOrLastInputField(i + 3, data);
+                            answer *= (Vector2)GetFieldOrLastInputField(i, data);
                         }
                         return answer;
                     }
                 case FieldType.Vector3:
                     {
-                        Vector3 answer = (Vector3)GetFieldOrLastInputField(2, data);
-                        for (int i = 0; i < fields.Count - 3; i++)
+                        Vector3 answer = (Vector3)GetFieldOrLastInputField(3, data);
+                        for (int i = 4; i < fields.Count; i++)
                         {
-                            Vector3 buffer = (Vector3)GetFieldOrLastInputField(i + 3, data);
+                            Vector3 buffer = (Vector3)GetFieldOrLastInputField(i, data);
                             answer = new Vector3(answer.x * buffer.x, answer.y * buffer.y, answer.z * buffer.z);
                         }
                         return answer;
                     }
                 case FieldType.Vector4:
                     {
-                        Vector4 answer = (Vector4)GetFieldOrLastInputField(2, data);
-                        for (int i = 0; i < fields.Count - 3; i++)
+                        Vector4 answer = (Vector4)GetFieldOrLastInputField(3, data);
+                        for (int i = 4; i < fields.Count; i++)
                         {
-                            Vector4 buffer = (Vector4)GetFieldOrLastInputField(i + 3, data);
+                            Vector4 buffer = (Vector4)GetFieldOrLastInputField(i, data);
                             answer = new Vector4(answer.x * buffer.x, answer.y * buffer.y, answer.z * buffer.z, answer.w * buffer.w);
                         }
                         return answer;

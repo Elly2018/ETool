@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/SelfTransform")]
+    [Self_Menu]
     public class TransformSelfTransform : NodeBase
     {
         public TransformSelfTransform(Vector2 position, float width, float height) : base(position, width, height)

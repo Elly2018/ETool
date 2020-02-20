@@ -4,9 +4,10 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Vector/VectorDistance")]
-    public class TwoVector2Distance : NodeBase
+    [Math_Menu("Vector")]
+    public class VectorDistance : NodeBase
     {
-        public TwoVector2Distance(Vector2 position, float width, float height) : base(position, width, height)
+        public VectorDistance(Vector2 position, float width, float height) : base(position, width, height)
         {
             unlocalTitle = "Vector Distance";
         }
@@ -34,12 +35,12 @@ namespace ETool.ANode
             FieldType ft = (FieldType)fields[0].GetValue(FieldType.Vector);
             if (fields[2].fieldType != ft)
             {
-                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[2]);
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[2]);
                 fields[2] = new Field(ft, "First", ConnectionType.DataInput, this, FieldContainer.Object);
             }
             if (fields[3].fieldType != ft)
             {
-                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[3]);
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[3]);
                 fields[3] = new Field(ft, "Second", ConnectionType.DataInput, this, FieldContainer.Object);
             }
         }

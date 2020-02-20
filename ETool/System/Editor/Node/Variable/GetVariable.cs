@@ -6,6 +6,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Variable/Get Variable")]
+    [ETool_Menu("Variable")]
     public class GetVariable : NodeBase
     {
         private List<Tuple<BlueprintVariable, EBlueprint>> MyTarget;

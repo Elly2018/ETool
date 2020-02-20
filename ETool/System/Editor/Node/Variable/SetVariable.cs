@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Variable/Set Variable")]
+    [ETool_Menu("Variable")]
     public class SetVariable : NodeBase
     {
         private List<Tuple<BlueprintVariable, EBlueprint>> MyTarget;
@@ -16,22 +17,18 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            if (fields.Count == 3)
+            if (fields[2].fieldContainer == FieldContainer.Object)
             {
-                if(data.blueprintVariables[(Int32)fields[1].GetValue(FieldType.Int)].fieldContainer == FieldContainer.Object)
+                object o = GetFieldOrLastInputField<object>(2, data);
+                if(o != null)
                 {
-                    object o = GetFieldOrLastInputField<object>(2, data);
-                    Field.SetObjectByFieldType(fields[2].fieldType, data.blueprintVariables[(Int32)fields[1].GetValue(FieldType.Int)].variable, o);
-                }
-                else
-                {
-                    object[] o = GetFieldOrLastInputField<object[]>(2, data);
-
-                    data.blueprintVariables[(Int32)fields[1].GetValue(FieldType.Int)].variable_Array = 
-                        Field.SetObjectArrayByField(fields[2].fieldType, data.blueprintVariables[(Int32)fields[1].GetValue(FieldType.Int)].variable_Array, o);
+                    SetVariable(data, fields[2].fieldType, o);
                 }
             }
-
+            else
+            {
+                SetVariableArray(data, fields[2].fieldType, GetFieldOrLastInputField<object[]>(2, data));
+            }
             ActiveNextEvent(0, data);
         }
 

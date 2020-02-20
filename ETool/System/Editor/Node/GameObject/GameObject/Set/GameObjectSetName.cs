@@ -5,6 +5,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Set/SetName")]
+    [Transform_Menu("GameObject")]
     public class GameObjectSetName : NodeBase
     {
         public GameObjectSetName(Vector2 position, float width, float height) : base(position, width, height)

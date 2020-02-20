@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Logic/Loop/ForEachElement")]
+    [Logic_Menu("Loop")]
     public class LoopForEach_Element : NodeBase
     {
         private object buffer = null;
@@ -49,12 +50,12 @@ namespace ETool.ANode
             FieldType ft = (FieldType)fields[1].GetValue(FieldType.Type);
             if (fields[2].fieldType != ft)
             {
-                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[2]);
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[2]);
                 fields[2] = new Field(ft, "Select", ConnectionType.DataOutput, true, this, FieldContainer.Object);
             }
             if (fields[3].fieldType != ft)
             {
-                NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[3]);
+                EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[3]);
                 fields[3] = new Field(ft, "Array", ConnectionType.DataInput, true, this, FieldContainer.Array);
             }
         }
@@ -62,7 +63,6 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(object), 2)]
         public object GetIndex(BlueprintInput data)
         {
-            Debug.Log("Get Call");
             return buffer;
         }
     }

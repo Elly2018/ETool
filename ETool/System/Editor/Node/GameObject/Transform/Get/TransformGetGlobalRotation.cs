@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetGlobalRotation")]
+    [Transform_Menu("TransformGlobal")]
     public class TransformGetGlobalRotation : NodeBase
     {
         public TransformGetGlobalRotation(Vector2 position, float width, float height) : base(position, width, height)

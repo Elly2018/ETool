@@ -13,8 +13,10 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
+#if UNITY_EDITOR
             if(Application.isEditor)
                 UnityEditor.EditorApplication.isPlaying = false;
+#endif
             ActiveNextEvent(0, data);
         }
 

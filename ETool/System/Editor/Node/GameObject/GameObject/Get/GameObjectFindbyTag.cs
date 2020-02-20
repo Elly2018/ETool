@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Get/FindByTag")]
+    [Transform_Menu("GameObjectFind")]
     public class GameObjectFindbyTag : NodeBase
     {
         public GameObjectFindbyTag(Vector2 position, float width, float height) : base(position, width, height)

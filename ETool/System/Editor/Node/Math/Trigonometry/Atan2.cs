@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Trigonometry/Atan2")]
+    [Math_Menu("Trigonometry")]
     public class Atan2 : NodeBase
     {
         public Atan2(Vector2 position, float width, float height) : base(position, width, height)

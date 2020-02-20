@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Quaternion/Identity")]
+    [Math_Menu("Quaternion")]
     public class QuaternionIdentity : NodeBase
     {
         public QuaternionIdentity(Vector2 position, float width, float height) : base(position, width, height)

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Time/Frame Count")]
+    [Math_Menu("Time")]
     public class TimeGetFrameCount : NodeBase
     {
         public TimeGetFrameCount(Vector2 position, float width, float height) : base(position, width, height)

@@ -1,4 +1,5 @@
-﻿namespace ETool.Docs
+﻿#if UNITY_EDITOR
+namespace ETool.Docs
 {
     [DocsPath("Home")]
     public class Home : DocsBase
@@ -37,3 +38,4 @@
         }
     }
 }
+#endif

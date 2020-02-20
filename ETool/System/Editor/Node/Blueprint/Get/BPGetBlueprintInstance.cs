@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Blueprint/Get/GetBlueprint")]
+    [ETool_Menu("Blueprint")]
     public class BPGetBlueprintInstance : NodeBase
     {
         public BPGetBlueprintInstance(Vector2 position, float width, float height) : base(position, width, height)
@@ -19,7 +20,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(EBlueprint), 0)]
         public EBlueprint GetBP(BlueprintInput data)
         {
-            return GetFieldOrLastInputField<NodeComponent>(1, data).GetInstanceOfBP();
+            return GetFieldOrLastInputField<ENodeComponent>(1, data).GetInstanceOfBP();
         }
     }
 }

@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 namespace ETool
 {
@@ -124,6 +127,7 @@ namespace ETool
 
         public void Import()
         {
+#if UNITY_EDITOR
             string filename = EditorUtility.OpenFilePanel("Import From Json File", "", "json");
             if(filename != null)
             {
@@ -131,16 +135,19 @@ namespace ETool
                 if(buffer != null)
                     languagePack.languageElements = buffer.languageElements;
             }
+#endif
         }
 
         public void Export()
         {
+#if UNITY_EDITOR
             string filename = EditorUtility.SaveFilePanel("Export To Json File", Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "", "json");
             if(filename != null)
             {
                 string buffer = JsonUtility.ToJson(languagePack, true);
                 File.WriteAllText(filename, buffer);
             }
+#endif
         }
 
         #endregion

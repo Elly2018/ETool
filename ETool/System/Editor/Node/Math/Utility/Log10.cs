@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Log10")]
+    [Math_Menu("Utility")]
     public class Log10 : NodeBase
     {
         public Log10(Vector2 position, float width, float height) : base(position, width, height)

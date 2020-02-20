@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Pi")]
+    [Math_Menu("Utility")]
     public class Pi : NodeBase
     {
         public Pi(Vector2 position, float width, float height) : base(position, width, height)

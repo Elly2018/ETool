@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Method/LookAt")]
+    [Transform_Menu("TransformMethod")]
     public class TransformLookAt : NodeBase
     {
         public TransformLookAt(Vector2 position, float width, float height) : base(position, width, height)

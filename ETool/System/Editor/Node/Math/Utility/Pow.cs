@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Pow")]
+    [Math_Menu("Utility")]
     public class Pow : NodeBase
     {
         public Pow(Vector2 position, float width, float height) : base(position, width, height)

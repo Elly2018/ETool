@@ -66,7 +66,7 @@ namespace ETool.ANode
             {
                 if(fields[i].fieldType != ft)
                 {
-                    NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[i]);
+                    EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[i]);
                     Field buffer = new Field(ft, "Element: ", ConnectionType.DataInput, this, FieldContainer.Object);
                     fields[i] = buffer;
                     buffer.title = "Element: " + (fields.IndexOf(buffer) - 3).ToString();
@@ -83,7 +83,7 @@ namespace ETool.ANode
 
         private void SubField()
         {
-            NodeBasedEditor.Instance.Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
+            EBlueprint.GetBlueprintByNode(this).Connection_RemoveRelateConnectionInField(fields[fields.Count - 1]);
             fields.RemoveAt(fields.Count - 1);
         }
 

@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Component/Get/GetComponent")]
+    [Component_Menu]
     public class ComponentGetComponent : NodeBase
     {
         public ComponentGetComponent(Vector2 position, float width, float height) : base(position, width, height)
@@ -35,7 +36,7 @@ namespace ETool.ANode
         public override void ConnectionUpdate()
         {
             NodeError nodeError = new NodeError() { errorType = NodeErrorType.ConnectionError, errorString = "The Target field must link a gameobject" };
-            bool gameObjectConnection = NodeBasedEditor.Instance.Check_ConnectionExist(this, 1, true);
+            bool gameObjectConnection = EBlueprint.GetBlueprintByNode(this).Check_ConnectionExist(this, 1, true);
 
             if (!gameObjectConnection)
             {

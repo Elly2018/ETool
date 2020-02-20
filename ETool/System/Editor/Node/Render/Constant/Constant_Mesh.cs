@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Render/Constant/Mesh")]
+    [Constant_Menu]
     public class Constant_Mesh : NodeBase
     {
         public Constant_Mesh(Vector2 position, float width, float height) : base(position, width, height)

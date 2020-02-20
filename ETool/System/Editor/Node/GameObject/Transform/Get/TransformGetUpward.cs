@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetUpward")]
+    [Transform_Menu("TransformVector")]
     public class TransformGetUpward : NodeBase
     {
         public TransformGetUpward(Vector2 position, float width, float height) : base(position, width, height)

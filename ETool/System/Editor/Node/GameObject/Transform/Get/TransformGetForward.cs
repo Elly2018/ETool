@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetForward")]
+    [Transform_Menu("TransformVector")]
     public class TransformGetForward : NodeBase
     {
         public TransformGetForward(Vector2 position, float width, float height) : base(position, width, height)

@@ -193,7 +193,7 @@ namespace ETool
             return null;
         }
 
-        public object Custom_CallGetVariableArray(string label, FieldType type)
+        public object[] Custom_CallGetVariableArray(string label, FieldType type)
         {
             foreach (var i in _InputInstance.blueprintVariables)
             {

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Trigonometry/Acos")]
+    [Math_Menu("Trigonometry")]
     public class Acos : NodeBase
     {
         public Acos(Vector2 position, float width, float height) : base(position, width, height)

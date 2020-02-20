@@ -3,6 +3,7 @@
 namespace ETool.ANode
 {
     [NodePath("Add Node/Input/Mobile/GetAllTouch")]
+    [Input_Menu("Touch")]
     public class InputGetAllTouch : NodeBase
     {
         public InputGetAllTouch(Vector2 position, float width, float height) : base(position, width, height)

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/Transform/Get/GetRightward")]
+    [Transform_Menu("TransformVector")]
     public class TransformGetRightward : NodeBase
     {
         public TransformGetRightward(Vector2 position, float width, float height) : base(position, width, height)

@@ -176,12 +176,11 @@ namespace ETool
         }
         #endregion
 
-
-        private Node GetNode(Type t, List<NodeBase> ns)
+        private Node GetNode(Type t, BlueprintInput ns)
         {
-            for (int i = 0; i < ns.Count; i++)
+            for (int i = 0; i < ns.allNode.Length; i++)
             {
-                if (ns[i].NodeType == t.FullName) return ns[i];
+                if (ns.allNode[i].NodeType == t.FullName) return ns.allNode[i];
             }
             return null;
         }

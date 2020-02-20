@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/GameObject/GameObject/Get/GetTag")]
+    [Transform_Menu("GameObject")]
     public class GameObjectGetTag : NodeBase
     {
         public GameObjectGetTag(Vector2 position, float width, float height) : base(position, width, height)

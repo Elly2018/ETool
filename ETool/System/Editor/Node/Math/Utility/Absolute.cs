@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Absolute")]
+    [Math_Menu("Utility")]
     public class Absolute : NodeBase
     {
         public Absolute(Vector2 position, float width, float height) : base(position, width, height)

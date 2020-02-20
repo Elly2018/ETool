@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/Min")]
+    [Math_Menu("Utility")]
     public class Min : NodeBase
     {
         public Min(Vector2 position, float width, float height) : base(position, width, height)

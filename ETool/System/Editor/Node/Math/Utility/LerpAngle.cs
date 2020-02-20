@@ -4,6 +4,7 @@ using UnityEngine;
 namespace ETool.ANode
 {
     [NodePath("Add Node/Math/Utility/LerpAngle")]
+    [Math_Menu("Utility")]
     public class LerpAngle : NodeBase
     {
         public LerpAngle(Vector2 position, float width, float height) : base(position, width, height)
