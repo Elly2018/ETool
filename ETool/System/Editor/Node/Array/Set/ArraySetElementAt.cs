@@ -15,7 +15,7 @@ namespace ETool.ANode
 
         public override void FieldInitialize()
         {
-            fields.Add(new Field(FieldType.Event, "Type", ConnectionType.EventBoth, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventBoth, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Type, "Type", ConnectionType.None, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Int, "Index", ConnectionType.DataInput, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Int, "Target", ConnectionType.DataInput, true, this, FieldContainer.Object));
@@ -52,7 +52,7 @@ namespace ETool.ANode
 
         private void FieldUpdateType()
         {
-            FieldType ft = (FieldType)fields[0].GetValue(FieldType.Type);
+            FieldType ft = (FieldType)fields[1].GetValue(FieldType.Type);
             if (fields[3].fieldType != ft)
             {
                 fields[3] = new Field(ft, "Target", ConnectionType.DataInput, true, this, FieldContainer.Object);

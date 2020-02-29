@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Assets.ETool.System.Editor.Node.Scene.Method
+namespace Assets.ETool.System.Editor.Node.Scene.Scene.Get
 {
-    class SceneLoadSceneByString
+    class SceneGetIsSubScene
     {
     }
 }

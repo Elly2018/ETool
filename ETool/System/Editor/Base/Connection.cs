@@ -144,6 +144,15 @@ namespace ETool
             return true;
         }
 
+        public Rect GetBoxRect()
+        {
+            /* Get connection point output */
+            ConnectionPoint outPoint = NodeBasedEditor.Instance.Connection_GetConnectionPoint(outPointMark, false);
+            ConnectionPoint inPoint = NodeBasedEditor.Instance.Connection_GetConnectionPoint(inPointMark, true);
+
+            return NodeBasedEditor.GetBoxBy2Point(inPoint.rect.center, outPoint.rect.center);
+        }
+
         public void ProcessContextMenu() 
         {
             GenericMenu genericMenu = new GenericMenu();

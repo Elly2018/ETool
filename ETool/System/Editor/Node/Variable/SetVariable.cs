@@ -27,7 +27,11 @@ namespace ETool.ANode
             }
             else
             {
-                SetVariableArray(data, fields[2].fieldType, GetFieldOrLastInputField<object[]>(2, data));
+                object[] o = GetFieldOrLastInputField<object[]>(2, data);
+                if(o != null)
+                {
+                    SetVariableArray(data, fields[2].fieldType, o);
+                }
             }
             ActiveNextEvent(0, data);
         }

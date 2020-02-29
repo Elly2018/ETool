@@ -25,9 +25,18 @@ namespace ETool.ANode
             List<object> _arg = new List<object>();
             FieldType ft = (FieldType)fields[0].GetValue(FieldType.Type);
 
-            for (int i = 3; i < fields.Count; i++)
+            for (int i = 0; i < GetFieldOrLastInputField<int>(1, data); i++)
             {
-                _arg.Add(fields[i].GetValue(ft));
+                switch (ft)
+                {
+                    case FieldType.Vector3:
+                        _arg.Add(Vector3.zero);
+                        break;
+                    default:
+                        _arg.Add(new object());
+                        break;
+
+                }
             }
 
             return _arg.ToArray();

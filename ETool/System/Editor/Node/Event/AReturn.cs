@@ -12,7 +12,7 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            data.eventManager.SendReturn(GetFieldOrLastInputField<object>(1, data));
+            data.eventManager.SendReturn(GetFieldOrLastInputField(1, data));
             data.eventManager.StartReturn(data);
         }
 

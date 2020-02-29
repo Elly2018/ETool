@@ -47,6 +47,8 @@ namespace ETool
                     Node_RemoveNodes(Check_GetEventNode(i.Item2));
                 }
             }
+
+            if (!Check_EventNodeExist(EventNodeType.Constructor)) GUI_OnClickAddNode(new AddClickEvent() { add = typeof(AConstructor), mousePosition = Vector2.zero, page = 1 });
         }
         #endregion
 
@@ -220,8 +222,12 @@ namespace ETool
             }
 
             blueprintEvent.customEvent.RemoveAt(index);
-        }
 
+            foreach (var i in nodes)
+            {
+                if (i.page > index + EBlueprint.DefaultPageCount) i.page--;
+            }
+        }
 
         /// <summary>
         /// Get the unique name of event name

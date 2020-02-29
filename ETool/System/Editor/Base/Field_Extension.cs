@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.Video;
+using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -71,6 +72,7 @@ namespace ETool
         Collision = 78,
         Collision2D = 79,
         Cubemap = 80,
+        Scene = 81,
 
         // Component
         // Range: 200 - 1999
@@ -183,6 +185,8 @@ namespace ETool
                     new FieldTypeStruct(FieldType.RenderTexture, typeof(RenderTexture), new Color(0, 1, 0)), // 77
                     new FieldTypeStruct(FieldType.Collision, typeof(Collision), new Color(0, 1, 0)), // 78
                     new FieldTypeStruct(FieldType.Collision2D, typeof(Collision2D), new Color(0, 1, 0)), // 79
+                    new FieldTypeStruct(FieldType.Cubemap, typeof(Cubemap), new Color(0, 1, 0)), // 80
+                    new FieldTypeStruct(FieldType.Scene, typeof(Scene), new Color(0, 1, 0)), // 81
 
                     new FieldTypeStruct(FieldType.Rigidbody, typeof(Rigidbody), new Color(0, 0, 1)), // 200
                     new FieldTypeStruct(FieldType.Rigidbody2D, typeof(Rigidbody2D), new Color(0, 0, 1)), // 201
@@ -274,6 +278,8 @@ namespace ETool
                 case FieldType.RenderTexture: return go.genericUnityType.target_RenderTexture; // 77
                 case FieldType.Collision: return go.genericUnityType.target_Collision; // 78
                 case FieldType.Collision2D: return go.genericUnityType.target_Collision2D; // 79
+                case FieldType.Cubemap: return go.genericUnityType.target_Cubemap; // 80
+                case FieldType.Scene: return go.genericUnityType.target_Scene; // 81
 
                 case FieldType.Rigidbody: return go.target_Component.rigidbody; // 200
                 case FieldType.Rigidbody2D: return go.target_Component.rigidbody2D; // 201
@@ -596,7 +602,7 @@ namespace ETool
             object[] result = new object[go.Length];
             for (int i = 0; i < go.Length; i++)
             {
-                result[i] = GetObjectByFieldType(tf, go[i]);
+                result[i] = FieldTypeStruct.GetGO(go[i], tf);
             }
             return result;
         }
@@ -609,14 +615,17 @@ namespace ETool
 
         public static GenericObject[] SetObjectArrayByField(FieldType tf, GenericObject[] go, object[] o)
         {
+            /* Length is equal */
             if (go.Length == o.Length)
             {
                 /* Just apply the value */
                 for (int i = 0; i < go.Length; i++)
                 {
-                    SetObjectByFieldType(tf, go[i], o[i]);
+                    FieldTypeStruct.SetGO(go[i], tf, o[i]);
                 }
             }
+            /* Length is bigger than the value length */
+            /* We will have to delete some array element */
             else if (go.Length > o.Length)
             {
                 /* Go remove element */
@@ -630,26 +639,31 @@ namespace ETool
 
                 for (int i = 0; i < buffer.Count; i++)
                 {
-                    SetObjectByFieldType(tf, buffer[i], o[i]);
+                    FieldTypeStruct.SetGO(buffer[i], tf, o[i]);
                 }
 
                 go = buffer.ToArray();
             }
+            /* Length is less than the value length */
+            /* We will have to add some empty array element */
             else if (go.Length < o.Length)
             {
                 /* Go adding element */
                 int diff = o.Length - go.Length;
-                List<GenericObject> buffer = go.ToList();
+                List<GenericObject> buffer = new List<GenericObject>(go);
 
+                /* Apply value first */
                 for (int i = 0; i < buffer.Count; i++)
                 {
-                    SetObjectByFieldType(tf, buffer[i], o[i]);
+                    FieldTypeStruct.SetGO(buffer[i], tf, o[i]);
                 }
 
                 for (int i = 0; i < diff; i++)
                 {
                     GenericObject bufferGO = new GenericObject();
-                    SetObjectByFieldType(tf, bufferGO, o[go.Length + i]);
+
+                    FieldTypeStruct.SetGO(bufferGO, tf, o[go.Length + i]);
+
                     buffer.Add(bufferGO);
                 }
                 go = buffer.ToArray();

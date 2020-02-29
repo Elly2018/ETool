@@ -18,6 +18,19 @@ namespace ETool
         /// Variables
         ///
         #region Variable
+
+        #region Selection
+        private bool boxSelectionMode = false;
+        private bool boxIsDeleteSelection = false;
+        private bool boxIsSelecting = false;
+        private Vector2 boxSelectionV1Point;
+        private Vector2 boxSelectionV2Point;
+
+        private ConnectionPoint[] preSelectionInPoint = new ConnectionPoint[1];
+        private bool preSelectionChangeMode = false;
+        private bool preSelectionChangeMode_Input = false;
+        private ConnectionPoint[] preSelectionOutPoint = new ConnectionPoint[0];
+
         /// <summary>
         /// Define select input point
         /// </summary>
@@ -27,7 +40,9 @@ namespace ETool
         /// Define select output point
         /// </summary>
         private ConnectionPoint selectedOutPoint = null;
+        #endregion
 
+        #region Utility
         /// <summary>
         /// Define background data <br />
         /// Use for show message in screen
@@ -35,14 +50,26 @@ namespace ETool
         private NodeEditorMessagePopup GreyBackground;
 
         /// <summary>
-        /// Editor select blueprint
-        /// </summary>
-        public EBlueprint selectBlueprint;
-
-        /// <summary>
         /// Define clipboard nodes and connection
         /// </summary>
         private Clipborad clipBorad = null;
+
+        /// <summary>
+        /// Define search struct
+        /// </summary>
+        private SearchStruct searchStruct = null;
+
+        /// <summary>
+        /// Define type list struct
+        /// </summary>
+        private TypeListStruct typeListStruct = null;
+        #endregion
+
+        #region Editor
+        /// <summary>
+        /// Editor select blueprint
+        /// </summary>
+        public EBlueprint selectBlueprint;
 
         /// <summary>
         /// Define current page selected index
@@ -57,8 +84,15 @@ namespace ETool
         /// <summary>
         /// Define the zoom
         /// </summary>
-        private int zoomLevel;
+        private float zoomLevel;
 
+        /// <summary>
+        /// Each key input how many gap will add on to editor
+        /// </summary>
+        private const float zoomGap = 0.05f;
+        #endregion
+
+        #region Buffer
         /// <summary>
         /// Define background grid offset
         /// </summary>
@@ -70,20 +104,31 @@ namespace ETool
         private Vector2 drag;
 
         /// <summary>
+        /// The page scroll position
+        /// </summary>
+        private Vector2 pageScrollPosition = new Vector2(0, 0);
+
+        /// <summary>
         /// Define the position buffer <br />
         /// When user is using search menu
         /// </summary>
         private Vector2 searchPosition;
 
         /// <summary>
-        /// Define the scroll view position
+        /// Define the scroll view position of search view
         /// </summary>
         private Vector2 searchScrollPosition;
 
         /// <summary>
-        /// Define search struct
+        /// Define the position buffer <br />
+        /// When user is using type list menu
         /// </summary>
-        private SearchStruct searchStruct = null;
+        private Vector2 typeListPosition;
+
+        /// <summary>
+        /// Define the scroll view position of type list view
+        /// </summary>
+        private Vector2 typeListScrollPosition;
 
         /// <summary>
         /// Define how many search element are
@@ -104,7 +149,9 @@ namespace ETool
         /// Define all nodebase type
         /// </summary>
         private Type[] allTypes;
+        #endregion
 
+        #region Singleton Target
         /// <summary>
         /// Define singleton node base editor
         /// </summary>
@@ -142,6 +189,8 @@ namespace ETool
         }
         #endregion
 
+        #endregion
+
 
         /// 
         /// Editor Window Event
@@ -156,6 +205,7 @@ namespace ETool
             /* \\\uwu\\\ seens somebody is calling me hehe */
             NodeBasedEditor.NBE = GetWindow<NodeBasedEditor>();
             NodeBasedEditor.NBE.titleContent = new GUIContent("Component Node Editor");
+            NodeBasedEditor.NBE.zoomLevel = 1;
         }
 
         /// <summary>
@@ -167,11 +217,26 @@ namespace ETool
             InitalizeContent();
         }
 
+        /// <summary>
+        /// When user click the editor window
+        /// </summary>
         private void OnFocus()
         {
             InitalizeContent();
+            selectedInPoint = null;
+            selectedOutPoint = null;
+            preSelectionChangeMode = false;
+            preSelectionOutPoint = new ConnectionPoint[0];
+            preSelectionInPoint = new ConnectionPoint[0];
+
+            if (selectBlueprint != null)
+                selectBlueprint.Connection_CleanConnectionPointSelection();
         }
 
+        /// <summary>
+        /// Initialize the editor window <br />
+        /// This action including initialize the node and blueprint selection
+        /// </summary>
         private void InitalizeContent()
         {
             if (selectBlueprint != null)
@@ -231,10 +296,53 @@ namespace ETool
         /// </summary>
         private void DrawMenuBar()
         {
-            GUI.Box(new Rect(0, 0, position.width, 26), "");
+            GUI.Box(new Rect(0, 0, position.width, 60), "");
             sizeLimit = new Vector2(100.0f, 20.0f);
             DrawMenuButtons(10.0f);
             DrawMenuZooming(10.0f);
+            DrawPageList();
+        }
+
+        /// <summary>
+        /// Drawing the page list at the bottom of the menu bar
+        /// </summary>
+        private void DrawPageList()
+        {
+            List<Tuple<string, float>> customNameList = new List<Tuple<string, float>>();
+            float TotalWidth = 0;
+            if (selectBlueprint != null)
+            {
+                customNameList.Add(new Tuple<string, float>("Main Editor", "Main Editor".Length));
+                customNameList.Add(new Tuple<string, float>("Constructor", "Constructor".Length));
+                customNameList.Add(new Tuple<string, float>("Physics", "Physics".Length));
+
+                for (int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
+                {
+                    string n = selectBlueprint.blueprintEvent.customEvent[i].eventName;
+                    customNameList.Add(new Tuple<string, float>(n, n.Length));
+                }
+
+                foreach(var i in customNameList)
+                {
+                    TotalWidth += i.Item2;
+                }
+            }
+
+            Rect range = new Rect(0, 30, position.width, 60 - 26);
+            pageScrollPosition = GUI.BeginScrollView(range, pageScrollPosition, new Rect(0, 26, TotalWidth * 16, 60 - 26));
+            GUILayout.BeginArea(new Rect(0, 30, TotalWidth * 16, 60 - 26));
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < customNameList.Count; i++)
+            {
+                if (GUILayout.Button(customNameList[i].Item1, GUILayout.Width(customNameList[i].Item2 * 15)))
+                {
+                    selectionPage = i;
+                    CenterViewer();
+                }
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndArea();
+            GUI.EndScrollView();
         }
 
         /// <summary>
@@ -243,24 +351,11 @@ namespace ETool
         /// <param name="rightOffset">Button Right Offset</param>
         private void DrawMenuZooming(float rightOffset)
         {
-            if (GUI.Button(new Rect(position.width - rightOffset - (sizeLimit.x / 3), 4f, (sizeLimit.x / 3), sizeLimit.y), "+"))
-            {
-                if(zoomLevel < 5)
-                {
-                    zoomLevel++;
-                }
-            }
-            if (GUI.Button(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 2) - 5f, 4f, (sizeLimit.x / 3), sizeLimit.y), "-"))
-            {
-                if(zoomLevel > 1)
-                {
-                    zoomLevel--;
-                }
-            }
-            GUI.Label(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 4) - 10f, 4f, (sizeLimit.x / 3) * 2, sizeLimit.y), "Zoom: " + zoomLevel.ToString());
+            zoomLevel = GUI.HorizontalSlider(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 2) - 5f, 4f, (sizeLimit.x / 2), sizeLimit.y), zoomLevel, GetZoomLevel().minimum, GetZoomLevel().maximum);
+            GUI.Label(new Rect(position.width - rightOffset - ((sizeLimit.x / 3) * 5) + 10f, 4f, (sizeLimit.x / 3) * 3, sizeLimit.y), "Zoom: " + zoomLevel.ToString("0.00"));
 
-            if (zoomLevel < 1) zoomLevel = 1;
-            if (zoomLevel > 5) zoomLevel = 5;
+            if (zoomLevel < GetZoomLevel().minimum) zoomLevel = GetZoomLevel().minimum;
+            if (zoomLevel > GetZoomLevel().maximum) zoomLevel = GetZoomLevel().maximum;
         }
 
         /// <summary>
@@ -271,63 +366,13 @@ namespace ETool
         {
             int ButtonPadding = 1;
 
+            if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Help (F1)"))
+            {
+                GreyBackground = GetHelpMessagePopup();
+            }
+
             if(selectBlueprint != null)
-            {
-                List<string> customNameList = new List<string>();
-                customNameList.Add("Main Editor");
-                customNameList.Add("Constructor");
-                customNameList.Add("Physics");
-
-                for (int i = 0; i < selectBlueprint.blueprintEvent.customEvent.Count; i++)
-                {
-                    customNameList.Add(selectBlueprint.blueprintEvent.customEvent[i].eventName);
-                }
-
-                EditorGUI.BeginChangeCheck();
-                selectionPage = EditorGUI.Popup(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), selectionPage, customNameList.ToArray());
-                if (selectionPage > customNameList.Count - 1) selectionPage = 0;
-                if (EditorGUI.EndChangeCheck())
-                    CenterViewer();
-            }
-            ButtonPadding++;
-            if (GUI.Button(GetMenuButtonRect(ButtonPadding, leftOffset, sizeLimit), "Help"))
-            {
-                string message =
-                    "Hotkey Map: \n\n" +
-                    "S \t\t Self Menu\n" +
-                    "C \t\t Constant Menu\n" +
-                    "V \t\t Casting Menu\n\n" +
-
-                    "Shift + C \t\t Center Page\n" +
-                    "F \t\t Center Selected Nodes\n" +
-                    "Ctrl + C \t\t Copy Selection \n" +
-                    "Ctrl + V \t\t Paste Clipboard \n" +
-                    "Delete \t\t Delete Selection \n\n" + 
-
-                    "[ \t\t Zoom Out \n" +
-                    "] \t\t Zoom In \n" +
-                    "A \t\t Select All \n" +
-                    "B \t\t Box Selection \n";
-                GreyBackground = new NodeEditorMessagePopup() { Okbutton = true, Message = message };
-            }
-
-            GUI.Box(RectGetMenuCenterRect(500), selectBlueprint.name);
-        }
-
-        /// <summary>
-        /// Get the menu button rect
-        /// </summary>
-        /// <param name="index">Index of button</param>
-        /// <param name="left">Left offset</param>
-        /// <returns></returns>
-        private Rect GetMenuButtonRect(int index, float left, Vector2 size)
-        {
-            return new Rect(left + (size.x * (index - 1)) + 3 * index, 3, size.x, size.y);
-        }
-
-        private Rect RectGetMenuCenterRect(float width)
-        {
-            return new Rect((position.width - width) / 2, 3, width, 20);
+                GUI.Box(RectGetMenuCenterRect(400f), selectBlueprint.name);
         }
 
         /// <summary>
@@ -426,13 +471,13 @@ namespace ETool
         /// What text you want to put it in the center
         /// </summary>
         /// <param name="message">The message you want to put it center</param>
-        private void GreyBackgroundCenterText(string message)
+        private void DrawGreyBackgroundCenterText(string message)
         {
             GUIStyle centerSkin = new GUIStyle();
             centerSkin.fontStyle = FontStyle.Bold;
             centerSkin.fontSize = 15;
             centerSkin.alignment = TextAnchor.MiddleLeft;
-            centerSkin.padding.left = (int)(position.width / 3);
+            centerSkin.padding.left = (int)(position.width / 2.5f);
             centerSkin.normal.textColor = Color.white;
             GUI.Label(new Rect(0, 0, position.width, position.height), message, centerSkin);
         }
@@ -443,7 +488,7 @@ namespace ETool
         /// </summary>
         /// <param name="message">The message you want to put it center</param>
         /// <param name="messageColor">The message text color</param>
-        private void GreyBackgroundCenterText(string message, Color messageColor)
+        private void DrawGreyBackgroundCenterText(string message, Color messageColor)
         {
             GUIStyle centerSkin = new GUIStyle();
             centerSkin.fontStyle = FontStyle.Bold;
@@ -458,7 +503,7 @@ namespace ETool
         /// Background will active when variable is not null
         /// </summary>
         /// <param name="message"></param>
-        public void GreyBackgroundOkButton(string message)
+        public void DrawGreyBackgroundOkButton(string message)
         {
             GreyBackground = new NodeEditorMessagePopup() { Message = message, Okbutton = true };
         }
@@ -573,6 +618,227 @@ namespace ETool
             popMessage = message;
         }
 
+        private void DrawTypeList()
+        {
+            float borderGap = 50;
+            float fieldWidth = 15;
+
+            Rect buttonRect = new Rect(borderGap, 70, position.width - (borderGap * 2), fieldWidth * 3);
+            Rect scrollRect = new Rect(borderGap, 200, position.width - borderGap * 2, position.height - 400);
+            Rect selectButton = new Rect(borderGap, position.height - 100, position.width / 2 - borderGap * 2, fieldWidth * 3);
+            Rect cancelButton = new Rect(position.width / 2 + borderGap, position.height - 100, position.width - (position.width / 2 + borderGap * 2), fieldWidth * 3);
+
+            GUIStyle buttonselect = new GUIStyle("button");
+            GUIStyle buttonunselect = new GUIStyle("button");
+            buttonselect.fontStyle = FontStyle.Bold;
+
+            GUILayout.BeginArea(buttonRect);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Basic Type", GUILayout.Height(25)))
+            {
+                typeListStruct.typeListTypeSelection = 1;
+            }
+            if (GUILayout.Button("Unity Type", GUILayout.Height(25)))
+            {
+                typeListStruct.typeListTypeSelection = 2;
+            }
+            if (GUILayout.Button("Component Type", GUILayout.Height(25)))
+            {
+                typeListStruct.typeListTypeSelection = 3;
+            }
+            if (GUILayout.Button("Enum Type", GUILayout.Height(25)))
+            {
+                typeListStruct.typeListTypeSelection = 4;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.EndArea();
+
+            EnumUseStruct[] enumUseStructs = null;
+            switch (typeListStruct.typeListTypeSelection)
+            {
+                case 1:
+                    enumUseStructs = Field.GetFieldTypeEnumUseStruct(10, 49);
+                    break;
+                case 2:
+                    enumUseStructs = Field.GetFieldTypeEnumUseStruct(50, 199);
+                    break;
+                case 3:
+                    enumUseStructs = Field.GetFieldTypeEnumUseStruct(200, 1999);
+                    break;
+                case 4:
+                    enumUseStructs = Field.GetFieldTypeEnumUseStruct(2000, 99999);
+                    break;
+            }
+
+            if (enumUseStructs != null)
+            {
+                typeListPosition = GUI.BeginScrollView(scrollRect, typeListPosition, new Rect(0, 0, scrollRect.width - scrollRect.x, enumUseStructs.Length * 25));
+                if (typeListStruct.typeListTypeSelection != 0)
+                {
+                    for (int i = 0; i < enumUseStructs.Length; i++)
+                    {
+                        if(enumUseStructs[i].fieldIndex == (int)typeListStruct.fieldSelection)
+                        {
+                            if (GUILayout.Button(enumUseStructs[i].fieldName, buttonselect))
+                            {
+                                typeListStruct.fieldSelection = (FieldType)enumUseStructs[i].fieldIndex;
+                            }
+                        }
+                        else
+                        {
+                            if (GUILayout.Button(enumUseStructs[i].fieldName, buttonunselect))
+                            {
+                                typeListStruct.fieldSelection = (FieldType)enumUseStructs[i].fieldIndex;
+                            }
+                        }
+                    }
+                }
+                GUI.EndScrollView();
+            }
+
+            GUI.enabled = typeListStruct.fieldSelection != FieldType.Event;
+            if (GUI.Button(selectButton, "Select"))
+            {
+                typeListStruct.target.target.genericBasicType.target_Int = (int)typeListStruct.fieldSelection;
+                typeListStruct.target.FieldUpdate();
+                typeListStruct = null;
+            }
+            GUI.enabled = true;
+
+            if (GUI.Button(cancelButton, "Cancel"))
+            {
+                typeListStruct = null;
+            }
+        }
+
+        private void DrawPreConnection(Event e)
+        {
+            if (!preSelectionChangeMode)
+            {
+                if (preSelectionOutPoint.Length > 0)
+                {
+                    foreach (var i in preSelectionOutPoint)
+                    {
+                        Field f = selectBlueprint.GetFieldByConnectionPoint(i);
+
+                        /* Drawing bezier curve */
+                        Handles.DrawBezier(
+                            e.mousePosition, // Start point
+                            i.rect.center,  // End point
+                            e.mousePosition + Vector2.left * 150f, // Start tangent
+                            i.rect.center - Vector2.left * 150f, // End tangent
+                            Field.GetColorByFieldType(f.fieldType, 1.0f), // Color
+                            null, // Texture
+                            5f
+                            );
+                        GUI.changed = true;
+                    }
+                }
+            }
+            else if (preSelectionChangeMode && !preSelectionChangeMode_Input)
+            {
+                foreach (var i in preSelectionInPoint)
+                {
+                    Field f = selectBlueprint.GetFieldByConnectionPoint(i);
+
+                    /* Drawing bezier curve */
+                    Handles.DrawBezier(
+                        i.rect.center, // Start point
+                        e.mousePosition,  // End point
+                        i.rect.center + Vector2.left * 150f, // Start tangent
+                        e.mousePosition - Vector2.left * 150f, // End tangent
+                        Field.GetColorByFieldType(f.fieldType, 1.0f), // Color
+                        null, // Texture
+                        5f
+                        );
+                    GUI.changed = true;
+                }
+            }
+            else if (preSelectionChangeMode && preSelectionChangeMode_Input)
+            {
+                foreach (var i in preSelectionOutPoint)
+                {
+                    Field f = selectBlueprint.GetFieldByConnectionPoint(i);
+
+                    /* Drawing bezier curve */
+                    Handles.DrawBezier(
+                        e.mousePosition, // Start point
+                        i.rect.center,  // End point
+                        e.mousePosition + Vector2.left * 150f, // Start tangent
+                        i.rect.center - Vector2.left * 150f, // End tangent
+                        Field.GetColorByFieldType(f.fieldType, 1.0f), // Color
+                        null, // Texture
+                        5f
+                        );
+                    GUI.changed = true;
+                }
+            }
+        }
+
+        public void PreConnectionPoint(ConnectionPoint cp)
+        {
+            preSelectionOutPoint = new ConnectionPoint[1] { cp };
+        }
+
+        #region Draw Getter
+        /// <summary>
+        /// It will make the help message popup instance and return <br />
+        /// </summary>
+        /// <returns>Help Popup</returns>
+        private NodeEditorMessagePopup GetHelpMessagePopup()
+        {
+            string message =
+                    "Hotkey Map: \n\n" +
+                    "S \t\t Self Menu\n" +
+                    "C \t\t Constant Menu\n" +
+                    "T \t\t GameObject Menu\n" +
+                    "E \t\t Component Menu\n" +
+                    "L \t\t Logic Menu\n" +
+                    "M \t\t Math Menu\n" +
+                    "V \t\t Casting Menu\n\n" +
+
+                    "Shift + C \t\t Center Page\n" +
+                    "F \t\t Center Selected Nodes\n" +
+                    "Ctrl + C \t\t Copy Selection \n" +
+                    "Ctrl + V \t\t Paste Clipboard \n" +
+                    "Delete \t\t Delete Selection \n\n" +
+
+                    "[ \t\t Zoom Out \n" +
+                    "] \t\t Zoom In \n" +
+                    "A \t\t Select All \n" +
+                    "B \t\t Box Selection \n";
+            return new NodeEditorMessagePopup() { Okbutton = true, Message = message };
+        }
+
+        /// <summary>
+        /// Get the menu button rect
+        /// </summary>
+        /// <param name="index">Index of button</param>
+        /// <param name="left">Left offset</param>
+        /// <returns></returns>
+        private Rect GetMenuButtonRect(int index, float left, Vector2 size)
+        {
+            return new Rect(left + (size.x * (index - 1)) + 3 * index, 3, size.x, size.y);
+        }
+
+        /// <summary>
+        /// The method will help draw the box which contain blueprint name <br />
+        /// The box will in the center of the menubar
+        /// </summary>
+        /// <param name="width">How long does the width is</param>
+        /// <returns></returns>
+        private Rect RectGetMenuCenterRect(float width)
+        {
+            return new Rect((position.width - width) / 2, 3, width, 20);
+        }
+
+        /// <summary>
+        /// Get how many element that target string relate have <br />
+        /// It will return the count of the type that have target string in their nodepath
+        /// </summary>
+        /// <param name="alltype">All Type</param>
+        /// <param name="searchString">Target Search String</param>
+        /// <returns></returns>
         private int GetCurrentSearchElement(Type[] alltype, string searchString)
         {
             int Result = 0;
@@ -588,6 +854,7 @@ namespace ETool
             return Result;
         }
         #endregion
+        #endregion
 
 
         /// 
@@ -595,9 +862,6 @@ namespace ETool
         /// 
         #region Event Related
 
-        ///
-        /// Event (editor)
-        ///
         #region Editor Event
         /// <summary>
         /// Receive gui event <br />
@@ -621,7 +885,7 @@ namespace ETool
             }
             if (targetN != null)
             {
-                if (selectBlueprint == null || targetN.GetComponent<ENodeComponent>() != null)
+                if (selectBlueprint == null && targetN.GetComponent<ENodeComponent>() != null)
                 {
                     if (targetN.GetComponent<ENodeComponent>().ABlueprint != null)
                     {
@@ -649,7 +913,10 @@ namespace ETool
                     case EventType.MouseDrag:
                         if (e.button == 2)
                         {
-                            OnDrag(e.delta * (1 / GetZoomLevel().ratio));
+                            if (!boxSelectionMode)
+                            {
+                                OnDrag(e.delta * (1 / GetZoomLevel().ratio));
+                            }
                         }
                         break;
                 }
@@ -682,15 +949,29 @@ namespace ETool
             if (e.keyCode == KeyCode.S && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
                 ProcessContextSelfMenu(e.mousePosition);
 
+            if (e.keyCode == KeyCode.B && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+                boxSelectionMode = true;
 
             if (e.keyCode == KeyCode.Escape)
+            {
                 Instance.Connection_CleanConnectionPointSelection();
+                preSelectionOutPoint = new ConnectionPoint[0];
+                preSelectionInPoint = new ConnectionPoint[0];
+                preSelectionChangeMode = false;
+            }
+                
 
             if (e.keyCode == KeyCode.C && e.shift && e.type == EventType.KeyDown)
                 CenterViewer();
 
             if (e.keyCode == KeyCode.F && e.type == EventType.KeyDown)
                 CenterSelectionNodes();
+
+            if (e.keyCode == KeyCode.F1 && !e.control && !e.alt && !e.shift && e.type == EventType.KeyDown)
+            {
+                GreyBackground = GetHelpMessagePopup();
+                GUI.changed = true;
+            }
 
             if (e.keyCode == KeyCode.C && e.control && e.type == EventType.KeyDown)
             {
@@ -712,13 +993,13 @@ namespace ETool
 
             if (e.keyCode == KeyCode.LeftBracket && e.type == EventType.KeyDown)
             {
-                zoomLevel--;
+                zoomLevel -= zoomGap;
                 GUI.changed = true;
             }
 
             if (e.keyCode == KeyCode.RightBracket && e.type == EventType.KeyDown)
             {
-                zoomLevel++;
+                zoomLevel += zoomGap;
                 GUI.changed = true;
             }
 
@@ -741,7 +1022,10 @@ namespace ETool
                 GUI.changed = true;
             }
 
-
+            if (boxSelectionMode)
+            {
+                OnBoxSelectionMode(e);
+            }
         }
 
         /// <summary>
@@ -752,6 +1036,8 @@ namespace ETool
         /// <param name="e">GUI event object</param>
         private void ProcessNodeEvents(Event e)
         {
+            DrawPreConnection(e);
+
             if (searchStruct != null) return;
             bool ClickAnyNode = false;
 
@@ -779,6 +1065,9 @@ namespace ETool
 
             if (!ClickAnyNode && e.type == EventType.MouseDown && e.button == 0) 
             {
+                preSelectionOutPoint = new ConnectionPoint[0];
+                preSelectionInPoint = new ConnectionPoint[0];
+                preSelectionChangeMode = false;
                 Instance.Node_CleanNodeSelection();
                 Instance.Connection_CleanConnectionSelection();
                 Instance.Connection_CleanConnectionPointSelection();
@@ -1377,9 +1666,10 @@ namespace ETool
             {
                 AddClickEvent a = new AddClickEvent() { add = Type.GetType(clipBorad.nodeBases[i].NodeType), mousePosition = clipBorad.nodeBases[i].rect.position + Diff };
                 NodeBase n = Instance.Node_AddNode(a.mousePosition, selectionPage, a.add);
+                n.GivenValue(clipBorad.nodeBases[i]);
                 for (int j = 0; j < n.fields.Count; j++)
                 {
-                    n.fields[j].target = new GenericObject(clipBorad.nodeBases[i].fields[j].target);
+                    n.fields[j] = new Field(clipBorad.nodeBases[i].fields[j]);
                 }
                 n.DynamicFieldInitialize(null);
                 buffer.Add(n);
@@ -1422,11 +1712,49 @@ namespace ETool
             GUI.changed = true;
             Repaint();
 
-            if (selectedInPoint != null && selectedOutPoint != null)
+            if (preSelectionChangeMode)
+            {
+                if (preSelectionChangeMode_Input)
+                {
+                    List<ConnectionPoint> buffer = new List<ConnectionPoint>(preSelectionOutPoint);
+
+                    bool Pass = true;
+
+                    for (int i = 0; i < buffer.Count; i++)
+                    {
+                        Connection c = selectBlueprint.Connection_GetConnectionByPoints(preSelectionInPoint[0], buffer[i]);
+                        selectBlueprint.Connection_RemoveConnection(c);
+                    }
+
+                    for (int i = 0; i < buffer.Count; i++)
+                    {
+                        if (selectBlueprint.Connection_CheckConnectionWork(selectedInPoint, buffer[i]) == false) Pass = false;
+                    }
+
+                    if (Pass)
+                    {
+                        for (int i = 0; i < buffer.Count; i++)
+                        {
+                            popMessage = selectBlueprint.Connection_CreateConnection(selectedInPoint, buffer[i], selectionPage);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < buffer.Count; i++)
+                        {
+                            popMessage = selectBlueprint.Connection_CreateConnection(preSelectionInPoint[0], buffer[i], selectionPage);
+                        }
+                    }
+                }
+            }
+            else
             {
                 popMessage = selectBlueprint.Connection_CreateConnection(selectedInPoint, selectedOutPoint, selectionPage);
             }
-                
+
+            preSelectionOutPoint = new ConnectionPoint[0];
+            preSelectionInPoint = new ConnectionPoint[0];
+            preSelectionChangeMode = false;
         }
 
         public void OnClickOutPoint(ConnectionPoint cp)
@@ -1439,8 +1767,231 @@ namespace ETool
 
             GUI.changed = true;
             Repaint();
+
+            if (preSelectionChangeMode)
+            {
+                if (!preSelectionChangeMode_Input)
+                {
+                    List<ConnectionPoint> buffer = new List<ConnectionPoint>(preSelectionInPoint);
+
+                    bool Pass = true;
+
+                    for (int i = 0; i < buffer.Count; i++)
+                    {
+                        Connection c = selectBlueprint.Connection_GetConnectionByPoints(buffer[i], preSelectionOutPoint[0]);
+                        selectBlueprint.Connection_RemoveConnection(c);
+                    }
+
+                    for (int i = 0; i < buffer.Count; i++)
+                    {
+                        if (selectBlueprint.Connection_CheckConnectionWork(buffer[i], selectedOutPoint) == false) Pass = false;
+                    }
+
+                    if (Pass)
+                    {
+                        for (int i = 0; i < buffer.Count; i++)
+                        {
+                            popMessage = selectBlueprint.Connection_CreateConnection(buffer[i], selectedOutPoint, selectionPage);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < buffer.Count; i++)
+                        {
+                            popMessage = selectBlueprint.Connection_CreateConnection(buffer[i], preSelectionOutPoint[0], selectionPage);
+                        }
+                    }
+
+                    preSelectionOutPoint = new ConnectionPoint[0];
+                    preSelectionInPoint = new ConnectionPoint[0];
+                    preSelectionChangeMode = false;
+
+                    if (selectedOutPoint != null)
+                        selectedOutPoint.Selected = false;
+                    selectedOutPoint = null;
+                }
+            }
+        }
+
+        public void OnUseTypeList(Field target)
+        {
+            typeListStruct = new TypeListStruct() { target = target };
+        }
+
+        public void OnChangeConnectionInputPoint(object _cp)
+        {
+            ConnectionPoint cp = (ConnectionPoint)_cp;
+            Vector2Int v = selectBlueprint.Connection_GetConnectionInfo(cp);
+
+            List<ConnectionPoint> connectionbuffer = new List<ConnectionPoint>();
+            foreach(var i in selectBlueprint.connections)
+            {
+                if (i.inPointMark == v)
+                {
+                    connectionbuffer.Add(selectBlueprint.nodes[i.outPointMark.x].fields[i.outPointMark.y].outPoint);
+                }
+            }
+
+            if (connectionbuffer.Count == 0) return;
+            preSelectionInPoint = new ConnectionPoint[1] { cp };
+            selectedInPoint = null;
+            preSelectionChangeMode_Input = true;
+            preSelectionChangeMode = true;
+            preSelectionOutPoint = connectionbuffer.ToArray();
+        }
+
+        public void OnChangeConnectionOutputPoint(object _cp)
+        {
+            ConnectionPoint cp = (ConnectionPoint)_cp;
+            Vector2Int v = selectBlueprint.Connection_GetConnectionInfo(cp);
+
+            List<ConnectionPoint> connectionbuffer = new List<ConnectionPoint>();
+            foreach (var i in selectBlueprint.connections)
+            {
+                if (i.outPointMark == v)
+                {
+                    connectionbuffer.Add(selectBlueprint.nodes[i.inPointMark.x].fields[i.inPointMark.y].outPoint);
+                }
+            }
+
+            if (connectionbuffer.Count == 0) return;
+            preSelectionOutPoint = new ConnectionPoint[1] { cp };
+            selectedInPoint = null;
+            preSelectionChangeMode_Input = false;
+            preSelectionChangeMode = true;
+            preSelectionInPoint = connectionbuffer.ToArray();
+        }
+
+        private void OnBoxSelectionMode(Event e)
+        {
+            if(e.type == EventType.MouseDown && e.button == 0)
+            {
+                boxIsSelecting = true;
+                boxIsDeleteSelection = false;
+                boxSelectionV1Point = e.mousePosition;
+            }
+            if (e.type == EventType.MouseDown && e.button == 2)
+            {
+                boxIsSelecting = true;
+                boxIsDeleteSelection = true;
+                boxSelectionV1Point = e.mousePosition;
+            }
+
+            if (e.type == EventType.MouseUp && e.button == 0)
+            {
+                boxSelectionMode = false;
+                boxIsSelecting = false;
+                BoxSelectExecute(GetBoxBy2Point(boxSelectionV1Point, boxSelectionV2Point), false);
+            }
+            if (e.type == EventType.MouseUp && e.button == 2)
+            {
+                boxSelectionMode = false;
+                boxIsSelecting = false;
+                BoxSelectExecute(GetBoxBy2Point(boxSelectionV1Point, boxSelectionV2Point), true);
+            }
+
+            if (boxIsSelecting)
+            {
+                boxSelectionV2Point = e.mousePosition;
+
+                if(boxIsDeleteSelection)
+                    GUI.Box(GetBoxBy2Point(boxSelectionV1Point, boxSelectionV2Point), "", StyleUtility.GetStyle(StyleType.BoxDeleteSelect));
+                else
+                    GUI.Box(GetBoxBy2Point(boxSelectionV1Point, boxSelectionV2Point), "", StyleUtility.GetStyle(StyleType.BoxSelect));
+
+                GUI.changed = true;
+            }
+        }
+
+        private void BoxSelectExecute(Rect range, bool delete)
+        {
+            foreach(var i in selectBlueprint.nodes)
+            {
+                bool fourPointIn = true;
+
+                Rect target = i.GetBoxRect();
+
+                Vector2[] fourPoint = new Vector2[4] 
+                {
+                    new Vector2(target.x, target.y),
+                    new Vector2(target.x, target.y + target.height),
+                    new Vector2(target.x + target.width, target.y),
+                    new Vector2(target.x + target.width, target.y + target.height) 
+                };
+
+                for(int j = 0; j < 4; j++)
+                {
+                    if (!range.Contains(fourPoint[j])) fourPointIn = false;
+                }
+
+                if (fourPointIn)
+                {
+                    i.isSelected = !delete;
+                }
+            }
+
+            foreach(var i in selectBlueprint.connections)
+            {
+                bool fourPointIn = true;
+
+                Rect target = i.GetBoxRect();
+
+                Vector2[] fourPoint = new Vector2[4]
+                {
+                    new Vector2(target.x, target.y),
+                    new Vector2(target.x, target.y + target.height),
+                    new Vector2(target.x + target.width, target.y),
+                    new Vector2(target.x + target.width, target.y + target.height)
+                };
+
+                for (int j = 0; j < 4; j++)
+                {
+                    if (!range.Contains(fourPoint[j])) fourPointIn = false;
+                }
+
+                if (fourPointIn)
+                {
+                    i.isSelected = !delete;
+                }
+            }
+        }
+
+        public static Rect GetBoxBy2Point(Vector2 v1, Vector2 v2)
+        {
+            Rect buffer = new Rect();
+
+            // v1 is at right down
+            // v2 is at left up
+            if(v1.x > v2.x && v1.y > v2.y)
+            {
+                buffer = new Rect(v2.x, v2.y, v1.x - v2.x, v1.y - v2.y);
+            }
+
+            // v1 is at right up
+            // v2 is at left down
+            else if (v1.x > v2.x && v1.y < v2.y)
+            {
+                buffer = new Rect(v2.x, v1.y, v1.x - v2.x, v2.y - v1.y);
+            }
+
+            // v1 is at left down
+            // v2 is at right up
+            else if (v1.x < v2.x && v1.y > v2.y)
+            {
+                buffer = new Rect(v1.x, v2.y, v2.x - v1.x, v1.y - v2.y);
+            }
+
+            // v1 is at left up
+            // v2 is at right down
+            else if (v1.x < v2.x && v1.y < v2.y)
+            {
+                buffer = new Rect(v1.x, v1.y, v2.x - v1.x, v2.y - v1.y);
+            }
+
+            return buffer;
         }
         #endregion
+
         #endregion
 
 
@@ -1449,6 +2000,9 @@ namespace ETool
         ///
         #region Editor State
 
+        ///<summary>
+        /// The method will prevent the list have repeat node instance
+        ///</summary>
         private void PreventRepeatInstance()
         {
             List<Node> n = new List<Node>();
@@ -1466,7 +2020,7 @@ namespace ETool
 
         private void StateCheck()
         {
-            if (allTypes == null)
+            if (allTypes == null && selectBlueprint != null)
             {
                 allTypes = Instance.Node_GetAllNodebaseType();
             }
@@ -1488,11 +2042,10 @@ namespace ETool
                     }
                 }
             }
-            if(popMessage != "" && popMessage != null)
+            if (popMessage != "" && popMessage != null)
             {
                 DrawPopMessage();
             }
-
             if(GreyBackground != null)
             {
                 DrawGreyBackground();
@@ -1509,32 +2062,30 @@ namespace ETool
                     }
                 }
                 if(GreyBackground != null)
-                    GreyBackgroundCenterText(GreyBackground.Message);
+                    DrawGreyBackgroundCenterText(GreyBackground.Message);
             }
             if(searchStruct != null)
             {
                 DrawGreyBackground();
                 DrawSearchMenu();
             }
+            if(typeListStruct != null)
+            {
+                DrawGreyBackground();
+                DrawTypeList();
+            }
         }
 
         public ZoomData GetZoomLevel()
         {
-            switch (zoomLevel)
+            return new ZoomData()
             {
-                case 1:
-                    return new ZoomData() { ratio = 0.4f, field = false, title = true };
-                case 2:
-                    return new ZoomData() { ratio = 0.8f, field = true, title = true };
-                case 3:
-                    return new ZoomData() { ratio = 1.0f, field = true, title = true };
-                case 4:
-                    return new ZoomData() { ratio = 1.5f, field = true, title = true };
-                case 5:
-                    return new ZoomData() { ratio = 2.0f, field = true, title = true };
-
-            }
-            return new ZoomData() { ratio = 1.0f, field = true, title = true };
+                maximum = 2.0f,
+                minimum = 0.4f,
+                ratio = zoomLevel,
+                fieldHiddenLimit = 0.7f,
+                titleHiddenLimit = 0.5f
+            };
         }
         
         #endregion

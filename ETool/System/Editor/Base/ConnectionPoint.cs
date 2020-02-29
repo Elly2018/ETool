@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 namespace ETool
 {
@@ -55,6 +56,14 @@ namespace ETool
             rect = new Rect(0, 0, 20f, 20f);
         }
 
+        public ConnectionPoint(ConnectionPoint connectionPoint)
+        {
+            this.type = connectionPoint.type;
+            this.style = connectionPoint.style;
+            this.fieldType = connectionPoint.fieldType;
+            rect = new Rect(0, 0, 20f, 20f);
+        }
+
 #if UNITY_EDITOR
         /// <summary>
         /// Drawing method
@@ -103,23 +112,46 @@ namespace ETool
             GUI.color = Field.GetColorByFieldType(fieldType, 1);
             if (GUI.Button(rect, "", useStyle))
             {
-                if (type == ConnectionPointType.In)
-                    NodeBasedEditor.Editor_Instance.OnClickInPoint(this);
-                else
-                    NodeBasedEditor.Editor_Instance.OnClickOutPoint(this);
+                Event e = Event.current;
+                if(e.button == 0)
+                {
+                    if (type == ConnectionPointType.In)
+                        NodeBasedEditor.Editor_Instance.OnClickInPoint(this);
+                    else
+                    {
+                        NodeBasedEditor.Editor_Instance.OnClickOutPoint(this);
+                        NodeBasedEditor.Editor_Instance.PreConnectionPoint(this);
+                    }
+                }
+                else if (e.button == 1)
+                {
+                    CreateProcessingContextMenu(e);
+                }
             }
+
             GUI.color = Color.white;
         }
 
+        private void CreateProcessingContextMenu(Event e)
+        {
+            GenericMenu genericMenu = new GenericMenu();
+
+            if(type == ConnectionPointType.In)
+            {
+                genericMenu.AddItem(new GUIContent("Change Input"), false, NodeBasedEditor.Editor_Instance.OnChangeConnectionInputPoint, this);
+            }
+
+            if (type == ConnectionPointType.Out)
+            {
+                genericMenu.AddItem(new GUIContent("Change Output"), false, NodeBasedEditor.Editor_Instance.OnChangeConnectionOutputPoint, this);
+            }
+
+
+            genericMenu.ShowAsContext();
+        }
         public void ProcessEvents(Event e)
         {
-            if (rect.Contains(e.mousePosition) && e.button == 0 && e.isMouse)
-            {
-                if (type == ConnectionPointType.Out)
-                    NodeBasedEditor.Editor_Instance.OnClickOutPoint(this);
-                if (type == ConnectionPointType.In)
-                    NodeBasedEditor.Editor_Instance.OnClickInPoint(this);
-            }
+
         }
 #endif
     }

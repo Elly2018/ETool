@@ -204,7 +204,7 @@ namespace ETool
                 rect.y * zoomLevel.ratio,
                 rect.width * zoomLevel.ratio,
                 rect.height * zoomLevel.ratio),
-                zoomLevel.title ? EToolString.GetString_Node(EToolString.GetNodeTitle(GetType()), unlocalTitle) : "...",
+                zoomLevel.titleHiddenLimit < zoomLevel.ratio ? EToolString.GetString_Node(EToolString.GetNodeTitle(GetType()), unlocalTitle) : "...",
                 ti);
 
             for (int i = 0; i < fs.Count; i++)
@@ -214,7 +214,7 @@ namespace ETool
                 fs[i].inPoint.rect = fs[i].rect;
                 fs[i].outPoint.rect = fs[i].rect;
 
-                if (zoomLevel.field)
+                if (zoomLevel.fieldHiddenLimit < zoomLevel.ratio)
                     fs[i].Draw();
                 else
                     fs[i].DrawBG();
@@ -368,6 +368,8 @@ namespace ETool
                 }
             }
 
+            genericMenu.AddDisabledItem(new GUIContent("Node Index: " + EBlueprint.GetNodeInBlueprintIndex(this as NodeBase)));
+
             genericMenu.ShowAsContext();
         }
 
@@ -399,7 +401,7 @@ namespace ETool
         /// <param name="messageString"></param>
         protected void OnClickErrorMessage(object messageString)
         {
-            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton((string)messageString);
+            NodeBasedEditor.Editor_Instance.DrawGreyBackgroundOkButton((string)messageString);
         }
 
         /// <summary>
@@ -407,7 +409,7 @@ namespace ETool
         /// </summary>
         protected void OnClickDescription()
         {
-            NodeBasedEditor.Editor_Instance.GreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
+            NodeBasedEditor.Editor_Instance.DrawGreyBackgroundOkButton(EToolString.GetString_Node(EToolString.GetNodeDes(GetType()), ""));
         }
 #endif
 

@@ -194,14 +194,14 @@ namespace ETool
         {
             rect = new Rect(reference.rect);
             title = new string(reference.title.ToCharArray());
-            target = reference.target;
-            target_array = reference.target_array;
+            target = new GenericObject(reference.target);
+            target_array = (GenericObject[])reference.target_array.Clone();
             connectionType = reference.connectionType;
             fieldType = reference.fieldType;
             fieldContainer = reference.fieldContainer;
 
-            inPoint = reference.inPoint;
-            outPoint = reference.outPoint;
+            inPoint = new ConnectionPoint(reference.inPoint);
+            outPoint = new ConnectionPoint(reference.outPoint);
 
             if (fieldContainer == FieldContainer.Object)
             {
@@ -255,7 +255,7 @@ namespace ETool
             EditorGUI.BeginChangeCheck();
 
             /* Enum type */
-            if((int)fieldType >= 2000)
+            if((int)fieldType >= 2000 && (int)fieldType != 2001)
             {
                 int bufferIndex = EnumField(target.genericBasicType.target_Int, Top, Bottom, FormExistEnumStruct(FieldTypeStruct.GetStruct(fieldType).Item2));
                 if(bufferIndex != target.genericBasicType.target_Int)
@@ -264,6 +264,15 @@ namespace ETool
                     FieldUpdate();
                 }
                 return;
+            }
+
+            if((int)fieldType == 2001)
+            {
+                GUI.Label(Top, ((FieldType)target.genericBasicType.target_Int).ToString(), StyleUtility.GetStyle(StyleType.GUI_Properties));
+                if(GUI.Button(Bottom, "Type Select"))
+                {
+                    NodeBasedEditor.Editor_Instance.OnUseTypeList(this);
+                }
             }
 
             switch (fieldType)
@@ -721,10 +730,10 @@ namespace ETool
         }
 
 
-        private void FieldUpdate()
+        public void FieldUpdate()
         {
             NodeBasedEditor.Instance.Node_GetNodeByField(this).FieldUpdate();
-            AssetDatabase.SaveAssets();
+            EditorUtility.SetDirty(NodeBasedEditor.Instance);
         }
 
 
@@ -987,7 +996,7 @@ namespace ETool
             return result.ToArray();
         }
 
-        private static EnumUseStruct[] GetFieldTypeEnumUseStruct(int min, int max)
+        public static EnumUseStruct[] GetFieldTypeEnumUseStruct(int min, int max)
         {
             List<EnumUseStruct> result = new List<EnumUseStruct>();
             string[] FieldTypeString = Enum.GetNames(typeof(FieldType));

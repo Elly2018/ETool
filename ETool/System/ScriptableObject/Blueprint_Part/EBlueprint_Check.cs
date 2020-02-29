@@ -6,6 +6,30 @@ namespace ETool
 {
     public partial class EBlueprint : ScriptableObject
     {
+        public Field GetFieldByConnectionPoint(ConnectionPoint cp)
+        {
+            foreach (var i in nodes)
+            {
+                foreach (var j in i.fields)
+                {
+                    if (j.inPoint == cp || j.outPoint == cp) return j;
+                }
+            }
+            return null;
+        }
+
+        public NodeBase GetNodeByConnectionPoint(ConnectionPoint cp)
+        {
+            foreach(var i in nodes)
+            {
+                foreach(var j in i.fields)
+                {
+                    if (j.inPoint == cp || j.outPoint == cp) return i;
+                }
+            }
+            return null;
+        }
+
         public static EBlueprint GetBlueprintByNode(Node node)
         {
             foreach(var i in GetAllBlueprint)
@@ -16,6 +40,11 @@ namespace ETool
                 }
             }
             return null;
+        }
+
+        public static int GetNodeInBlueprintIndex(NodeBase nb)
+        {
+            return EBlueprint.GetBlueprintByNode(nb).nodes.IndexOf(nb);
         }
 
         public static int GetBlueprintNodeIndexByNode(Node node)

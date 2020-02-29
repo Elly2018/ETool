@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Assets.ETool.System.Editor.Node.Scene.Method
 {
-    class SceneLoadSceneByIndex
+    class SceneLoadScene
     {
     }
 }

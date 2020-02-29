@@ -16,7 +16,7 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            int count = (int)GetFieldOrLastInputField(2, data);
+            int count = GetFieldOrLastInputField<int>(2, data);
 
             for(int i = 0; i < count; i++)
             {

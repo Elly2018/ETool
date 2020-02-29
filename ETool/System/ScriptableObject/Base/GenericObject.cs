@@ -2,6 +2,7 @@
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 using UnityEngine.Video;
 
 namespace ETool
@@ -110,6 +111,7 @@ namespace ETool
         public Collision target_Collision; // 78
         public Collision2D target_Collision2D; // 79
         public Cubemap target_Cubemap; // 80
+        public Scene target_Scene; // 81
 
         public GenericUnityType()
         {
@@ -146,6 +148,7 @@ namespace ETool
             target_Collision = reference.target_Collision;
             target_Collision2D = reference.target_Collision2D;
             target_Cubemap = reference.target_Cubemap;
+            target_Scene = reference.target_Scene;
         }
     }
 

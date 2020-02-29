@@ -196,6 +196,16 @@ namespace ETool
 
     /// <summary>
     /// 
+    /// </summary>
+    public class TypeListStruct
+    {
+        public int typeListTypeSelection = 0;
+        public FieldType fieldSelection = FieldType.Event;
+        public Field target;
+    }
+
+    /// <summary>
+    /// 
     /// For Node Name Sort <br />
     /// 
     /// A buffer store the node type and path string
@@ -248,6 +258,16 @@ namespace ETool
     public struct ZoomData
     {
         /// <summary>
+        /// The max value of zoom level
+        /// </summary>
+        public float maximum;
+
+        /// <summary>
+        /// The min value of zoom level
+        /// </summary>
+        public float minimum;
+
+        /// <summary>
         /// The node position and its size will multiply this number
         /// </summary>
         public float ratio;
@@ -255,11 +275,11 @@ namespace ETool
         /// <summary>
         /// Should the title be rendering
         /// </summary>
-        public bool title;
+        public float titleHiddenLimit;
 
         /// <summary>
         /// Should the field be rendering
         /// </summary>
-        public bool field;
+        public float fieldHiddenLimit;
     }
 }

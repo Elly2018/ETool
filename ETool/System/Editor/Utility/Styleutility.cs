@@ -29,6 +29,9 @@ namespace ETool
         Panel,
         GUI_Title,
         GUI_Properties,
+
+        BoxSelect,
+        BoxDeleteSelect
     }
 
     /* Define how sisters getting draw hehe */
@@ -141,6 +144,18 @@ namespace ETool
                 case StyleType.GUI_Properties: // 121
                     result.alignment = TextAnchor.MiddleCenter;
                     result.normal.background = GetTexBG();
+                    return result;
+
+                case StyleType.BoxSelect:
+                    result.normal.background = new Texture2D(1, 1);
+                    result.normal.background.SetPixel(0, 0, new Color(1, 1, 1, 0.5f));
+                    result.normal.background.Apply();
+                    return result;
+
+                case StyleType.BoxDeleteSelect:
+                    result.normal.background = new Texture2D(1, 1);
+                    result.normal.background.SetPixel(0, 0, new Color(1, 0, 0, 0.5f));
+                    result.normal.background.Apply();
                     return result;
             }
             return result;

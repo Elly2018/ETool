@@ -7,8 +7,6 @@ namespace ETool.ANode
     [Math_Menu("Vector3")]
     public class SmoothDampVector3 : NodeBase
     {
-        private Vector3 velocity = Vector3.zero;
-
         public SmoothDampVector3(Vector2 position, float width, float height) : base(position, width, height)
         {
             unlocalTitle = "SmoothDamp";
@@ -19,7 +17,7 @@ namespace ETool.ANode
             fields.Add(new Field(FieldType.Vector3, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "Current", ConnectionType.DataBoth, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Vector3, "Target", ConnectionType.DataBoth, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.Vector3, "Velocity", ConnectionType.DataOutput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.Vector3, "Velocity", ConnectionType.DataBoth, true, this, FieldContainer.Object));
             fields.Add(new Field(FieldType.Float, "SmoothTime", ConnectionType.DataInput, this, FieldContainer.Object));
         }
 
@@ -28,6 +26,7 @@ namespace ETool.ANode
         {
             Vector3 current = GetFieldOrLastInputField<Vector3>(1, data);
             Vector3 target = GetFieldOrLastInputField<Vector3>(2, data);
+            Vector3 velocity = GetFieldOrLastInputField<Vector3>(3, data);
             float smooth = GetFieldOrLastInputField<float>(4, data);
 
             Vector3 result = Vector3.SmoothDamp(current, target, ref velocity, smooth);
@@ -49,7 +48,7 @@ namespace ETool.ANode
         [NodePropertyGet(typeof(Vector3), 3)]
         public Vector3 GetVelocity(BlueprintInput data)
         {
-            return velocity;
+            return GetFieldOrLastInputField<Vector3>(3, data);
         }
     }
 }

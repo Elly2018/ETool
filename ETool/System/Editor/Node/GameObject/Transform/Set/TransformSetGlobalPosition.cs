@@ -14,7 +14,7 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            ((Transform)GetFieldOrLastInputField(1, data)).position = (Vector3)GetFieldOrLastInputField(2, data);
+            GetFieldOrLastInputField<Transform>(1, data).position = GetFieldOrLastInputField<Vector3>(2, data);
             ActiveNextEvent(0, data);
         }
 

@@ -50,7 +50,7 @@ namespace ETool
             DrawField(fields);
         }
 
-        private Rect GetBoxRect()
+        public Rect GetBoxRect()
         {
             ZoomData zoomLevel = NodeBasedEditor.Editor_Instance.GetZoomLevel();
             float height = rect.height + ((fields.Count + 1) * PropertiesHeight);
@@ -149,6 +149,7 @@ namespace ETool
                     return data.allNode[data.allConnection[i].inPointMark.x];
                 }
             }
+
             return null;
         }
 
@@ -177,7 +178,6 @@ namespace ETool
                     if (i.targetEventOrVar.Split('.')[1] == eventName && i.NodeType == typeof(ACustomEvent).FullName)
                     {
                         ACustomEvent target = (ACustomEvent)i;
-                        data.eventManager.AddEvent(this as ACustomEventCall);
                         target.ReceivedObject(obj);
                         target.ProcessCalling(data);
                     }

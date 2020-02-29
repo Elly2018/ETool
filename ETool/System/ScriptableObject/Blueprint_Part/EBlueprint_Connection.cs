@@ -103,9 +103,14 @@ namespace ETool
 
                 foreach (var i in connections)
                 {
-                    if (i.inPointMark == _in)
+                    if (i.inPointMark == _in && nodes[_out.x].fields[_out.y].fieldType != FieldType.Event)
                     {
-                        return "Twice input detect";
+                        return "Twice data input detect";
+                    }
+
+                    if (i.outPointMark == _out && nodes[_out.x].fields[_out.y].fieldType == FieldType.Event)
+                    {
+                        return "Twice event output detect";
                     }
                 }
             }
@@ -131,6 +136,46 @@ namespace ETool
 #if UNITY_EDITOR
             AssetDatabase.SaveAssets();
 #endif
+            return null;
+        }
+
+        public bool Connection_CheckConnectionWork(ConnectionPoint cp_in, ConnectionPoint cp_out)
+        {
+            Vector2Int _in = Connection_GetConnectionInfo(cp_in);
+            Vector2Int _out = Connection_GetConnectionInfo(cp_out);
+
+            if (nodes[_in.x].fields[_in.y].fieldType != nodes[_out.x].fields[_out.y].fieldType)
+            {
+                return false;
+            }
+
+            if (nodes[_in.x].fields[_in.y].fieldContainer != nodes[_out.x].fields[_out.y].fieldContainer)
+            {
+                return false;
+            }
+
+            foreach (var i in connections)
+            {
+                if (i.inPointMark == _in && nodes[_out.x].fields[_out.y].fieldType != FieldType.Event)
+                {
+                    return false;
+                }
+
+                if (i.outPointMark == _out && nodes[_out.x].fields[_out.y].fieldType == FieldType.Event)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public Connection Connection_GetConnectionByPoints(ConnectionPoint cp_in, ConnectionPoint cp_out)
+        {
+            foreach(var i in connections)
+            {
+                if (i.inPointMark == Connection_GetConnectionInfo(cp_in) && i.outPointMark == Connection_GetConnectionInfo(cp_out)) return i;
+            }
             return null;
         }
 

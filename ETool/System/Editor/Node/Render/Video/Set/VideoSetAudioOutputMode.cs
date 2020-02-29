@@ -20,8 +20,8 @@ namespace ETool.ANode
         public override void FieldInitialize()
         {
             fields.Add(new Field(FieldType.Event, "Event", ConnectionType.EventBoth, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.VideoPlayer, "Target", ConnectionType.DataBoth, true, this, FieldContainer.Object));
-            fields.Add(new Field(FieldType.VideoAudioOutputMode, "Output Mode", ConnectionType.DataBoth, true, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.VideoPlayer, "Target", ConnectionType.DataBoth, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.VideoAudioOutputMode, "Output Mode", ConnectionType.DataBoth, this, FieldContainer.Object));
         }
 
         [NodePropertyGet(typeof(VideoPlayer), 1)]

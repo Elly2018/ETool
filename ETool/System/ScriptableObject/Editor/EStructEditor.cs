@@ -11,10 +11,12 @@ namespace ETool
     [CanEditMultipleObjects]
     public class EStructEditor : EToolEditorBase
     {
+        private Rect buttonRect;
+
         public override void DrawEToolInformation()
         {
             EStruct myTarget = (EStruct)target;
-            StructElement[] se = myTarget.structBase.structElement.ToArray();
+            BlueprintVariable[] se = myTarget.structBase.structElement.ToArray();
 
             VGroupStart();
             DrawTopLabel();
@@ -22,7 +24,13 @@ namespace ETool
             {
                 HGroupStart();
                 DrawElementLabel(se[i]);
-                se[i].type = (FieldType)EditorGUILayout.EnumPopup(se[i].type);
+
+                if (GUILayout.Button(se[i].type.ToString(), GUILayout.Width(200)))
+                {
+                    PopupWindow.Show(buttonRect, new ETypeSelection(se[i]));
+                }
+                if (Event.current.type == EventType.Repaint) buttonRect = GUILayoutUtility.GetLastRect();
+
                 DrawElementContainerType(se[i]);
                 DrawElementDefaultValue(se[i]);
                 if (GUILayout.Button("-"))
@@ -30,7 +38,7 @@ namespace ETool
                 HGroupEnd();
             }
             if (GUILayout.Button("+"))
-                myTarget.structBase.structElement.Add(new StructElement());
+                myTarget.structBase.structElement.Add(new BlueprintVariable());
             VGroupEnd();
         }
 
@@ -58,7 +66,7 @@ namespace ETool
             EditorGUILayout.LabelField("Label", centerSkin(), GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Data Type", centerSkin(), GUILayout.MinWidth(100));
             EditorGUILayout.LabelField("Struct Type", centerSkin(), GUILayout.MinWidth(100));
-            EditorGUILayout.LabelField("Element Default", centerSkin(), GUILayout.MinWidth(100));
+            EditorGUILayout.LabelField("Default / Array Size", centerSkin(), GUILayout.MinWidth(100));
             HGroupEnd();
         }
 
@@ -66,7 +74,7 @@ namespace ETool
         /// Element's label
         /// </summary>
         /// <param name="e"></param>
-        private void DrawElementLabel(StructElement e)
+        private void DrawElementLabel(BlueprintVariable e)
         {
             e.label = EditorGUILayout.TextField(e.label, GUILayout.MinWidth(100));
         }
@@ -75,23 +83,25 @@ namespace ETool
         /// Element's container type
         /// </summary>
         /// <param name="e"></param>
-        private void DrawElementContainerType(StructElement e)
+        private void DrawElementContainerType(BlueprintVariable e)
         {
-            e.structDataType = EditorGUILayout.Popup(e.structDataType, Enum.GetNames(typeof(StructDataType)));
+            e.fieldContainer = (FieldContainer)EditorGUILayout.EnumPopup(e.fieldContainer);
         }
 
         /// <summary>
         /// Element's default value
         /// </summary>
         /// <param name="e"></param>
-        private void DrawElementDefaultValue(StructElement e)
+        private void DrawElementDefaultValue(BlueprintVariable e)
         {
-            if (e.structDataType != (int)StructDataType.Object)
-                GUI.enabled = false;
-
-            e.elementDefault = Field.DrawFieldHelper(e.elementDefault, e.type);
-
-            GUI.enabled = true;
+            if(e.fieldContainer == FieldContainer.Array)
+            {
+                e.variable.genericBasicType.target_Int = EditorGUILayout.IntField(e.variable.genericBasicType.target_Int);
+            }
+            else
+            {
+                e.variable = Field.DrawFieldHelper(e.variable, e.type);
+            }
         }
         #endregion
     }

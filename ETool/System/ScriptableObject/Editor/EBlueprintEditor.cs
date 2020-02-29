@@ -19,6 +19,8 @@ namespace ETool
         private bool eventAnyNameEmpty = false;
         private bool eventRepeatName = false;
 
+        private Rect buttonRect;
+
         public override string GetInfoString()
         {
             return this.name;
@@ -162,7 +164,11 @@ namespace ETool
                         HGroupStart();
                         bmv.label = b.Editor_CustomEventArgument_GetUniqueName_Field(EditorGUILayout.TextField(bmv.label), j, i);
                         EditorGUI.BeginChangeCheck();
-                        bmv.type = (FieldType)EditorGUILayout.EnumPopup(bmv.type);
+                        if (GUILayout.Button(bmv.type.ToString(), GUILayout.Width(200)))
+                        {
+                            PopupWindow.Show(buttonRect, new ETypeSelection(bmv, b.Editor_CustomEventArgument_ChangeCustomEventArugment, i));
+                        }
+                        if (Event.current.type == EventType.Repaint) buttonRect = GUILayoutUtility.GetLastRect();
                         bmv.fieldContainer = (FieldContainer)EditorGUILayout.EnumPopup(bmv.fieldContainer);
                         if (EditorGUI.EndChangeCheck())
                         {
@@ -313,7 +319,14 @@ namespace ETool
                         b.Editor_CustomVariable_ChangeCustomVariableName(b.blueprintVariables[i].label, buffer);
                         b.blueprintVariables[i].label = buffer;
                     }
-                    b.blueprintVariables[i].type = (FieldType)EditorGUILayout.EnumPopup(b.blueprintVariables[i].type);
+
+                    if (GUILayout.Button(b.blueprintVariables[i].type.ToString(), GUILayout.Width(200)))
+                    {
+                        PopupWindow.Show(buttonRect, new ETypeSelection(b.blueprintVariables[i], b.Editor_CustomVariable_ChangeCustomVariable));
+                    }
+                    if (Event.current.type == EventType.Repaint) buttonRect = GUILayoutUtility.GetLastRect();
+                    //b.blueprintVariables[i].type = (FieldType)EditorGUILayout.EnumPopup(b.blueprintVariables[i].type);
+
                     if (EditorGUI.EndChangeCheck())
                     {
                         /* If change state is true, calling change event */

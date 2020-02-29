@@ -174,7 +174,7 @@ namespace ETool
             {
                 if (i.label == label)
                 {
-                    Field.SetObjectArrayByField(type, i.variable_Array, o);
+                    i.variable_Array = Field.SetObjectArrayByField(type, i.variable_Array, o);
                     return true;
                 }
             }

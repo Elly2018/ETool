@@ -30,8 +30,9 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
+            data.eventManager.ApplyEvent(this);
             ActiveNextEvent(0, data);
-            data.eventManager.StartReturn(data); // return null
+            data.eventManager.NoneReturn(this, data);
         }
 
         public override void DynamicFieldInitialize(BlueprintInput data)

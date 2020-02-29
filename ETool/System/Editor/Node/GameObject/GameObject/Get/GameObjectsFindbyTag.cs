@@ -1,0 +1,28 @@
+﻿using System;
+using UnityEngine;
+
+namespace ETool.ANode
+{
+    [NodePath("Add Node/GameObject/GameObject/Get/FindGameObjectsByTag")]
+    [Transform_Menu("GameObjectFind")]
+    public class GameObjectsFindbyTag : NodeBase
+    {
+        public GameObjectsFindbyTag(Vector2 position, float width, float height) : base(position, width, height)
+        {
+            unlocalTitle = "Find By Tag";
+        }
+
+        public override void FieldInitialize()
+        {
+            fields.Add(new Field(FieldType.String, "Find", ConnectionType.DataInput, this, FieldContainer.Object));
+            fields.Add(new Field(FieldType.GameObject, "Result", ConnectionType.DataOutput, true, this, FieldContainer.Array));
+        }
+
+        [NodePropertyGet(typeof(GameObject[]), 1)]
+        public GameObject[] GetGameObject(BlueprintInput data)
+        {
+            return GameObject.FindGameObjectsWithTag((string)GetFieldOrLastInputField(0, data));
+        }
+    }
+}
+

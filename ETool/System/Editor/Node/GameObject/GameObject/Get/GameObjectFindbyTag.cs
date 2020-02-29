@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ETool.ANode
 {
-    [NodePath("Add Node/GameObject/GameObject/Get/FindByTag")]
+    [NodePath("Add Node/GameObject/GameObject/Get/FindGameObjectByTag")]
     [Transform_Menu("GameObjectFind")]
     public class GameObjectFindbyTag : NodeBase
     {

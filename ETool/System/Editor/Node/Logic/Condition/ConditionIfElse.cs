@@ -14,7 +14,7 @@ namespace ETool.ANode
 
         public override void ProcessCalling(BlueprintInput data)
         {
-            if ((bool)GetFieldOrLastInputField(2, data))
+            if (GetFieldOrLastInputField<bool>(2, data))
             {
                 ActiveNextEvent(0, data);
             }

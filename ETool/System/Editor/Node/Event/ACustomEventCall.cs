@@ -16,17 +16,18 @@ namespace ETool.ANode
         public override void ProcessCalling(BlueprintInput data)
         {
             List<object> _arg = new List<object>();
-            for (int i = 1; i < fields.Count; i++)
+
+            int count = MyTarget.returnType == FieldType.Event ? fields.Count : fields.Count - 1;
+
+            for (int i = 1; i < count; i++)
             {
                 if (CheckIfConnectionExist(i, data, true))
                     _arg.Add(GetFieldInputValue(i, data));
                 else
                     _arg.Add(null);
-
             }
 
-            if (MyTarget.returnType != FieldType.Event)
-                data.eventManager.AddEvent(this);
+            data.eventManager.AddEvent(this);
 
             if (isInherit)
             {
